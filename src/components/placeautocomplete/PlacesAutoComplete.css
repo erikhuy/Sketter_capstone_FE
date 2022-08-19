@@ -1,0 +1,16 @@
+.labelText {
+    font-size: 20px !important;
+    font-family: 'SF Pro Display' !important;
+    font-weight: 300;
+    color: #b9b7be;
+  }
+  .labelText2 {
+    color: #130f26 !important;
+    transform-origin: top center !important;
+  }
+  .text-field-style {
+    border-radius: 8px !important;
+    font-family: 'SF Pro Display' !important;
+    font-weight: 300 !important;
+    
+  }

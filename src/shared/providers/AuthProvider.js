@@ -1,6 +1,7 @@
 import noop from 'lodash/noop';
 import PropTypes from 'prop-types';
 import React, {createContext, useCallback, useMemo, useRef} from 'react';
+import {Cookies} from 'react-cookie';
 import axiosInstance from 'utils/axios';
 import {clearSession, isValidToken, setSession} from 'utils/jwt';
 import {ACCESS_TOKEN_KEY} from '../constants';
@@ -17,6 +18,7 @@ export const AuthContext = createContext({
 
 const AuthProvider = ({children}) => {
 	const fetchUser = useFetchUser();
+	const cookies = new Cookies();
 	const tokenExpiredRef = useRef();
 	const initializeAuth = useInitializeAuth();
 	const authState = useAuthState();
@@ -41,10 +43,10 @@ const AuthProvider = ({children}) => {
 		() => {
 			const accessToken = window.localStorage.getItem(ACCESS_TOKEN_KEY);
 			if (accessToken && isValidToken(accessToken)) {
+				initializeAuth();
+			} else {
 				tokenExpiredRef.current = setSession(accessToken);
 				fetchUser();
-			} else {
-				initializeAuth();
 			}
 
 			window.addEventListener('storage', handleStorageEvent);

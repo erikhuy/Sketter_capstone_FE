@@ -63,32 +63,28 @@ export default function SortingSelecting() {
 	const [dense, setDense] = useState(false);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const [data, setData] = useState([]);
-	const [singleSelect, setSingleSelect] = useState(false);
+	const [dataNumber, setDataNumber] = useState();
+	const [maxPage, setMaxPage] = useState();
+	const [currentPage, setCurrentPage] = useState();
 	useEffect(() => {
-		try {
-			axios.get(`${API_URL.Destination}?page=${page + 1}`).then((res) => {
-				setData(res.data.data);
-				// console.log(res.data.data);
-			});
-		} catch (error) {
-			console.log(error);
-		}
+		const fetchData = async () => {
+			try {
+				await axios.get(`${API_URL.Destination}?page=${page + 1}`).then((res) => {
+					setData(res.data.data);
+					setMaxPage(res.data.maxPage);
+					setCurrentPage(res.data.currentPage);
+					if (res.data.maxPage > res.data.currentPage) {
+						setDataNumber(res.data.data.length + 1);
+					} else {
+						setDataNumber(res.data.data.length);
+					}
+				});
+			} catch (error) {
+				setPage(page - 1);
+			}
+		};
+		fetchData();
 	}, [page, selectedID]);
-	// const data = [
-	// 	createData('Cupcake', 305, 3.7, 67, 4.3),
-	// 	createData('Donut', 452, 25.0, 51, 4.9),
-	// 	createData('Eclair', 262, 16.0, 24, 6.0),
-	// 	createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-	// 	createData('Gingerbread', 356, 16.0, 49, 3.9),
-	// 	createData('Honeycomb', 408, 3.2, 87, 6.5),
-	// 	createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-	// 	createData('Jelly Bean', 375, 0.0, 94, 0.0),
-	// 	createData('KitKat', 518, 26.0, 65, 7.0),
-	// 	createData('Lollipop', 392, 0.2, 98, 0.0),
-	// 	createData('Marshmallow', 318, 0, 81, 2.0),
-	// 	createData('Nougat', 360, 19.0, 9, 37.0),
-	// 	createData('Oreo', 437, 18.0, 63, 4.0)
-	// ];
 
 	const TABLE_HEAD = [
 		{
@@ -132,7 +128,6 @@ export default function SortingSelecting() {
 
 	const handleSelectAllClick = (event) => {
 		if (event.target.checked) {
-			console.log(data);
 			const newSelecteds = data.map((n) => n.name);
 			setSelected(newSelecteds);
 			return;
@@ -172,7 +167,13 @@ export default function SortingSelecting() {
 		setSelected(newSelected);
 		setSelectedID(newSelectedID);
 	};
-
+	// const handleItem = (data) => {
+	// 	if (maxPage > currentPage) {
+	// 		setDataLength(data.length + 1);
+	// 	} else if (maxPage === currentPage) {
+	// 		setDataLength(data.length);
+	// 	}
+	// };
 	const handleChangePage = (event, newPage) => {
 		setPage(newPage);
 	};
@@ -193,7 +194,12 @@ export default function SortingSelecting() {
 
 	return (
 		<>
-			<SortingSelectingToolbar numSelected={selected} idSelected={selectedID} reloadData={setSelectedID} />
+			<SortingSelectingToolbar
+				numSelected={selected}
+				idSelected={selectedID}
+				reloadData={setSelectedID}
+				reloadNumber={setSelected}
+			/>
 
 			<Scrollbar>
 				<TableContainer sx={{minWidth: 800}}>
@@ -208,34 +214,32 @@ export default function SortingSelecting() {
 							onSelectAllClick={handleSelectAllClick}
 						/>
 						<TableBody>
-							{stableSort(data, getComparator(order, orderBy))
-								.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-								.map((row, index) => {
-									const isItemSelected = isSelected(row.name);
-									const labelId = `enhanced-table-checkbox-${index}`;
+							{stableSort(data, getComparator(order, orderBy)).map((row, index) => {
+								const isItemSelected = isSelected(row.name);
+								const labelId = `enhanced-table-checkbox-${index}`;
 
-									return (
-										<TableRow
-											hover
-											onClick={(event) => handleClick(event, row)}
-											role="checkbox"
-											aria-checked={isItemSelected}
-											tabIndex={-1}
-											key={row.id}
-										>
-											<TableCell padding="checkbox">
-												<Checkbox checked={isItemSelected} />
-											</TableCell>
-											<TableCell component="th" id={labelId} scope="row" padding="none">
-												{row.name}
-											</TableCell>
-											<TableCell align="right">{row.address}</TableCell>
-											<TableCell align="right">{row.lowestPrice}</TableCell>
-											<TableCell align="right">{row.rating}</TableCell>
-											<TableCell align="right">{row.status}</TableCell>
-										</TableRow>
-									);
-								})}
+								return (
+									<TableRow
+										hover
+										onClick={(event) => handleClick(event, row)}
+										role="checkbox"
+										aria-checked={isItemSelected}
+										tabIndex={-1}
+										key={row.id}
+									>
+										<TableCell padding="checkbox">
+											<Checkbox checked={isItemSelected} />
+										</TableCell>
+										<TableCell component="th" id={labelId} scope="row" padding="none">
+											{row.name}
+										</TableCell>
+										<TableCell align="right">{row.address}</TableCell>
+										<TableCell align="right">{row.lowestPrice}</TableCell>
+										<TableCell align="right">{row.rating}</TableCell>
+										<TableCell align="right">{row.status}</TableCell>
+									</TableRow>
+								);
+							})}
 							{emptyRows > 0 && (
 								<TableRow
 									style={{
@@ -254,9 +258,9 @@ export default function SortingSelecting() {
 				<TablePagination
 					rowsPerPageOptions={[10]}
 					component="div"
-					count={data.length}
-					rowsPerPage={rowsPerPage}
-					page={page}
+					count={dataNumber}
+					rowsPerPage={10}
+					page={currentPage - 1}
 					onPageChange={handleChangePage}
 					onRowsPerPageChange={handleChangeRowsPerPage}
 				/>

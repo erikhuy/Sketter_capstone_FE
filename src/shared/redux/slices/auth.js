@@ -78,7 +78,7 @@ export const authSlice = createSlice({
 					isAuthenticated: true,
 					updateMeErrorMessage: isUpdateMeFulfilledMatcher(action) ? '' : null,
 					updatePasswordErrorMessage: isUpdatePasswordFulfilledMatcher(action) ? '' : null,
-					registerErrorMessage: isUpdatePasswordFulfilledMatcher(action) ? '' : null
+					registerErrorMessage: isRegisterFulfilledMatcher(action) ? '' : null
 				})
 			)
 			.addMatcher(isAnyOf(loginThunk.rejected, loginThunk.pending), (state, action) => ({

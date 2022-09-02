@@ -1,13 +1,18 @@
+/* eslint-disable no-constant-condition */
+/* eslint-disable no-nested-ternary */
 import trash2Fill from '@iconify/icons-eva/trash-2-fill';
 import CreateIcon from '@material-ui/icons/Create';
 import {Icon} from '@iconify/react';
-import {IconButton, Stack, Toolbar, Tooltip, Typography} from '@material-ui/core';
+import {IconButton, Modal, Stack, Toolbar, Tooltip, Typography} from '@material-ui/core';
 // material
 import {styled, useTheme} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import {API_URL} from 'shared/constants';
 import axios from 'axios';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
+import {Box} from '@material-ui/system';
+import {LoginForm} from 'components/authentication/login';
+import UpdateDestinationForm from 'pages/dashboard/destination/UpdateDestinationForm';
 
 // ----------------------------------------------------------------------
 
@@ -23,11 +28,59 @@ const RootStyle = styled(Toolbar)(({theme}) => ({
 SortingSelectingToolbar.propTypes = {
 	numSelected: PropTypes.any.isRequired,
 	reloadData: PropTypes.any,
+	reloadNumber: PropTypes.any,
 	idSelected: PropTypes.any.isRequired
 };
-
-export default function SortingSelectingToolbar({numSelected, idSelected, reloadData}) {
+const styles = {
+	position: 'absolute',
+	top: '10%',
+	left: '10%',
+	height: '100%',
+	display: 'block'
+};
+const style = {
+	'&::-webkit-scrollbar': {
+		display: 'none'
+	},
+	position: 'absolute',
+	overflow: 'scroll',
+	borderRadius: '25px',
+	top: '50%',
+	left: '50%',
+	transform: 'translate(-50%, -50%)',
+	width: 1200,
+	height: '100%',
+	bgcolor: 'background.paper',
+	boxShadow: 24,
+	p: 4
+};
+export default function SortingSelectingToolbar({numSelected, idSelected, reloadData, reloadNumber}) {
+	const [open, setOpen] = useState(false);
+	const handleOpen = () => setOpen(true);
+	const handleClose = () => setOpen(false);
 	const [resetToolbar, setResetToolbar] = useState([]);
+	const [destinationDetail, setDestinationDetail] = useState({
+		Catalogs: [],
+		Destination_Images: [],
+		Destination_RecommendedTimes: [],
+		TravelPersonalityTypes: [],
+		address: '',
+		closingTime: '',
+		description: '',
+		email: '',
+		estimatedTimeStay: 0,
+		highestPrice: 0,
+		id: '',
+		latitude: 0,
+		longitude: 0,
+		lowestPrice: 0,
+		name: '',
+		openingTime: '',
+		phone: '',
+		rating: null,
+		status: '',
+		supplierID: ''
+	});
 	const deleteDestination = useCallback(
 		async (idSelected) => {
 			try {
@@ -35,7 +88,8 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 					idSelected.map(async (id) => {
 						await axios.delete(`${API_URL.Destination}/${id}`).then((res) => {
 							if (res.status === 204) {
-								reloadData('');
+								reloadData([]);
+								reloadNumber([]);
 								setResetToolbar('');
 							}
 						});
@@ -47,28 +101,70 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 		},
 		[resetToolbar]
 	);
+
+	const getDestinationDetail = useCallback(async (idSelected) => {
+		handleOpen();
+		try {
+			if (idSelected.length === 1) {
+				await Promise.all(
+					idSelected.map(async (id) => {
+						await axios.get(`${API_URL.Destination}/${id}`).then((res) => {
+							if (res.status === 200) {
+								reloadData([]);
+								reloadNumber([]);
+								setResetToolbar('');
+								setDestinationDetail(res.data.data);
+								console.log(res.data.data);
+							}
+						});
+					})
+				);
+			}
+		} catch (e) {
+			console.log('');
+		}
+	});
+
 	const theme = useTheme();
 	const isLight = theme.palette.mode === 'light';
 	return (
 		<RootStyle
 			sx={{
-				...(numSelected.length > 0 && {
+				...(idSelected.length > 0 && {
 					color: isLight ? 'primary.main' : 'text.primary',
 					bgcolor: isLight ? 'primary.lighter' : 'primary.dark'
 				})
 			}}
 		>
-			{numSelected.length > 0 ? (
+			{idSelected.length > 0 ? (
 				<Typography color="inherit" variant="subtitle1" component="div">
-					{numSelected.length} is selected
+					{idSelected.length} is selected
 				</Typography>
 			) : (
 				<Typography variant="h6" id="tableTitle" component="div">
 					Danh sách địa điểm
 				</Typography>
 			)}
-
-			{numSelected.length > 0 ? (
+			<Modal
+				sx={styles}
+				open={open}
+				onClose={handleClose}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box sx={style}>
+					<UpdateDestinationForm destinationDetailData={destinationDetail} />
+				</Box>
+			</Modal>
+			{idSelected.length > 1 ? (
+				<IconButton
+					onClick={() => {
+						deleteDestination(idSelected);
+					}}
+				>
+					<Icon icon={trash2Fill} />
+				</IconButton>
+			) : idSelected.length === 1 ? (
 				<Stack direction="row" spacing={1}>
 					<IconButton
 						onClick={() => {
@@ -79,7 +175,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 					</IconButton>
 					<IconButton
 						onClick={() => {
-							console.log(`update + ${idSelected}`);
+							getDestinationDetail(idSelected);
 						}}
 					>
 						<CreateIcon />

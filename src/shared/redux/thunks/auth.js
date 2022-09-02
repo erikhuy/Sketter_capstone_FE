@@ -1,8 +1,8 @@
+import {Cookies, useCookies} from 'react-cookie';
 import axiosInstance from 'utils/axios';
 import {createAsyncThunkWithErrorHandler} from 'utils/createAsyncThunkWithErrorHandler';
 import {setSession} from 'utils/jwt';
-
-import {API_URL, AppContext} from '../../constants';
+import {ACCESS_TOKEN_KEY, API_URL, AppContext} from '../../constants';
 
 export const fetchUserService = () => axiosInstance.get(`${API_URL.User}/me`).then((response) => response.data);
 

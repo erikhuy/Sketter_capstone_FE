@@ -22,20 +22,20 @@ import {MIconButton} from '../../@material-extend';
 
 export default function RegisterForm() {
 	const registerSupplier = useDispatchAction(registerThunk);
-	const {updatePasswordErrorMessage} = useAuth();
+	const {registerErrorMessage} = useAuth();
 	const isMountedRef = useIsMountedRef();
-	const {enqueueSnackbar, closeSnackbar} = useSnackbar();
+	const {enqueueSnackbar} = useSnackbar();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 	useEffect(() => {
-		if (isNull(updatePasswordErrorMessage)) {
+		if (isNull(registerErrorMessage)) {
 			return;
 		}
 
-		const message = updatePasswordErrorMessage || 'Update success';
-		enqueueSnackbar(message, {variant: updatePasswordErrorMessage ? 'error' : 'success'});
-	}, [enqueueSnackbar, updatePasswordErrorMessage]);
+		const message = registerErrorMessage || 'Update success';
+		enqueueSnackbar(message, {variant: registerErrorMessage ? 'error' : 'success'});
+	}, [enqueueSnackbar, registerErrorMessage]);
 
 	const RegisterSchema = Yup.object().shape({
 		phone: Yup.string()
@@ -64,6 +64,7 @@ export default function RegisterForm() {
 		validationSchema: RegisterSchema,
 		onSubmit: async (values, {setErrors, setSubmitting}) => {
 			try {
+				console.log(values);
 				registerSupplier(values);
 				if (isMountedRef.current) {
 					setSubmitting(false);
@@ -87,7 +88,6 @@ export default function RegisterForm() {
 
 					<TextField
 						fullWidth
-						autoComplete="username"
 						type="email"
 						label="Email"
 						{...getFieldProps('email')}
@@ -97,7 +97,6 @@ export default function RegisterForm() {
 
 					<TextField
 						fullWidth
-						autoComplete="current-password"
 						type={showPassword ? 'text' : 'password'}
 						label="Mật khẩu"
 						{...getFieldProps('password')}

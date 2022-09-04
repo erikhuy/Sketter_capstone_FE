@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 import {useLoadScript, GoogleMap, Marker} from '@react-google-maps/api';
 import React, {useCallback, useRef, useEffect} from 'react';
 import {useField} from 'formik';
@@ -25,13 +26,13 @@ const MapField = ({containerProps = {}, ...props}) => {
 
 	const onMapClick = useCallback(
 		(e) => {
+			console.log(e);
 			setFieldValue({
 				lat: e.latLng.lat(),
 				lng: e.latLng.lng(),
 				time: new Date()
 			});
 
-			// eslint-disable-next-line no-unused-expressions
 			searchRef.current && searchRef.current.clearSearch();
 		},
 		[setFieldValue]
@@ -105,7 +106,7 @@ const MapField = ({containerProps = {}, ...props}) => {
 				onClick={onMapClick}
 				onLoad={onMapLoad}
 			>
-				{value && <Marker position={value} icon={<>adsad</>} />}
+				{value && <Marker position={value} />}
 			</GoogleMap>
 		</Box>
 	);

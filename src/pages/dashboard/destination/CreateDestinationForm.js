@@ -39,6 +39,7 @@ import Mapfield from 'components/mapfield';
 import {API_URL} from 'shared/constants';
 import {useSnackbar} from 'notistack5';
 import {isNull} from 'lodash';
+import {useNavigate} from 'react-router-dom';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -53,8 +54,8 @@ export default function CreateDestinationForm() {
 	const [createDestinationMessage, setCreateDestinationMessage] = useState();
 
 	const CreateDestinationSchema = Yup.object().shape({
-		name: Yup.string().min(2, 'Quá ngắn!').max(50, 'Quá dài!').required('Yêu cầu nhập tên'),
-		address: Yup.string().min(5, 'Địa chỉ không hợp lệ').required('Yêu cầu nhập địa chỉ'),
+		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
+		// address: Yup.string().min(5, 'Địa chỉ không hợp lệ').required('Yêu cầu nhập địa chỉ'),
 		phone: Yup.string()
 			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
 			.min(7, 'Số điện thoại không tồn tại!')
@@ -66,24 +67,37 @@ export default function CreateDestinationForm() {
 			.integer()
 			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
 			.required('Yêu cầu giá thấp nhất'),
-		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm')
+		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
+		// longitude: Yup.number()
+		// 	.min(-180, 'Kinh độ không tồn tại!')
+		// 	.max(180, 'Kinh độ không tồn tại!')
+		// 	.required('Yêu cầu kinh độ'),
+		// latitude: Yup.number()
+		// 	.min(-90, 'Vĩ độ không tồn tại!')
+		// 	.max(90, 'Vĩ độ không tồn tại!')
+		// 	.required('Yêu cầu vĩ độ'),
+		estimatedTimeStay: Yup.number()
+			.min(0, 'Thời gian không hợp lệ!')
+			.max(1440, 'Thời gian không quá 1 ngày!')
+			.required('Yêu cầu thời gian dự kiến ở lại')
 	});
 	const formik = useFormik({
 		initialValues: {
 			name: '',
 			address: '',
-			longitude: 0,
-			latitude: 0,
+			longitude: '',
+			latitude: '',
+			location: null,
 			phone: '',
 			email: '',
 			description: '',
-			lowestPrice: 0,
-			highestPrice: 0,
+			lowestPrice: '',
+			highestPrice: '',
 			openingTimeSup: null,
 			openingTime: null,
 			closingTimeSup: null,
 			closingTime: null,
-			estimatedTimeStay: 0,
+			estimatedTimeStay: '',
 			recommendedTimes: [
 				{
 					start: '',
@@ -102,8 +116,10 @@ export default function CreateDestinationForm() {
 		onSubmit: async (values, {setErrors, setSubmitting}) => {
 			// handleImageBB(getFieldProps('images'));
 			console.log(values);
+
 			try {
-				await createDestination(values);
+				// processData(values);
+				await createDestination(processData(values));
 				if (isMountedRef.current) {
 					setSubmitting(false);
 				}
@@ -111,25 +127,46 @@ export default function CreateDestinationForm() {
 				if (isMountedRef.current) {
 					setErrors({afterSubmit: error.message});
 					setSubmitting(false);
+					setCreateDestinationMessage(null);
 				}
 			}
 		}
 	});
+	const processData = (data) => {
+		const supArray = data;
+		supArray.longitude = data.location.lng;
+		supArray.latitude = data.location.lat;
+		supArray.address = data.location.destinationAddress;
+
+		return supArray;
+	};
 	useEffect(() => {
 		if (!createDestinationMessage) {
 			return;
 		}
 
-		const message = createDestinationMessage || 'Create success';
-		enqueueSnackbar(message, {variant: createDestinationMessage ? 'error' : 'success'});
+		const message = createDestinationMessage;
+		if (message === 'success') {
+			enqueueSnackbar('Tạo địa điểm thành công', {variant: 'success'});
+		} else {
+			enqueueSnackbar(message, {variant: createDestinationMessage ? 'error' : 'success'});
+		}
 	}, [createDestinationMessage]);
 
+	const navigate = useNavigate();
+
+	const navigateToViewDestination = () => {
+		navigate('/dashboard/destinationList');
+	};
 	const createDestination = useCallback(async (data) => {
+		console.log(data);
 		try {
 			await axios.post(`${API_URL.Destination}`, data).then((res) => {
+				setCreateDestinationMessage(res.data.message);
 				console.log(res.data);
+				// navigateToViewDestination();
 			});
-			// console.log(data);
+			console.log(data);
 		} catch (e) {
 			console.log(e.response.data.message);
 			setCreateDestinationMessage(e.response.data.message);
@@ -180,14 +217,14 @@ export default function CreateDestinationForm() {
 								<Stack direction={{xs: 'column'}} spacing={2.4} sx={{m: 2}}>
 									<TextField
 										fullWidth
-										label="Tên địa điểm"
+										label="Tên địa điểm*"
 										{...getFieldProps('name')}
 										error={Boolean(touched.name && errors.name)}
 										helperText={touched.name && errors.name}
 									/>
 									<TextField
 										fullWidth
-										label="Số điện thoại"
+										label="Số điện thoại*"
 										{...getFieldProps('phone')}
 										error={Boolean(touched.phone && errors.phone)}
 										helperText={touched.phone && errors.phone}
@@ -202,7 +239,7 @@ export default function CreateDestinationForm() {
 									<TextField
 										fullWidth
 										multiline
-										label="Thông tin địa điểm"
+										label="Thông tin địa điểm*"
 										rows={22}
 										{...getFieldProps('description')}
 										error={Boolean(touched.description && errors.description)}
@@ -214,7 +251,7 @@ export default function CreateDestinationForm() {
 											type="number"
 											{...getFieldProps('lowestPrice')}
 											style={{height: 56, width: 360}}
-											label={<span className="labelText">Giá thấp nhất</span>}
+											label={<span className="labelText">Giá thấp nhất*</span>}
 											InputLabelProps={{
 												shrink: true,
 												placeholder: '1000-10000'
@@ -234,7 +271,7 @@ export default function CreateDestinationForm() {
 											type="number"
 											{...getFieldProps('highestPrice')}
 											style={{height: 56, width: 360}}
-											label={<span className="labelText">Giá cao nhất</span>}
+											label={<span className="labelText">Giá cao nhất*</span>}
 											InputLabelProps={{
 												shrink: true,
 												className: 'labelText2',
@@ -256,10 +293,10 @@ export default function CreateDestinationForm() {
 								</Stack>
 							</Grid>
 							<Grid item xs={6}>
-								<Stack direction={{xs: 'column'}} spacing={2} sx={{m: 2, display: 'flex'}}>
-									<TextField
+								<Stack direction={{xs: 'column'}} spacing={2.4} sx={{m: 2}}>
+									{/* <TextField
 										fullWidth
-										label="Địa chỉ"
+										label="Địa chỉ*"
 										{...getFieldProps('address')}
 										error={Boolean(touched.address && errors.address)}
 										helperText={touched.address && errors.address}
@@ -267,20 +304,20 @@ export default function CreateDestinationForm() {
 									<TextField
 										fullWidth
 										type="number"
-										label="Longitude"
+										label="Kinh độ*"
 										{...getFieldProps('longitude')}
 										error={Boolean(touched.longitude && errors.longitude)}
 										helperText={touched.longitude && errors.longitude}
 									/>
 									<TextField
 										fullWidth
-										label="Latitude"
+										label="Vĩ độ*"
 										type="number"
 										{...getFieldProps('latitude')}
 										error={Boolean(touched.latitude && errors.latitude)}
 										helperText={touched.latitude && errors.latitude}
-									/>
-									{/* <Mapfield name="addrress" label="Địa chỉ" placeholder="Chọn địa điểm" /> */}
+									/> */}
+									<Mapfield name="location" label="Địa chỉ" placeholder="Chọn địa điểm" />
 									<Box
 										sx={{
 											height: 15
@@ -288,53 +325,43 @@ export default function CreateDestinationForm() {
 									/>
 									<h2>Thông tin về phân loại</h2>
 									<h3 className="category-label">Catalog</h3>
-									<Stack spacing={3}>
-										<Autocomplete
-											onChange={(e, value) => {
-												setFieldValue(
-													'catalogs',
-													value !== null ? value : initialValues.catalogs
-												);
-											}}
-											multiple
-											id="tags-outlined"
-											options={catalog}
-											getOptionLabel={(option) => option}
-											filterSelectedOptions
-											renderInput={(params) => (
-												<TextField {...params} label="Loại địa điểm" required />
-											)}
-										/>
-										<h3 className="category-label">Tính cách du lịch người dùng</h3>
-										<Autocomplete
-											multiple
-											id="tags-outlined"
-											options={TravelPersonalityTypes}
-											getOptionLabel={(option) => option}
-											onChange={(e, value) => {
-												setFieldValue(
-													'personalityTypes',
-													value !== null ? value : initialValues.personalityTypes
-												);
-											}}
-											filterSelectedOptions
-											renderInput={(params) => (
-												<TextField
-													multiline="false"
-													required
-													{...params}
-													label="Loại tính cách"
-												/>
-											)}
-										/>
-									</Stack>
+									<Autocomplete
+										onChange={(e, value) => {
+											setFieldValue('catalogs', value !== null ? value : initialValues.catalogs);
+										}}
+										multiple
+										id="tags-outlined"
+										options={catalog}
+										getOptionLabel={(option) => option}
+										filterSelectedOptions
+										renderInput={(params) => (
+											<TextField {...params} label="Loại địa điểm" required />
+										)}
+									/>
+									<h3 className="category-label">Tính cách du lịch người dùng</h3>
+									<Autocomplete
+										multiple
+										id="tags-outlined"
+										options={TravelPersonalityTypes}
+										getOptionLabel={(option) => option}
+										onChange={(e, value) => {
+											setFieldValue(
+												'personalityTypes',
+												value !== null ? value : initialValues.personalityTypes
+											);
+										}}
+										filterSelectedOptions
+										renderInput={(params) => (
+											<TextField multiline="false" required {...params} label="Loại tính cách" />
+										)}
+									/>
 									<h3>Thông tin về thời gian</h3>
 									<Stack direction={{xs: 'row'}} spacing={2}>
 										<LocalizationProvider dateAdapter={AdapterDateFns}>
 											<TimePicker
 												ampm={false}
 												views={['hours', 'minutes']}
-												label={<span className="labelText">Thời gian mở cửa</span>}
+												label={<span className="labelText">Thời gian mở cửa*</span>}
 												value={values.openingTimeSup}
 												// onChange={(value) => setFieldValue('openingTime', value.toString().substr(16, 5))}
 												onChange={(value) => handleOpeningTime(value)}
@@ -347,7 +374,7 @@ export default function CreateDestinationForm() {
 										<LocalizationProvider dateAdapter={AdapterDateFns}>
 											<TimePicker
 												ampm={false}
-												label={<span className="labelText">Thời gian đóng cửa</span>}
+												label={<span className="labelText">Thời gian đóng cửa*</span>}
 												value={values.closingTimeSup}
 												minTime={values.openingTimeSup}
 												onChange={(value) => handleClosingTime(value)}
@@ -357,16 +384,15 @@ export default function CreateDestinationForm() {
 											/>
 										</LocalizationProvider>
 									</Stack>
-									{/* <Stack direction={{xs: 'row'}} spacing={2}> */}
 									<TextField
 										{...getFieldProps('estimatedTimeStay')}
 										required
+										type="number"
 										className="form-control"
 										style={{height: 56, width: 740}}
 										label={<span className="labelText">Thời gian dự kiến ở lại</span>}
 										InputProps={{
 											className: 'text-field-style',
-											placeholder: '10',
 											endAdornment: (
 												<InputAdornment position="end">
 													<span className="adorment-text">min</span>
@@ -378,6 +404,8 @@ export default function CreateDestinationForm() {
 												</InputAdornment>
 											)
 										}}
+										error={Boolean(touched.estimatedTimeStay && errors.estimatedTimeStay)}
+										helperText={touched.estimatedTimeStay && errors.estimatedTimeStay}
 									/>
 									<Autocomplete
 										multiple
@@ -451,13 +479,21 @@ const RecommendedTimesFrame = [
 	{
 		start: '07:00',
 		end: '09:00'
+	},
+	{
+		start: '09:00',
+		end: '12:00'
+	},
+	{
+		start: '12:00',
+		end: '15:00'
+	},
+	{
+		start: '15:00',
+		end: '18:00'
+	},
+	{
+		start: '18:00',
+		end: '21:00'
 	}
-	// {timeFrame: '04:00 - 06:00'},
-	// {timeFrame: '06:00 - 08:00'},
-	// {timeFrame: '08:00 - 10:00'},
-	// {timeFrame: '10:00 - 12:00'},
-	// {timeFrame: '12:00 - 14:00'},
-	// {timeFrame: '14:00 - 16:00'},
-	// {timeFrame: '16:00 - 18:00'},
-	// {timeFrame: '18:00 - 20:00'}
 ];

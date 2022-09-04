@@ -40,7 +40,7 @@ const SearchItem = ({option, ...props}) => {
 
 const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedRef}) => {
 	const {placesService, placePredictions, getPlacePredictions, isPlacePredictionsLoading} = usePlacesService({
-		apiKey: 'AIzaSyBJUprJ0tR5rBnHp-9yRAzbWCA4ft_8Xww',
+		apiKey: process.env.REACT_APP_GOOGLE_KEY,
 		debounce: 500,
 		options: {
 			language: 'vi',
@@ -77,12 +77,14 @@ const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedR
 
 	useEffect(() => {
 		const placeId = value && value.place_id;
+		const address = value && value.description;
 		if (placeId) {
-			placesService?.getDetails({placeId}, ({geometry: {location}}) => {
+			placesService?.getDetails({placeId, address}, ({geometry: {location}}) => {
 				onSelect({
 					lat: location.lat(),
 					lng: location.lng(),
-					googlePlaceId: placeId
+					googlePlaceId: placeId,
+					destinationAddress: address
 				});
 			});
 		}

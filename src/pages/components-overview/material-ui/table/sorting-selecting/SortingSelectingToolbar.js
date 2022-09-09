@@ -60,26 +60,32 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 	const handleClose = () => setOpen(false);
 	const [resetToolbar, setResetToolbar] = useState([]);
 	const [destinationDetail, setDestinationDetail] = useState({
-		Catalogs: [],
-		Destination_Images: [],
-		Destination_RecommendedTimes: [],
-		TravelPersonalityTypes: [],
-		address: '',
-		closingTime: '',
-		description: '',
-		email: '',
-		estimatedTimeStay: 0,
-		highestPrice: 0,
-		id: '',
-		latitude: 0,
-		longitude: 0,
-		lowestPrice: 0,
 		name: '',
-		openingTime: '',
+		address: '',
+		longitude: '',
+		latitude: '',
+		location: null,
 		phone: '',
-		rating: null,
-		status: '',
-		supplierID: ''
+		email: '',
+		description: '',
+		lowestPrice: '',
+		highestPrice: '',
+		openingTime: null,
+		closingTime: null,
+		estimatedTimeStay: '',
+		recommendedTimes: [
+			{
+				start: '',
+				end: ''
+			}
+		],
+		destinationPersonalities: [],
+		catalogs: [],
+		images: [
+			{
+				url: ''
+			}
+		]
 	});
 	const deleteDestination = useCallback(
 		async (idSelected) => {
@@ -102,28 +108,28 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 		[resetToolbar]
 	);
 
-	const getDestinationDetail = useCallback(async (idSelected) => {
-		handleOpen();
-		try {
-			if (idSelected.length === 1) {
-				await Promise.all(
-					idSelected.map(async (id) => {
-						await axios.get(`${API_URL.Destination}/${id}`).then((res) => {
-							if (res.status === 200) {
-								reloadData([]);
-								reloadNumber([]);
-								setResetToolbar('');
-								setDestinationDetail(res.data.data);
-								console.log(res.data.data);
-							}
-						});
-					})
-				);
-			}
-		} catch (e) {
-			console.log('');
-		}
-	});
+	// const getDestinationDetail = useCallback(async (idSelected) => {
+	// 	handleOpen();
+	// 	try {
+	// 		if (idSelected.length === 1) {
+	// 			await Promise.all(
+	// 				idSelected.map(async (id) => {
+	// 					await axios.get(`${API_URL.Destination}/${id}`).then((res) => {
+	// 						if (res.status === 200) {
+	// 							reloadData([]);
+	// 							reloadNumber([]);
+	// 							setResetToolbar('');
+	// 							setDestinationDetail(res.data.data);
+	// 							console.log(res.data.data);
+	// 						}
+	// 					});
+	// 				})
+	// 			);
+	// 		}
+	// 	} catch (e) {
+	// 		console.log('');
+	// 	}
+	// });
 
 	const theme = useTheme();
 	const isLight = theme.palette.mode === 'light';
@@ -153,7 +159,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 				aria-describedby="modal-modal-description"
 			>
 				<Box sx={style}>
-					<UpdateDestinationForm destinationDetailData={destinationDetail} />
+					<UpdateDestinationForm destinationID={idSelected} />
 				</Box>
 			</Modal>
 			{idSelected.length > 1 ? (
@@ -175,7 +181,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 					</IconButton>
 					<IconButton
 						onClick={() => {
-							getDestinationDetail(idSelected);
+							handleOpen();
 						}}
 					>
 						<CreateIcon />

@@ -43,10 +43,10 @@ const AuthProvider = ({children}) => {
 		() => {
 			const accessToken = window.localStorage.getItem(ACCESS_TOKEN_KEY);
 			if (accessToken && isValidToken(accessToken)) {
-				initializeAuth();
-			} else {
 				tokenExpiredRef.current = setSession(accessToken);
 				fetchUser();
+			} else {
+				initializeAuth();
 			}
 
 			window.addEventListener('storage', handleStorageEvent);

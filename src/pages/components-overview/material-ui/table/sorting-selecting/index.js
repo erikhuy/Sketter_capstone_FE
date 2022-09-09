@@ -167,13 +167,7 @@ export default function SortingSelecting() {
 		setSelected(newSelected);
 		setSelectedID(newSelectedID);
 	};
-	// const handleItem = (data) => {
-	// 	if (maxPage > currentPage) {
-	// 		setDataLength(data.length + 1);
-	// 	} else if (maxPage === currentPage) {
-	// 		setDataLength(data.length);
-	// 	}
-	// };
+
 	const handleChangePage = (event, newPage) => {
 		setPage(newPage);
 	};

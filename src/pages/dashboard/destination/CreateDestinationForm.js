@@ -68,14 +68,6 @@ export default function CreateDestinationForm() {
 			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
 			.required('Yêu cầu giá thấp nhất'),
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
-		// longitude: Yup.number()
-		// 	.min(-180, 'Kinh độ không tồn tại!')
-		// 	.max(180, 'Kinh độ không tồn tại!')
-		// 	.required('Yêu cầu kinh độ'),
-		// latitude: Yup.number()
-		// 	.min(-90, 'Vĩ độ không tồn tại!')
-		// 	.max(90, 'Vĩ độ không tồn tại!')
-		// 	.required('Yêu cầu vĩ độ'),
 		estimatedTimeStay: Yup.number()
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(1440, 'Thời gian không quá 1 ngày!')
@@ -104,13 +96,9 @@ export default function CreateDestinationForm() {
 					end: ''
 				}
 			],
-			personalityTypes: [],
+			destinationPersonalities: [],
 			catalogs: [],
-			images: [
-				{
-					url: ''
-				}
-			]
+			images: []
 		},
 		validationSchema: CreateDestinationSchema,
 		onSubmit: async (values, {setErrors, setSubmitting}) => {
@@ -133,6 +121,7 @@ export default function CreateDestinationForm() {
 		}
 	});
 	const processData = (data) => {
+		console.log(data.location);
 		const supArray = data;
 		supArray.longitude = data.location.lng;
 		supArray.latitude = data.location.lat;
@@ -166,7 +155,6 @@ export default function CreateDestinationForm() {
 				console.log(res.data);
 				// navigateToViewDestination();
 			});
-			console.log(data);
 		} catch (e) {
 			console.log(e.response.data.message);
 			setCreateDestinationMessage(e.response.data.message);
@@ -185,7 +173,7 @@ export default function CreateDestinationForm() {
 					// OPTIONAL: pass base64-encoded image (max 32Mb)
 				})
 					.then((response) => imageArray.push({url: response.url}))
-					.catch((error) => console.error(error));
+					.catch((error) => setCreateDestinationMessage(error));
 			} catch (e) {
 				console.log(e);
 			}
@@ -202,7 +190,7 @@ export default function CreateDestinationForm() {
 		setFieldValue('closingTime', data.toString().substr(16, 5));
 	};
 	const handleRecommendedTime = (data) => {
-		// setFieldValue('personalityTypes', value !== null ? value : initialValues.personalityTypes);
+		// setFieldValue('destinationPersonalities', value !== null ? value : initialValues.destinationPersonalities);
 		console.log(data);
 	};
 	const {errors, touched, isSubmitting, handleSubmit, getFieldProps, setFieldValue, values} = formik;
@@ -324,7 +312,7 @@ export default function CreateDestinationForm() {
 										}}
 									/>
 									<h2>Thông tin về phân loại</h2>
-									<h3 className="category-label">Catalog</h3>
+									<h3 className="category-label">Loại địa điểm</h3>
 									<Autocomplete
 										onChange={(e, value) => {
 											setFieldValue('catalogs', value !== null ? value : initialValues.catalogs);
@@ -346,8 +334,8 @@ export default function CreateDestinationForm() {
 										getOptionLabel={(option) => option}
 										onChange={(e, value) => {
 											setFieldValue(
-												'personalityTypes',
-												value !== null ? value : initialValues.personalityTypes
+												'destinationPersonalities',
+												value !== null ? value : initialValues.destinationPersonalities
 											);
 										}}
 										filterSelectedOptions

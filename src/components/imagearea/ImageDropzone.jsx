@@ -114,6 +114,7 @@ const ImageUploadArea = (props) => {
 			<div className="dropimage-group">
 				{/* Image Flip Card  */}
 				{props.imageList.map((image, index) => (
+					
 					<FlipImageCard
 						key={index}
 						// Remove function for Flip card
@@ -126,7 +127,7 @@ const ImageUploadArea = (props) => {
 							//Set back to state
 							props.setImageList(rep_imageList);
 						}}
-						imageContent={image.image_base64 ? image.image_base64 : image.imageUrl}
+						imageContent={image.image_base64 ? image.image_base64 : image.url}
 						onTitleChange={(event) => onIMGTitleChange(index, event.target.value)}
 						onDescriptionChange={(event) => onIMGDescriptionChange(index, event.target.value)}
 					/>

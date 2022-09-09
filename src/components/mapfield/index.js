@@ -48,6 +48,7 @@ const MapField = ({containerProps = {}, ...props}) => {
 		if (mapRef.current && value) {
 			mapRef.current.panTo(value);
 		}
+		console.log(value);
 	}, [value]);
 
 	if (loadError) return <Alert severity="error">Failed to load the map</Alert>;
@@ -75,6 +76,7 @@ const MapField = ({containerProps = {}, ...props}) => {
 				onClick={() => {
 					navigator.geolocation.getCurrentPosition(
 						(position) => {
+							console.log(position.coords);
 							if (mapRef.current) {
 								const location = {
 									lat: position.coords.latitude,

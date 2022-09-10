@@ -10,14 +10,7 @@ import {BaseOptionChart} from '../../charts';
 
 const CHART_DATA = [
 	{
-		year: 2019,
-		data: [
-			{name: 'Asia', data: [10, 41, 35, 51, 49, 62, 69, 91, 148]},
-			{name: 'America', data: [10, 34, 13, 56, 77, 88, 99, 77, 45]}
-		]
-	},
-	{
-		year: 2020,
+		year: 2022,
 		data: [
 			{name: 'Asia', data: [148, 91, 69, 62, 49, 51, 35, 41, 10]},
 			{name: 'America', data: [45, 77, 99, 88, 77, 56, 13, 34, 10]}
@@ -26,7 +19,7 @@ const CHART_DATA = [
 ];
 
 export default function AppAreaInstalled() {
-	const [seriesData, setSeriesData] = useState(2019);
+	const [seriesData, setSeriesData] = useState(2022);
 
 	const handleChangeSeriesData = (event) => {
 		setSeriesData(Number(event.target.value));

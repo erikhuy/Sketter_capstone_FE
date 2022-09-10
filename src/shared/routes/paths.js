@@ -26,7 +26,6 @@ export const PATH_PAGE = {
 	pricing: '/pricing',
 	payment: '/payment',
 	about: '/about-us',
-	contact: '/contact-us',
 	faqs: '/faqs',
 	page404: '/404',
 	page500: '/500',
@@ -67,7 +66,6 @@ export const PATH_DASHBOARD = {
 	},
 	eCommerce: {
 		root: path(ROOTS_DASHBOARD, '/e-commerce'),
-		shop: path(ROOTS_DASHBOARD, '/e-commerce/shop'),
 		product: path(ROOTS_DASHBOARD, '/e-commerce/product/:name'),
 		productById: path(ROOTS_DASHBOARD, '/e-commerce/product/nike-air-force-1-ndestrukt'),
 		list: path(ROOTS_DASHBOARD, '/e-commerce/list'),

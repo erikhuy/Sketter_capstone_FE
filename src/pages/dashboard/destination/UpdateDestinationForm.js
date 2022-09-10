@@ -35,6 +35,7 @@ import axios from 'axios';
 import {API_URL} from 'shared/constants';
 import useIsMountedRef from 'shared/hooks/useIsMountedRef';
 import imgbbUploader from 'imgbb-uploader/lib/cjs';
+import {useSnackbar} from 'notistack5';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -46,8 +47,10 @@ export default function UpdateDestinationForm({destinationID}) {
 	const isMountedRef = useIsMountedRef();
 	const [gallery, setGallery] = useState([]);
 	const [valueArray, setValueArray] = useState([]);
+	const {enqueueSnackbar} = useSnackbar();
 	const [data, setData] = useState();
 	const [isBusy, setBusy] = useState(true);
+	const [createDestinationMessage, setCreateDestinationMessage] = useState();
 
 	const UpdateDestinationSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
@@ -66,7 +69,14 @@ export default function UpdateDestinationForm({destinationID}) {
 		estimatedTimeStay: Yup.number()
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(1440, 'Thời gian không quá 1 ngày!')
-			.required('Yêu cầu thời gian dự kiến ở lại')
+			.required('Yêu cầu thời gian dự kiến ở lại'),
+		openingTime: Yup.string()
+			.notOneOf([Yup.ref('closingTime')], 'Thời gian mở cửa không hợp lệ')
+			.required('Yêu cầu thời gian mở cửa'),
+		closingTime: Yup.string()
+			.notOneOf([Yup.ref('openingTime')], 'Thời gian đóng cửa không hợp lệ')
+			.required('Yêu cầu thời gian đóng cửa'),
+		recommendedTimes: Yup.array().min(1, 'Khoảng thời gian lý tưởng không được trống')
 	});
 	const locationData = {
 		location: {
@@ -84,28 +94,17 @@ export default function UpdateDestinationForm({destinationID}) {
 		supArray.catalogs = convertToArray(data?.catalogs);
 		supArray.destinationPersonalities = convertToArray(data?.destinationPersonalities);
 		// eslint-disable-next-line array-callback-return
-		data.images.map((image) => {
-			if (!image.url) {
-				console.log('BASE64');
-				try {
-					imgbbUploader({
-						apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
-						base64string: image.image_base64.split('base64,')[1]
-						// OPTIONAL: pass base64-encoded image (max 32Mb)
-					})
-						.then((response) => supArray.images.push({url: response.url}), console.log('SUCCESS'))
-						.catch((error) => setCreateDestinationMessage(error));
-				} catch (e) {
-					setCreateDestinationMessage(e);
-				}
-			}
-		});
+		// data.images.map((image, index) => {
+		// 	if (image.image_base64) {
+		// 		supArray.images.splice(index, 1);
+		// 	}
+		// });
 		return supArray;
 	};
 	const formik = useFormik({
 		enableReinitialize: true,
 		validationSchema: UpdateDestinationSchema,
-		initialValues: !data ? null : data,
+		initialValues: data,
 		onSubmit: async (values, {setErrors, setSubmitting}) => {
 			try {
 				await updateDestination(processData(values));
@@ -124,34 +123,58 @@ export default function UpdateDestinationForm({destinationID}) {
 
 	const updateDestination = useCallback(async (data) => {
 		console.log(data);
-		// try {
-		// 	await axios.patch(`${API_URL.Destination}/${data.id}`, data).then((res) => {
-		// 		setCreateDestinationMessage(res.data.message);
-		// 		console.log(res.data);
-		// 		// navigateToViewDestination();
-		// 	});
-		// } catch (e) {
-		// 	console.log(e.response.data.message);
-		// 	setCreateDestinationMessage(e.response.data.message);
-		// }
+		try {
+			await axios.patch(`${API_URL.Destination}/${data.id}`, data).then((res) => {
+				if (res.data.message === 'success') {
+					enqueueSnackbar('Cập nhật địa điểm thành công', {variant: 'success'});
+				}
+				console.log(res.data);
+			});
+		} catch (e) {
+			enqueueSnackbar(e.response.data.message, {variant: 'error'});
+		}
 	});
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				await axios.get(`${API_URL.Destination}/${destinationID}`).then((res) => {
 					if (res.status === 200) {
-						setData(res.data.data);
+						setData(res.data.data.destination);
 						setBusy(false);
-						console.log(res.data.data);
+						setGallery(res.data.data.destination.images);
+						console.log(res.data.data.destination);
 					}
 				});
 			} catch (error) {
-				console.log(error.response.data.message);
-				setCreateDestinationMessage(error.response.data.message);
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
 			}
 		};
 		fetchData();
 	}, []);
+
+	const handleImages = (data) => {
+		setGallery(data);
+		const imageArray = [];
+		// eslint-disable-next-line array-callback-return
+		data.map((images) => {
+			if (!images.url) {
+				try {
+					imgbbUploader({
+						apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
+						base64string: images.image_base64.split('base64,')[1]
+						// OPTIONAL: pass base64-encoded image (max 32Mb)
+					})
+						.then((response) => imageArray.push({url: response.url}))
+						.catch((error) => setCreateDestinationMessage(error));
+				} catch (e) {
+					console.log(e);
+				}
+			} else {
+				imageArray.push({url: images.url});
+			}
+		});
+		setFieldValue('images', imageArray);
+	};
 
 	const convertToArray = (data) => {
 		const supData = [];
@@ -167,32 +190,13 @@ export default function UpdateDestinationForm({destinationID}) {
 	};
 	const handleTimeToString = (data) => {
 		console.log(data);
-		return data.toString().substr(16, 5);
+		return data?.toString().substr(16, 5);
 	};
 	const handleStringToTime = (data) => {
 		const hms = data;
 		return new Date(`1970-01-01 ${hms}`);
 	};
 
-	const handleImages = (data) => {
-		setGallery(data);
-		const imageArray = [];
-		// eslint-disable-next-line array-callback-return
-		data.map((images) => {
-			try {
-				imgbbUploader({
-					apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
-					base64string: images.image_base64.split('base64,')[1]
-					// OPTIONAL: pass base64-encoded image (max 32Mb)
-				})
-					.then((response) => imageArray.push({url: response.url}))
-					.catch((error) => console.error(error));
-			} catch (e) {
-				console.log(e);
-			}
-		});
-		setFieldValue('images', imageArray);
-	};
 	const {errors, touched, isSubmitting, handleSubmit, getFieldProps, setFieldValue, values} = formik;
 	return (
 		<>
@@ -210,18 +214,31 @@ export default function UpdateDestinationForm({destinationID}) {
 											fullWidth
 											label="Tên địa điểm"
 											{...getFieldProps('name')}
-											onChange={() => {
-												console.log({...getFieldProps('location')});
-											}}
+											error={Boolean(touched.name && errors.name)}
+											helperText={touched.name && errors.name}
 										/>
-										<TextField fullWidth label="Số điện thoại" {...getFieldProps('phone')} />
-										<TextField fullWidth label="Email" {...getFieldProps('email')} />
+										<TextField
+											fullWidth
+											label="Số điện thoại"
+											{...getFieldProps('phone')}
+											error={Boolean(touched.phone && errors.phone)}
+											helperText={touched.phone && errors.phone}
+										/>
+										<TextField
+											fullWidth
+											label="Email"
+											{...getFieldProps('email')}
+											error={Boolean(touched.email && errors.email)}
+											helperText={touched.email && errors.email}
+										/>
 										<TextField
 											fullWidth
 											multiline
 											label="Thông tin địa điểm"
 											rows={12}
 											{...getFieldProps('description')}
+											error={Boolean(touched.description && errors.description)}
+											helperText={touched.description && errors.description}
 										/>
 
 										<Stack direction={{xs: 'row'}} spacing={2}>
@@ -240,6 +257,8 @@ export default function UpdateDestinationForm({destinationID}) {
 														</InputAdornment>
 													)
 												}}
+												error={Boolean(touched.lowestPrice && errors.lowestPrice)}
+												helperText={touched.lowestPrice && errors.lowestPrice}
 											/>
 											<div>-</div>
 											<TextField
@@ -260,6 +279,8 @@ export default function UpdateDestinationForm({destinationID}) {
 														</InputAdornment>
 													)
 												}}
+												error={Boolean(touched.highestPrice && errors.highestPrice)}
+												helperText={touched.highestPrice && errors.highestPrice}
 											/>
 										</Stack>
 									</Stack>
@@ -325,24 +346,36 @@ export default function UpdateDestinationForm({destinationID}) {
 												ampm={false}
 												views={['hours', 'minutes']}
 												label={<span className="labelText">Thời gian mở cửa*</span>}
-												maxTime={handleStringToTime(values.closingTime)}
 												value={handleStringToTime(values.openingTime)}
 												onChange={(value) =>
 													setFieldValue('openingTime', handleTimeToString(value))
 												}
-												renderInput={(params) => <TextField {...params} />}
+												renderInput={(params) => (
+													<TextField
+														{...params}
+														{...getFieldProps('openingTime')}
+														error={Boolean(touched.openingTime && errors.openingTime)}
+														helperText={touched.openingTime && errors.openingTime}
+													/>
+												)}
 											/>
 										</LocalizationProvider>
 										<LocalizationProvider dateAdapter={AdapterDateFns}>
 											<TimePicker
 												ampm={false}
 												label={<span className="labelText">Thời gian đóng cửa*</span>}
-												minTime={handleStringToTime(values.openingTime)}
 												value={handleStringToTime(values.closingTime)}
 												onChange={(value) =>
 													setFieldValue('closingTime', handleTimeToString(value))
 												}
-												renderInput={(params) => <TextField {...params} />}
+												renderInput={(params) => (
+													<TextField
+														{...params}
+														{...getFieldProps('closingTime')}
+														error={Boolean(touched.closingTime && errors.closingTime)}
+														helperText={touched.closingTime && errors.closingTime}
+													/>
+												)}
 											/>
 										</LocalizationProvider>
 										<TextField
@@ -365,6 +398,8 @@ export default function UpdateDestinationForm({destinationID}) {
 													</InputAdornment>
 												)
 											}}
+											error={Boolean(touched.estimatedTimeStay && errors.estimatedTimeStay)}
+											helperText={touched.estimatedTimeStay && errors.estimatedTimeStay}
 										/>
 										<Autocomplete
 											multiple
@@ -381,7 +416,10 @@ export default function UpdateDestinationForm({destinationID}) {
 													multiline="false"
 													required
 													{...params}
+													{...getFieldProps('recommendedTimes')}
 													label="Khoảng thời gian lý tưởng"
+													error={Boolean(touched.recommendedTimes && errors.recommendedTimes)}
+													helperText={touched.recommendedTimes && errors.recommendedTimes}
 												/>
 											)}
 										/>
@@ -392,12 +430,7 @@ export default function UpdateDestinationForm({destinationID}) {
 										</Box>
 									</Stack>
 								</Grid>
-								<ImageDropzone
-									setImageList={(value) => {
-										setFieldValue('images', value);
-									}}
-									imageList={values.images}
-								/>
+								<ImageDropzone setImageList={handleImages} imageList={gallery} />
 							</Grid>
 						</Card>
 					)}

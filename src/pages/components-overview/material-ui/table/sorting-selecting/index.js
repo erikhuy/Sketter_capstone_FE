@@ -70,7 +70,7 @@ export default function SortingSelecting() {
 		const fetchData = async () => {
 			try {
 				await axios.get(`${API_URL.Destination}?page=${page + 1}`).then((res) => {
-					setData(res.data.data);
+					setData(res.data.data.destinations);
 					setMaxPage(res.data.maxPage);
 					setCurrentPage(res.data.currentPage);
 					if (res.data.maxPage > res.data.currentPage) {

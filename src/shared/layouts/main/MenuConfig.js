@@ -32,8 +32,6 @@ const menuConfig = [
 			{
 				subheader: 'Other',
 				items: [
-					{title: 'About us', path: PATH_PAGE.about},
-					{title: 'Contact us', path: PATH_PAGE.contact},
 					{title: 'FAQs', path: PATH_PAGE.faqs},
 					{title: 'Pricing', path: PATH_PAGE.pricing},
 					{title: 'Payment', path: PATH_PAGE.payment},

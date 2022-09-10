@@ -89,7 +89,6 @@ export default function Router() {
 					path: 'e-commerce',
 					children: [
 						{path: '', element: <Navigate to="/dashboard/e-commerce/shop" replace />},
-						{path: 'shop', element: <EcommerceShop />},
 						{path: 'product/:name', element: <EcommerceProductDetails />},
 						{path: 'list', element: <EcommerceProductList />},
 						{path: 'product/new', element: <EcommerceProductCreate />},
@@ -161,8 +160,6 @@ export default function Router() {
 			element: <MainLayout />,
 			children: [
 				{path: '', element: <Navigate to="/dashboard" replace />},
-				{path: 'about-us', element: <About />},
-				{path: 'contact-us', element: <Contact />},
 				{path: 'faqs', element: <Faqs />},
 				{
 					path: 'components',
@@ -239,7 +236,6 @@ const CreateDestination = Loadable(lazy(() => import('pages/dashboard/destinatio
 const GeneralApp = Loadable(lazy(() => import('pages/dashboard/GeneralApp')));
 const GeneralEcommerce = Loadable(lazy(() => import('pages/dashboard/GeneralEcommerce')));
 const GeneralAnalytics = Loadable(lazy(() => import('pages/dashboard/GeneralAnalytics')));
-const EcommerceShop = Loadable(lazy(() => import('pages/dashboard/EcommerceShop')));
 const EcommerceProductDetails = Loadable(lazy(() => import('pages/dashboard/EcommerceProductDetails')));
 const EcommerceProductList = Loadable(lazy(() => import('pages/dashboard/EcommerceProductList')));
 const EcommerceProductCreate = Loadable(lazy(() => import('pages/dashboard/EcommerceProductCreate')));
@@ -259,8 +255,6 @@ const Calendar = Loadable(lazy(() => import('pages/dashboard/Calendar')));
 const Kanban = Loadable(lazy(() => import('pages/dashboard/Kanban')));
 // Main
 const LandingPage = Loadable(lazy(() => import('pages/LandingPage')));
-const About = Loadable(lazy(() => import('pages/About')));
-const Contact = Loadable(lazy(() => import('pages/Contact')));
 const Faqs = Loadable(lazy(() => import('pages/Faqs')));
 const ComingSoon = Loadable(lazy(() => import('pages/ComingSoon')));
 const Maintenance = Loadable(lazy(() => import('pages/Maintenance')));

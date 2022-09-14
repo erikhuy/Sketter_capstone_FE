@@ -78,6 +78,8 @@ const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedR
 
 	useEffect(() => {
 		console.log(placeAddress);
+		// TAO ĐANG BỊ LỖI Ở ĐÂY NÈ
+		// cái này dùng để load lên search bar ở trang xem chi tiết vs lại khi có data từ onclick của map
 		setValue({
 			description: placeAddress,
 			matched_substrings: [],

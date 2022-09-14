@@ -4,6 +4,7 @@ import React, {useCallback, useRef, useEffect} from 'react';
 import {useField} from 'formik';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import {Alert, Box, CircularProgress, IconButton} from '@material-ui/core';
+import {geocodeByPlaceId} from 'react-places-autocomplete';
 import SearchBar from './SearchBar';
 
 const options = {
@@ -26,12 +27,16 @@ const MapField = ({containerProps = {}, ...props}) => {
 
 	const onMapClick = useCallback(
 		(e) => {
-			console.log(e);
-			setFieldValue({
-				lat: e.latLng.lat(),
-				lng: e.latLng.lng(),
-				time: new Date()
-			});
+			geocodeByPlaceId(e.placeId)
+				.then((results) =>
+					setFieldValue({
+						lat: e.latLng.lat(),
+						lng: e.latLng.lng(),
+						destinationAddress: results[0].formatted_address,
+						time: new Date()
+					})
+				)
+				.catch((error) => console.error(error));
 
 			searchRef.current && searchRef.current.clearSearch();
 		},
@@ -53,9 +58,6 @@ const MapField = ({containerProps = {}, ...props}) => {
 	useEffect(() => {
 		if (mapRef.current && value) {
 			mapRef.current.panTo(value);
-		}
-		if (searchRef.current && value) {
-			searchRef.current = '123';
 		}
 		console.log(value);
 	}, [value]);
@@ -104,7 +106,8 @@ const MapField = ({containerProps = {}, ...props}) => {
 			</IconButton>
 			<SearchBar
 				ref={searchRef}
-				placeAddress={value.destinationAddress}
+				// dùng để load địa chỉ từ data và từ khi onClick vào map
+				placeAddress={value ? value.destinationAddress : ''}
 				error={error}
 				fieldProps={fieldProps}
 				onSelect={setFieldValue}

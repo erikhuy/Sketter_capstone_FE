@@ -4,7 +4,7 @@ import {createAsyncThunkWithErrorHandler} from 'utils/createAsyncThunkWithErrorH
 import {setSession} from 'utils/jwt';
 import {ACCESS_TOKEN_KEY, API_URL, AppContext} from '../../constants';
 
-export const fetchUserService = () => axiosInstance.get(`${API_URL.User}/me`).then((response) => response.data);
+export const fetchUserService = () => axiosInstance.get(`${API_URL.User}/me`).then((response) => response.data.profile);
 
 export const fetchUserThunk = createAsyncThunkWithErrorHandler(`${AppContext.Auth}/fetchUser`, async () =>
 	fetchUserService()

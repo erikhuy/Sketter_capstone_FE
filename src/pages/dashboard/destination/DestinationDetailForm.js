@@ -475,7 +475,7 @@ export default function DestinationDetailForm({destinationID}) {
 									<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
 										Cập nhật
 									</LoadingButton>
-									<Button color="error" variant="contained" onClick={() => handleReject(values.id)}>
+									<Button color="error" variant="contained" onClick={() => handleApprove(values.id,false)}>
 										Từ chối
 									</Button>
 								</Stack>

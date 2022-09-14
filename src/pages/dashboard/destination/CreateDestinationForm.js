@@ -68,10 +68,21 @@ export default function CreateDestinationForm() {
 			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
 			.required('Yêu cầu giá thấp nhất'),
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
+		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
+		openingTime: Yup.string()
+			.notOneOf([Yup.ref('closingTime')], 'Thời gian mở cửa không hợp lệ')
+			.nullable(true, 'Thời gian không được trống')
+			.required('Yêu cầu thời gian mở cửa'),
+		closingTime: Yup.string()
+			.notOneOf([Yup.ref('openingTime')], 'Thời gian đóng cửa không hợp lệ')
+			.nullable(true, 'Thời gian không được trống')
+			.required('Yêu cầu thời gian đóng cửa'),
+
 		estimatedTimeStay: Yup.number()
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(1440, 'Thời gian không quá 1 ngày!')
-			.required('Yêu cầu thời gian dự kiến ở lại')
+			.required('Yêu cầu thời gian dự kiến ở lại'),
+		recommendedTimes: Yup.array().min(1, 'Khoảng thời gian lý tưởng không được trống')
 	});
 	const formik = useFormik({
 		initialValues: {
@@ -90,12 +101,7 @@ export default function CreateDestinationForm() {
 			closingTimeSup: null,
 			closingTime: null,
 			estimatedTimeStay: '',
-			recommendedTimes: [
-				{
-					start: '',
-					end: ''
-				}
-			],
+			recommendedTimes: [],
 			destinationPersonalities: [],
 			catalogs: [],
 			images: []
@@ -323,7 +329,14 @@ export default function CreateDestinationForm() {
 										getOptionLabel={(option) => option}
 										filterSelectedOptions
 										renderInput={(params) => (
-											<TextField {...params} label="Loại địa điểm" required />
+											<TextField
+												{...params}
+												{...getFieldProps('catalogs')}
+												label="Loại địa điểm"
+												required
+												error={Boolean(touched.catalogs && errors.catalogs)}
+												helperText={touched.catalogs && errors.catalogs}
+											/>
 										)}
 									/>
 									<h3 className="category-label">Tính cách du lịch người dùng</h3>
@@ -340,89 +353,120 @@ export default function CreateDestinationForm() {
 										}}
 										filterSelectedOptions
 										renderInput={(params) => (
-											<TextField multiline="false" required {...params} label="Loại tính cách" />
-										)}
-									/>
-									<h3>Thông tin về thời gian</h3>
-									<Stack direction={{xs: 'row'}} spacing={2}>
-										<LocalizationProvider dateAdapter={AdapterDateFns}>
-											<TimePicker
-												ampm={false}
-												views={['hours', 'minutes']}
-												label={<span className="labelText">Thời gian mở cửa*</span>}
-												value={values.openingTimeSup}
-												// onChange={(value) => setFieldValue('openingTime', value.toString().substr(16, 5))}
-												onChange={(value) => handleOpeningTime(value)}
-												maxTime={values.closingTimeSup}
-												renderInput={(params) => (
-													<TextField {...params} style={{height: 56, width: 410}} />
-												)}
-											/>
-										</LocalizationProvider>
-										<LocalizationProvider dateAdapter={AdapterDateFns}>
-											<TimePicker
-												ampm={false}
-												label={<span className="labelText">Thời gian đóng cửa*</span>}
-												value={values.closingTimeSup}
-												minTime={values.openingTimeSup}
-												onChange={(value) => handleClosingTime(value)}
-												renderInput={(params) => (
-													<TextField {...params} style={{height: 56, width: 410}} />
-												)}
-											/>
-										</LocalizationProvider>
-									</Stack>
-									<TextField
-										{...getFieldProps('estimatedTimeStay')}
-										required
-										type="number"
-										className="form-control"
-										style={{height: 56, width: 740}}
-										label={<span className="labelText">Thời gian dự kiến ở lại</span>}
-										InputProps={{
-											className: 'text-field-style',
-											endAdornment: (
-												<InputAdornment position="end">
-													<span className="adorment-text">min</span>
-												</InputAdornment>
-											),
-											startAdornment: (
-												<InputAdornment position="start">
-													<AccessTimeIcon />
-												</InputAdornment>
-											)
-										}}
-										error={Boolean(touched.estimatedTimeStay && errors.estimatedTimeStay)}
-										helperText={touched.estimatedTimeStay && errors.estimatedTimeStay}
-									/>
-									<Autocomplete
-										multiple
-										id="tags-outlined"
-										options={RecommendedTimesFrame}
-										getOptionLabel={(option) => `${option.start}-${option.end}`}
-										onChange={(e, value) => {
-											setFieldValue('recommendedTimes', value);
-										}}
-										filterSelectedOptions
-										renderInput={(params) => (
 											<TextField
 												multiline="false"
 												required
 												{...params}
-												label="Khoảng thời gian lý tưởng"
+												{...getFieldProps('destinationPersonalities')}
+												label="Loại tính cách"
+												error={Boolean(
+													touched.destinationPersonalities && errors.destinationPersonalities
+												)}
+												helperText={
+													touched.destinationPersonalities && errors.destinationPersonalities
+												}
 											/>
 										)}
 									/>
-
-									<Box sx={{mt: 3, display: 'flex', justifyContent: 'flex-end'}}>
-										<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-											Tạo địa điểm
-										</LoadingButton>
-									</Box>
+									<h3>Thông tin về thời gian</h3>
+									<Stack direction={{xs: 'column'}} spacing={5} sx={{m: 2}}>
+										<Stack direction={{xs: 'row'}} spacing={2}>
+											<LocalizationProvider dateAdapter={AdapterDateFns}>
+												<TimePicker
+													ampm={false}
+													views={['hours', 'minutes']}
+													label={<span className="labelText">Thời gian mở cửa*</span>}
+													value={values.openingTimeSup}
+													// onChange={(value) => setFieldValue('openingTime', value.toString().substr(16, 5))}
+													onChange={(value) => handleOpeningTime(value)}
+													maxTime={values.closingTimeSup}
+													renderInput={(params) => (
+														<TextField
+															{...params}
+															style={{height: 56, width: 410}}
+															{...getFieldProps('openingTime')}
+															error={Boolean(touched.openingTime && errors.openingTime)}
+															helperText={touched.openingTime && errors.openingTime}
+														/>
+													)}
+												/>
+											</LocalizationProvider>
+											<LocalizationProvider dateAdapter={AdapterDateFns}>
+												<TimePicker
+													ampm={false}
+													label={<span className="labelText">Thời gian đóng cửa*</span>}
+													value={values.closingTimeSup}
+													minTime={values.openingTimeSup}
+													onChange={(value) => handleClosingTime(value)}
+													renderInput={(params) => (
+														<TextField
+															{...params}
+															style={{height: 56, width: 410}}
+															{...getFieldProps('closingTime')}
+															error={Boolean(touched.closingTime && errors.closingTime)}
+															helperText={touched.closingTime && errors.closingTime}
+														/>
+													)}
+												/>
+											</LocalizationProvider>
+										</Stack>
+										<TextField
+											{...getFieldProps('estimatedTimeStay')}
+											required
+											type="number"
+											className="form-control"
+											style={{height: 56, width: 740}}
+											label={<span className="labelText">Thời gian dự kiến ở lại</span>}
+											InputProps={{
+												className: 'text-field-style',
+												endAdornment: (
+													<InputAdornment position="end">
+														<span className="adorment-text">min</span>
+													</InputAdornment>
+												),
+												startAdornment: (
+													<InputAdornment position="start">
+														<AccessTimeIcon />
+													</InputAdornment>
+												)
+											}}
+											error={Boolean(touched.estimatedTimeStay && errors.estimatedTimeStay)}
+											helperText={touched.estimatedTimeStay && errors.estimatedTimeStay}
+										/>
+										<Autocomplete
+											multiple
+											id="tags-outlined"
+											options={RecommendedTimesFrame}
+											getOptionLabel={(option) => `${option.start}-${option.end}`}
+											onChange={(e, value) => {
+												setFieldValue(
+													'recommendedTimes',
+													value !== null ? value : initialValues.recommendedTimes
+												);
+											}}
+											filterSelectedOptions
+											renderInput={(params) => (
+												<TextField
+													multiline="false"
+													required
+													{...params}
+													label="Khoảng thời gian lý tưởng"
+													{...getFieldProps('recommendedTimes')}
+													error={Boolean(touched.recommendedTimes && errors.recommendedTimes)}
+													helperText={touched.recommendedTimes && errors.recommendedTimes}
+												/>
+											)}
+										/>
+									</Stack>
 								</Stack>
 							</Grid>
 							<ImageDropzone setImageList={handleImages} imageList={gallery} />
 						</Grid>
+						<Box sx={{mt: 3, display: 'flex', justifyContent: 'flex-end'}}>
+							<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+								Tạo địa điểm
+							</LoadingButton>
+						</Box>
 					</Card>
 				</Form>
 			</FormikProvider>

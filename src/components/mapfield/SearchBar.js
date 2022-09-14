@@ -38,7 +38,7 @@ const SearchItem = ({option, ...props}) => {
 	);
 };
 
-const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedRef}) => {
+const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedRef, placeAddress}) => {
 	const {placesService, placePredictions, getPlacePredictions, isPlacePredictionsLoading} = usePlacesService({
 		apiKey: process.env.REACT_APP_GOOGLE_KEY,
 		debounce: 500,
@@ -55,9 +55,10 @@ const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedR
 		() => throttle((input) => getPlacePredictions({input}), 200),
 		[getPlacePredictions]
 	);
-	const onChange = useCallback((_, value) => setValue(value), []);
+	const onChange = useCallback((_, value) => console.log(value), []);
 	const onInputChange = useCallback(
 		(_, newInputValue) => {
+			console.log(newInputValue);
 			fetchPredictions(newInputValue);
 		},
 		[fetchPredictions]
@@ -76,6 +77,16 @@ const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedR
 	);
 
 	useEffect(() => {
+		console.log(placeAddress);
+		setValue({
+			description: placeAddress,
+			matched_substrings: [],
+			place_id: '',
+			reference: '',
+			structured_formatting: {main_text: '', main_text_matched_substrings: [], secondary_text: ''},
+			terms: [],
+			types: []
+		});
 		const placeId = value && value.place_id;
 		const address = value && value.description;
 		if (placeId) {

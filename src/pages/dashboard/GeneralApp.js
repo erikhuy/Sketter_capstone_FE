@@ -32,7 +32,7 @@ export default function GeneralApp() {
 			<Container maxWidth={themeStretch ? false : 'xl'}>
 				<Grid container spacing={2}>
 					<Grid item xs={12} md={12}>
-						<AppWelcome displayName={user.name} />
+						<AppWelcome displayName={user.name} displayRole={user.roleID} />
 					</Grid>
 
 					<Grid item xs={12} md={4}>

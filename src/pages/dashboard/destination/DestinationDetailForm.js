@@ -18,7 +18,8 @@ import {
 	Typography,
 	Autocomplete,
 	Checkbox,
-	Chip
+	Chip,
+	Button
 } from '@material-ui/core';
 import {useFormik, Form, FormikProvider} from 'formik';
 import {DesktopDatePicker, LoadingButton, LocalizationProvider, TimePicker} from '@material-ui/lab';
@@ -39,10 +40,10 @@ import {useSnackbar} from 'notistack5';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-UpdateDestinationForm.propTypes = {
+DestinationDetailForm.propTypes = {
 	destinationID: PropTypes.object.isRequired
 };
-export default function UpdateDestinationForm({destinationID}) {
+export default function DestinationDetailForm({destinationID}) {
 	// eslint-disable-next-line no-bitwise
 	const isMountedRef = useIsMountedRef();
 	const [gallery, setGallery] = useState([]);
@@ -66,6 +67,7 @@ export default function UpdateDestinationForm({destinationID}) {
 			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
 			.required('Yêu cầu giá thấp nhất'),
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
+		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		estimatedTimeStay: Yup.number()
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(1440, 'Thời gian không quá 1 ngày!')
@@ -88,9 +90,6 @@ export default function UpdateDestinationForm({destinationID}) {
 	const processData = (data) => {
 		console.log(data);
 		const supArray = Object.assign(data, locationData);
-		supArray.location.lng = data.longitude;
-		supArray.location.lat = data.latitude;
-		supArray.location.destinationAddress = data.address;
 		supArray.catalogs = convertToArray(data?.catalogs);
 		supArray.destinationPersonalities = convertToArray(data?.destinationPersonalities);
 		// eslint-disable-next-line array-callback-return
@@ -134,19 +133,39 @@ export default function UpdateDestinationForm({destinationID}) {
 			enqueueSnackbar(e.response.data.message, {variant: 'error'});
 		}
 	});
+	
+	const handleApprove = useCallback(async (id, status) => {
+		console.log(data);
+		try {
+			await axios.patch(`${API_URL.Destination}/pending/${id}`, {"isApprove": status}).then((res) => {
+				if (res.data.message === 'success') {
+					enqueueSnackbar(res.data.data, {variant: 'success'});
+				}
+				console.log(res.data);
+			});
+		} catch (e) {
+			enqueueSnackbar(e.response.data.message, {variant: 'error'});
+		}
+	});
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				await axios.get(`${API_URL.Destination}/${destinationID}`).then((res) => {
 					if (res.status === 200) {
-						setData(res.data.data.destination);
+						const supArray = Object.assign(res.data.data.destination, locationData);
+						supArray.location.lng = res.data.data.destination.longitude;
+						supArray.location.lat = res.data.data.destination.latitude;
+						supArray.location.destinationAddress = res.data.data.destination.address;
+						setData(supArray);
 						setBusy(false);
 						setGallery(res.data.data.destination.images);
-						console.log(res.data.data.destination);
+						console.log(supArray);
 					}
 				});
 			} catch (error) {
-				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
 			}
 		};
 		fetchData();
@@ -288,10 +307,10 @@ export default function UpdateDestinationForm({destinationID}) {
 								<Grid item xs={6}>
 									<Stack direction={{xs: 'column'}} spacing={2.4} sx={{m: 2}}>
 										{/* <PlacesAutocomplete location={location} updateLocation={setLocation} /> */}
-										<TextField fullWidth label="Địa chỉ" {...getFieldProps('address')} />
+										{/* <TextField fullWidth label="Địa chỉ" {...getFieldProps('address')} />
 										<TextField fullWidth label="Kinh độ" {...getFieldProps('latitude')} />
-										<TextField fullWidth label="Vĩ độ" {...getFieldProps('longitude')} />
-										{/* <Mapfield name="location" label="Địa chỉ" placeholder="Chọn địa điểm" /> */}
+										<TextField fullWidth label="Vĩ độ" {...getFieldProps('longitude')} /> */}
+										<Mapfield name="location" label="Địa chỉ" placeholder="Chọn địa điểm" />
 
 										<Box
 											sx={{
@@ -316,7 +335,14 @@ export default function UpdateDestinationForm({destinationID}) {
 												))
 											}
 											renderInput={(params) => (
-												<TextField multiline="false" {...params} label="Loại địa điểm" />
+												<TextField
+													multiline="false"
+													{...params}
+													{...getFieldProps('catalogs')}
+													label="Loại địa điểm"
+													error={Boolean(touched.catalogs && errors.catalogs)}
+													helperText={touched.catalogs && errors.catalogs}
+												/>
 											)}
 										/>
 										<h3 className="category-label">Tính cách du lịch người dùng</h3>
@@ -337,7 +363,20 @@ export default function UpdateDestinationForm({destinationID}) {
 												))
 											}
 											renderInput={(params) => (
-												<TextField multiline="false" {...params} label="Loại tính cách" />
+												<TextField
+													multiline="false"
+													{...params}
+													{...getFieldProps('destinationPersonalities')}
+													label="Loại tính cách"
+													error={Boolean(
+														touched.destinationPersonalities &&
+															errors.destinationPersonalities
+													)}
+													helperText={
+														touched.destinationPersonalities &&
+														errors.destinationPersonalities
+													}
+												/>
 											)}
 										/>
 										<h3>Thông tin về thời gian</h3>
@@ -423,15 +462,24 @@ export default function UpdateDestinationForm({destinationID}) {
 												/>
 											)}
 										/>
-										<Box sx={{mt: 3, display: 'flex', justifyContent: 'flex-end'}}>
-											<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-												Cập nhật
-											</LoadingButton>
-										</Box>
 									</Stack>
 								</Grid>
 								<ImageDropzone setImageList={handleImages} imageList={gallery} />
 							</Grid>
+
+							<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
+								<Stack direction={{xs: 'row'}} spacing={2}>
+									<Button color="success" variant="contained" onClick={() => handleApprove(values.id,true)}>
+										Duyệt
+									</Button>
+									<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+										Cập nhật
+									</LoadingButton>
+									<Button color="error" variant="contained" onClick={() => handleReject(values.id)}>
+										Từ chối
+									</Button>
+								</Stack>
+							</Box>
 						</Card>
 					)}
 				</Form>

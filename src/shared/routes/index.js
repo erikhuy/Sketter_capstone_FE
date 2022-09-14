@@ -81,6 +81,7 @@ export default function Router() {
 				{path: 'userManagement', element: <UserManegement />},
 				{path: 'destinationList', element: <DestinationList />},
 				{path: 'createDestination', element: <CreateDestination />},
+				{path: 'pendingDestinationList', element: <PendingDestinationList />},
 				{
 					path: 'analytics',
 					element: <GeneralAnalytics />
@@ -233,6 +234,7 @@ const VerifyCode = Loadable(lazy(() => import('pages/authentication/VerifyCode')
 const UserManegement = Loadable(lazy(() => import('pages/dashboard/admin/UserManagement')));
 const DestinationList = Loadable(lazy(() => import('pages/dashboard/destination/DestinationList')));
 const CreateDestination = Loadable(lazy(() => import('pages/dashboard/destination/CreateDestination')));
+const PendingDestinationList = Loadable(lazy(() => import('pages/dashboard/destination/PendingDestinationList')));
 const GeneralApp = Loadable(lazy(() => import('pages/dashboard/GeneralApp')));
 const GeneralEcommerce = Loadable(lazy(() => import('pages/dashboard/GeneralEcommerce')));
 const GeneralAnalytics = Loadable(lazy(() => import('pages/dashboard/GeneralAnalytics')));

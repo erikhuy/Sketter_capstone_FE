@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import PropTypes from 'prop-types';
 import {Link as RouterLink} from 'react-router-dom';
 // material
@@ -23,10 +24,11 @@ const RootStyle = styled(Card)(({theme}) => ({
 // ----------------------------------------------------------------------
 
 AppWelcome.propTypes = {
-	displayName: PropTypes.string
+	displayName: PropTypes.string,
+	displayRole: PropTypes.number
 };
 
-export default function AppWelcome({displayName}) {
+export default function AppWelcome({displayName, displayRole}) {
 	return (
 		<RootStyle>
 			<CardContent
@@ -38,7 +40,7 @@ export default function AppWelcome({displayName}) {
 			>
 				<Typography gutterBottom variant="h2">
 					Welcome back,
-					<br /> {!displayName ? '...' : displayName}!
+					<br /> {!displayName ? (displayRole === 2 ? 'Supplier Manager' : 'Admin') : displayName}!
 				</Typography>
 			</CardContent>
 

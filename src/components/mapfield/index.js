@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-expressions */
-import {useLoadScript, GoogleMap, Marker} from '@react-google-maps/api';
+import {useLoadScript, GoogleMap, Marker, MarkerF} from '@react-google-maps/api';
 import React, {useCallback, useRef, useEffect} from 'react';
 import {useField} from 'formik';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
@@ -40,13 +40,22 @@ const MapField = ({containerProps = {}, ...props}) => {
 
 	const mapRef = useRef(null);
 	const searchRef = useRef(null);
-	const onMapLoad = useCallback((map) => {
-		mapRef.current = map;
-	}, []);
+	const onMapLoad = useCallback(
+		(map) => {
+			mapRef.current = map;
+			if (value) {
+				map.panTo(value);
+			}
+		},
+		[value]
+	);
 
 	useEffect(() => {
 		if (mapRef.current && value) {
 			mapRef.current.panTo(value);
+		}
+		if (searchRef.current && value) {
+			searchRef.current = '123';
 		}
 		console.log(value);
 	}, [value]);
@@ -95,6 +104,7 @@ const MapField = ({containerProps = {}, ...props}) => {
 			</IconButton>
 			<SearchBar
 				ref={searchRef}
+				placeAddress={value.destinationAddress}
 				error={error}
 				fieldProps={fieldProps}
 				onSelect={setFieldValue}
@@ -108,7 +118,7 @@ const MapField = ({containerProps = {}, ...props}) => {
 				onClick={onMapClick}
 				onLoad={onMapLoad}
 			>
-				{value && <Marker position={value} />}
+				{value && <MarkerF position={value} />}
 			</GoogleMap>
 		</Box>
 	);

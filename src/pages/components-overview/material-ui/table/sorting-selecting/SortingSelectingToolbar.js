@@ -59,34 +59,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
 	const [resetToolbar, setResetToolbar] = useState([]);
-	const [destinationDetail, setDestinationDetail] = useState({
-		name: '',
-		address: '',
-		longitude: '',
-		latitude: '',
-		location: null,
-		phone: '',
-		email: '',
-		description: '',
-		lowestPrice: '',
-		highestPrice: '',
-		openingTime: null,
-		closingTime: null,
-		estimatedTimeStay: '',
-		recommendedTimes: [
-			{
-				start: '',
-				end: ''
-			}
-		],
-		destinationPersonalities: [],
-		catalogs: [],
-		images: [
-			{
-				url: ''
-			}
-		]
-	});
+
 	const deleteDestination = useCallback(
 		async (idSelected) => {
 			try {
@@ -121,24 +94,28 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 		>
 			{idSelected.length > 0 ? (
 				<Typography color="inherit" variant="subtitle1" component="div">
-					{idSelected.length} is selected
+					{idSelected.length} địa điểm đang được chọn
 				</Typography>
 			) : (
 				<Typography variant="h6" id="tableTitle" component="div">
 					Danh sách địa điểm
 				</Typography>
 			)}
-			<Modal
-				sx={styles}
-				open={open}
-				onClose={handleClose}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-			>
-				<Box sx={style}>
-					<DestinationDetailForm destinationID={idSelected} />
-				</Box>
-			</Modal>
+			{open && (
+				<Modal
+					sx={styles}
+					// eslint-disable-next-line react/jsx-boolean-value
+					open={true}
+					onClose={handleClose}
+					aria-labelledby="modal-modal-title"
+					aria-describedby="modal-modal-description"
+				>
+					<Box sx={style}>
+						<DestinationDetailForm destinationID={idSelected} />
+					</Box>
+				</Modal>
+			)}
+
 			{idSelected.length > 1 ? (
 				<IconButton
 					onClick={() => {

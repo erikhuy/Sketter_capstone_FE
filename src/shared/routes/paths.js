@@ -43,7 +43,8 @@ export const PATH_DASHBOARD = {
 	destination: {
 		destinationList: path(ROOTS_DASHBOARD, '/destinationList'),
 		createDestination: path(ROOTS_DASHBOARD, '/createDestination'),
-		pendingDestinationList: path(ROOTS_DASHBOARD, '/pendingDestinationList')
+		pendingDestinationList: path(ROOTS_DASHBOARD, '/pendingDestinationList'),
+		rejectDestinationList: path(ROOTS_DASHBOARD, '/rejectDestinationList')
 	},
 	mail: {
 		root: path(ROOTS_DASHBOARD, '/mail'),

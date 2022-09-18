@@ -39,8 +39,8 @@ export default function AppWelcome({displayName, displayRole}) {
 				}}
 			>
 				<Typography gutterBottom variant="h2">
-					Welcome back,
-					<br /> {!displayName ? (displayRole === 2 ? 'Supplier Manager' : 'Admin') : displayName}!
+					Chào mừng trở lại,
+					<br /> {!displayName ? displayRole : displayName}!
 				</Typography>
 			</CardContent>
 

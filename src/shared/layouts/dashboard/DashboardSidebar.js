@@ -170,7 +170,7 @@ export default function DashboardSidebar({isOpenSidebar, onCloseSidebar}) {
 									{user?.name}
 								</Typography>
 								<Typography variant="body2" sx={{color: 'text.secondary'}}>
-									{ChangeRoleToText(user?.roleID)}
+									{user?.role.description}
 									{/* {user?.roleID} */}
 								</Typography>
 							</Box>

@@ -14,7 +14,8 @@ const sidebarConfig = [
 		items: [
 			{title: 'Danh sách địa điểm', path: PATH_DASHBOARD.destination.destinationList},
 			{title: 'Tạo địa điểm', path: PATH_DASHBOARD.destination.createDestination},
-			{title: 'Tạo địa điểm chờ duyệt', path: PATH_DASHBOARD.destination.pendingDestinationList}
+			{title: 'Địa điểm chờ duyệt', path: PATH_DASHBOARD.destination.pendingDestinationList},
+			{title: 'Địa điểm bị từ chối', path: PATH_DASHBOARD.destination.rejectDestinationList}
 		]
 	}
 ];

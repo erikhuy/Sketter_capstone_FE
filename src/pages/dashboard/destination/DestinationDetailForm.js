@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-undef */
 /* eslint-disable guard-for-in */
-
 /* eslint-disable camelcase */
 
 import * as Yup from 'yup';
@@ -133,18 +133,42 @@ export default function DestinationDetailForm({destinationID}) {
 			enqueueSnackbar(e.response.data.message, {variant: 'error'});
 		}
 	});
-	
-	const handleApprove = useCallback(async (id, status) => {
+
+	const handleAction = useCallback(async (id, action) => {
 		console.log(data);
-		try {
-			await axios.patch(`${API_URL.Destination}/pending/${id}`, {"isApprove": status}).then((res) => {
-				if (res.data.message === 'success') {
-					enqueueSnackbar(res.data.data, {variant: 'success'});
-				}
-				console.log(res.data);
-			});
-		} catch (e) {
-			enqueueSnackbar(e.response.data.message, {variant: 'error'});
+		if (action === 'Approve') {
+			try {
+				await axios.patch(`${API_URL.Destination}/pending/approve?id=${id}`).then((res) => {
+					if (res.data.message === 'success') {
+						enqueueSnackbar(res.data.data, {variant: 'success'});
+					}
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
+		} else if (action === 'Reject') {
+			try {
+				await axios.patch(`${API_URL.Destination}/pending/reject?id=${id}`).then((res) => {
+					if (res.data.message === 'success') {
+						enqueueSnackbar(res.data.data, {variant: 'success'});
+					}
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
+		} else if (action === 'Close') {
+			try {
+				await axios.patch(`${API_URL.Destination}/pending/close?id=${id}`).then((res) => {
+					if (res.data.message === 'success') {
+						enqueueSnackbar(res.data.data, {variant: 'success'});
+					}
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
 		}
 	});
 
@@ -468,17 +492,63 @@ export default function DestinationDetailForm({destinationID}) {
 							</Grid>
 
 							<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
-								<Stack direction={{xs: 'row'}} spacing={2}>
-									<Button color="success" variant="contained" onClick={() => handleApprove(values.id,true)}>
+								{values.status === 'Verified' ? (
+									<Stack direction={{xs: 'row'}} spacing={2}>
+										<Button
+											color="success"
+											variant="contained"
+											onClick={() => handleAction(values.id, 'Close')}
+										>
+											Ngưng hoạt động
+										</Button>
+										<Button
+											color="error"
+											variant="contained"
+											onClick={() => handleAction(values.id, 'Reject')}
+										>
+											Từ chối
+										</Button>
+										<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+											Cập nhật
+										</LoadingButton>
+									</Stack>
+								) : values.status !== 'Close' ? (
+									<Button
+										color="success"
+										variant="contained"
+										onClick={() => handleAction(values.id, 'Approve')}
+									>
+										Mở hoạt động
+									</Button>
+								) : values.status !== 'Reject' ? (
+									<Button
+										color="success"
+										variant="contained"
+										onClick={() => handleAction(values.id, 'Approve')}
+									>
 										Duyệt
 									</Button>
-									<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-										Cập nhật
-									</LoadingButton>
-									<Button color="error" variant="contained" onClick={() => handleApprove(values.id,false)}>
-										Từ chối
-									</Button>
-								</Stack>
+								) : (
+									<Stack direction={{xs: 'row'}} spacing={2}>
+										<Button
+											color="success"
+											variant="contained"
+											onClick={() => handleAction(values.id, 'Approve')}
+										>
+											Mở hoạt động
+										</Button>
+										<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+											Cập nhật
+										</LoadingButton>
+										<Button
+											color="error"
+											variant="contained"
+											onClick={() => handleAction(values.id, 'Reject')}
+										>
+											Từ chối
+										</Button>
+									</Stack>
+								)}
 							</Box>
 						</Card>
 					)}

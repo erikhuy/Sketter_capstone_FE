@@ -55,10 +55,9 @@ const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedR
 		() => throttle((input) => getPlacePredictions({input}), 200),
 		[getPlacePredictions]
 	);
-	const onChange = useCallback((_, value) => console.log(value), []);
+	const onChange = useCallback((_, value) => setValue(value), []);
 	const onInputChange = useCallback(
 		(_, newInputValue) => {
-			console.log(newInputValue);
 			fetchPredictions(newInputValue);
 		},
 		[fetchPredictions]
@@ -75,20 +74,13 @@ const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedR
 		}),
 		[]
 	);
-
 	useEffect(() => {
-		console.log(placeAddress);
-		// TAO ĐANG BỊ LỖI Ở ĐÂY NÈ
-		// cái này dùng để load lên search bar ở trang xem chi tiết vs lại khi có data từ onclick của map
 		setValue({
-			description: placeAddress,
-			matched_substrings: [],
-			place_id: '',
-			reference: '',
-			structured_formatting: {main_text: '', main_text_matched_substrings: [], secondary_text: ''},
-			terms: [],
-			types: []
+			description: placeAddress
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+	useEffect(() => {
 		const placeId = value && value.place_id;
 		const address = value && value.description;
 		if (placeId) {
@@ -116,13 +108,16 @@ const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedR
 			filterOptions={(x) => x}
 			options={placePredictions}
 			onChange={onChange}
+			// eslint-disable-next-line no-unneeded-ternary
 			value={value}
+			defaultValue={{description: {...placeAddress}}}
 			isOptionEqualToValue={isOptionEqualToValue}
 			renderInput={(params) => (
 				<TextField
 					fullWidth
 					{...params}
 					{...fieldProps}
+					defaultValue="1231231"
 					error={isError}
 					helperText={isError ? error : helperText}
 				/>

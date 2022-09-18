@@ -17,7 +17,9 @@ import axios from 'axios';
 import {useCallback, useEffect, useState} from 'react';
 import {API_URL} from 'shared/constants';
 // components
+import PropTypes from 'prop-types';
 import Scrollbar from '../../../../../components/Scrollbar';
+
 //
 import SortingSelectingHead from './SortingSelectingHead';
 import SortingSelectingToolbar from './SortingSelectingToolbar';
@@ -53,8 +55,10 @@ function stableSort(array, comparator) {
 	});
 	return stabilizedThis.map((el) => el[0]);
 }
-
-export default function SortingSelecting() {
+SortingSelectingSupplierManager.propTypes = {
+	listType: PropTypes.object.isRequired
+};
+export default function SortingSelectingSupplierManager({listType}) {
 	const [order, setOrder] = useState('asc');
 	const [orderBy, setOrderBy] = useState('name');
 	const [selected, setSelected] = useState([]);
@@ -68,19 +72,36 @@ export default function SortingSelecting() {
 	const [currentPage, setCurrentPage] = useState();
 	useEffect(() => {
 		const fetchData = async () => {
-			try {
-				await axios.get(`${API_URL.Destination}/pending?page=${page + 1}`).then((res) => {
-					setData(res.data.data.destinations);
-					setMaxPage(res.data.maxPage);
-					setCurrentPage(res.data.currentPage);
-					if (res.data.maxPage > res.data.currentPage) {
-						setDataNumber(res.data.data.destinations.length + 1);
-					} else {
-						setDataNumber(res.data.data.destinations.length);
-					}
-				});
-			} catch (error) {
-				setPage(page - 1);
+			if (listType === 'pending') {
+				try {
+					await axios.get(`${API_URL.Destination}/pending?page=${page + 1}`).then((res) => {
+						setData(res.data.data.destinations);
+						setMaxPage(res.data.maxPage);
+						setCurrentPage(res.data.currentPage);
+						if (res.data.maxPage > res.data.currentPage) {
+							setDataNumber(res.data.data.destinations.length + 1);
+						} else {
+							setDataNumber(res.data.data.destinations.length);
+						}
+					});
+				} catch (error) {
+					setPage(page - 1);
+				}
+			} else {
+				try {
+					await axios.get(`${API_URL.Destination}/reject?page=${page + 1}`).then((res) => {
+						setData(res.data.data.destinations);
+						setMaxPage(res.data.maxPage);
+						setCurrentPage(res.data.currentPage);
+						if (res.data.maxPage > res.data.currentPage) {
+							setDataNumber(res.data.data.destinations.length + 1);
+						} else {
+							setDataNumber(res.data.data.destinations.length);
+						}
+					});
+				} catch (error) {
+					setPage(page - 1);
+				}
 			}
 		};
 		fetchData();

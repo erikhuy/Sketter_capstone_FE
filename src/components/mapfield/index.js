@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-expressions */
-import {useLoadScript, GoogleMap, Marker, MarkerF} from '@react-google-maps/api';
-import React, {useCallback, useRef, useEffect} from 'react';
+import {useLoadScript, GoogleMap, MarkerF} from '@react-google-maps/api';
+import React, {useCallback, useRef, useEffect, useMemo} from 'react';
 import {useField} from 'formik';
+import get from 'lodash/get';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import {Alert, Box, CircularProgress, IconButton} from '@material-ui/core';
 import {geocodeByPlaceId} from 'react-places-autocomplete';
@@ -11,7 +12,7 @@ const options = {
 	disableDefaultUI: true,
 	zoomControl: true
 };
-const libraries = ['places'];
+const libraries = ['places', 'geometry'];
 const MAPS_KEY = 'AIzaSyBJUprJ0tR5rBnHp-9yRAzbWCA4ft_8Xww';
 const DEFAULT_CENTER = {lat: 10.8411276, lng: 106.809883};
 
@@ -24,21 +25,24 @@ const MapField = ({containerProps = {}, ...props}) => {
 		googleMapsApiKey: MAPS_KEY,
 		libraries
 	});
+	const geocoderRef = useRef(null);
 
 	const onMapClick = useCallback(
 		(e) => {
-			geocodeByPlaceId(e.placeId)
-				.then((results) =>
-					setFieldValue({
-						lat: e.latLng.lat(),
-						lng: e.latLng.lng(),
-						destinationAddress: results[0].formatted_address,
-						time: new Date()
+			const geocoder = geocoderRef.current;
+			if (geocoder) {
+				geocoder
+					.geocode({location: e.latLng})
+					.then(({results}) => {
+						setFieldValue({
+							lat: e.latLng.lat(),
+							lng: e.latLng.lng(),
+							destinationAddress: (results[0] || {}).formatted_address || '',
+							time: new Date()
+						});
 					})
-				)
-				.catch((error) => console.error(error));
-
-			searchRef.current && searchRef.current.clearSearch();
+					.catch((error) => console.error(error));
+			}
 		},
 		[setFieldValue]
 	);
@@ -47,6 +51,10 @@ const MapField = ({containerProps = {}, ...props}) => {
 	const searchRef = useRef(null);
 	const onMapLoad = useCallback(
 		(map) => {
+			const Geocoder = get(window, 'google.maps.Geocoder', null);
+			if (Geocoder) {
+				geocoderRef.current = new Geocoder();
+			}
 			mapRef.current = map;
 			if (value) {
 				map.panTo(value);
@@ -61,6 +69,8 @@ const MapField = ({containerProps = {}, ...props}) => {
 		}
 		console.log(value);
 	}, [value]);
+
+	const initialCenter = useMemo(() => value || DEFAULT_CENTER, []);
 
 	if (loadError) return <Alert severity="error">Failed to load the map</Alert>;
 	if (!isLoaded) return <CircularProgress />;
@@ -115,7 +125,7 @@ const MapField = ({containerProps = {}, ...props}) => {
 			/>
 			<GoogleMap
 				zoom={16}
-				center={DEFAULT_CENTER}
+				center={initialCenter}
 				mapContainerStyle={{width: '100%', height: '100%'}}
 				options={options}
 				onClick={onMapClick}

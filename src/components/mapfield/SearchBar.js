@@ -75,11 +75,12 @@ const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedR
 		[]
 	);
 	useEffect(() => {
+		console.log(placeAddress);
 		setValue({
 			description: placeAddress
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [placeAddress]);
 	useEffect(() => {
 		const placeId = value && value.place_id;
 		const address = value && value.description;
@@ -117,9 +118,8 @@ const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedR
 					fullWidth
 					{...params}
 					{...fieldProps}
-					defaultValue="1231231"
 					error={isError}
-					helperText={isError ? error : helperText}
+					helperText={value ? '' : 'Địa chỉ không được trống'}
 				/>
 			)}
 			onInputChange={onInputChange}

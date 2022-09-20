@@ -40,6 +40,7 @@ const MapField = ({containerProps = {}, ...props}) => {
 							destinationAddress: (results[0] || {}).formatted_address || '',
 							time: new Date()
 						});
+						console.log(value);
 					})
 					.catch((error) => console.error(error));
 			}

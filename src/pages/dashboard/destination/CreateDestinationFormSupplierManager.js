@@ -45,12 +45,13 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const imgbbUploader = require('imgbb-uploader');
 
-export default function CreateDestinationForm() {
+export default function CreateDestinationFormSupplierManager() {
 	// eslint-disable-next-line no-bitwise
 	const [registerDate, setRegisterDate] = useState(new Date());
 	const isMountedRef = useIsMountedRef();
 	const {enqueueSnackbar} = useSnackbar();
 	const [gallery, setGallery] = useState([]);
+	const [suppliers, setSuppliers] = useState([]);
 	const [createDestinationMessage, setCreateDestinationMessage] = useState();
 
 	const CreateDestinationSchema = Yup.object().shape({
@@ -70,7 +71,7 @@ export default function CreateDestinationForm() {
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		openingTime: Yup.string().nullable(true, 'Thời gian không được trống').required('Yêu cầu thời gian mở cửa'),
-
+		supplierID: Yup.string().required('Yêu cầu chọn đối tác'),
 		closingTime: Yup.string()
 			.nullable(true, 'Thời gian không được trống')
 			.required('Yêu cầu thời gian đóng cửa')
@@ -92,6 +93,7 @@ export default function CreateDestinationForm() {
 			phone: '',
 			email: '',
 			description: '',
+			supplierID: '',
 			lowestPrice: '',
 			highestPrice: '',
 			openingTimeSup: null,
@@ -134,10 +136,25 @@ export default function CreateDestinationForm() {
 		return supArray;
 	};
 	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				await axios.get(`${API_URL.User}/supplier`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data.suppliers);
+						setSuppliers(res.data.data.suppliers);
+					}
+				});
+			} catch (error) {
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchData();
+	}, []);
+	useEffect(() => {
 		if (!createDestinationMessage) {
 			return;
 		}
-
 		const message = createDestinationMessage;
 		if (message === 'success') {
 			enqueueSnackbar('Tạo địa điểm thành công', {variant: 'success'});
@@ -157,7 +174,6 @@ export default function CreateDestinationForm() {
 			await axios.post(`${API_URL.Destination}`, data).then((res) => {
 				setCreateDestinationMessage(res.data.message);
 				console.log(res.data);
-				// navigateToViewDestination();
 			});
 		} catch (e) {
 			console.log(e.response.data.message);
@@ -237,7 +253,29 @@ export default function CreateDestinationForm() {
 										error={Boolean(touched.description && errors.description)}
 										helperText={touched.description && errors.description}
 									/>
-
+									<Autocomplete
+										onChange={(e, value) => {
+											console.log(value.id);
+											setFieldValue(
+												'supplierID',
+												value !== null ? value.id : initialValues.supplierID
+											);
+										}}
+										id="tags-outlined"
+										options={suppliers}
+										getOptionLabel={(option) => `${option.email}-${option.name}`}
+										filterSelectedOptions
+										renderInput={(params) => (
+											<TextField
+												{...params}
+												label="Supplier"
+												{...getFieldProps('supplierID')}
+												required
+												error={Boolean(touched.supplierID && errors.supplierID)}
+												helperText={touched.supplierID && errors.supplierID}
+											/>
+										)}
+									/>
 									<Stack direction={{xs: 'row'}} spacing={2}>
 										<TextField
 											type="number"

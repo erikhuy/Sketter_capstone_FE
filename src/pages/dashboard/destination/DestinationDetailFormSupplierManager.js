@@ -40,10 +40,10 @@ import {useSnackbar} from 'notistack5';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-DestinationDetailForm.propTypes = {
+DestinationDetailFormSupplierManager.propTypes = {
 	destinationID: PropTypes.object.isRequired
 };
-export default function DestinationDetailForm({destinationID}) {
+export default function DestinationDetailFormSupplierManager({destinationID}) {
 	// eslint-disable-next-line no-bitwise
 	const isMountedRef = useIsMountedRef();
 	const [gallery, setGallery] = useState([]);
@@ -133,16 +133,41 @@ export default function DestinationDetailForm({destinationID}) {
 		}
 	});
 
-	const handleAction = useCallback(async (id) => {
-		try {
-			await axios.patch(`${API_URL.Destination}/pending/close?id=${id}`).then((res) => {
-				if (res.data.message === 'success') {
-					enqueueSnackbar(res.data.data, {variant: 'success'});
-				}
-				console.log(res.data);
-			});
-		} catch (e) {
-			enqueueSnackbar(e.response.data.message, {variant: 'error'});
+	const handleAction = useCallback(async (id, action) => {
+		console.log(data);
+		if (action === 'Approve') {
+			try {
+				await axios.patch(`${API_URL.Destination}/pending/approve?id=${id}`).then((res) => {
+					if (res.data.message === 'success') {
+						enqueueSnackbar(res.data.data, {variant: 'success'});
+					}
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
+		} else if (action === 'Reject') {
+			try {
+				await axios.patch(`${API_URL.Destination}/pending/reject?id=${id}`).then((res) => {
+					if (res.data.message === 'success') {
+						enqueueSnackbar(res.data.data, {variant: 'success'});
+					}
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
+		} else if (action === 'Close') {
+			try {
+				await axios.patch(`${API_URL.Destination}/pending/close?id=${id}`).then((res) => {
+					if (res.data.message === 'success') {
+						enqueueSnackbar(res.data.data, {variant: 'success'});
+					}
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
 		}
 	});
 
@@ -258,10 +283,15 @@ export default function DestinationDetailForm({destinationID}) {
 											error={Boolean(touched.description && errors.description)}
 											helperText={touched.description && errors.description}
 										/>
-										
+										<TextField
+											fullWidth
+											label="Thông tin địa điểm"
+											{...getFieldProps('supplierID')}
+											error={Boolean(touched.supplierID && errors.supplierID)}
+											helperText={touched.supplierID && errors.supplierID}
+										/>
 										<Stack direction={{xs: 'row'}} spacing={2}>
 											<TextField
-												type="number"
 												{...getFieldProps('lowestPrice')}
 												style={{height: 56, width: 360}}
 												label={<span className="labelText">Giá thấp nhất</span>}
@@ -281,7 +311,6 @@ export default function DestinationDetailForm({destinationID}) {
 											/>
 											<div>-</div>
 											<TextField
-												type="number"
 												{...getFieldProps('highestPrice')}
 												style={{height: 56, width: 360}}
 												label={<span className="labelText">Giá cao nhất</span>}
@@ -469,14 +498,56 @@ export default function DestinationDetailForm({destinationID}) {
 							</Grid>
 
 							<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
-								<Stack direction={{xs: 'row'}} spacing={2}>
-									<Button color="error" variant="contained" onClick={() => handleAction(values.id)}>
-										Ngưng hoạt động
+								{values.status === 'Verified' ? (
+									<Stack direction={{xs: 'row'}} spacing={2}>
+										<Button
+											color="success"
+											variant="contained"
+											onClick={() => handleAction(values.id, 'Close')}
+										>
+											Ngưng hoạt động
+										</Button>
+										<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+											Cập nhật
+										</LoadingButton>
+									</Stack>
+								) : values.status !== 'Close' ? (
+									<Button
+										color="success"
+										variant="contained"
+										onClick={() => handleAction(values.id, 'Approve')}
+									>
+										Mở hoạt động
 									</Button>
-									<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-										Cập nhật
-									</LoadingButton>
-								</Stack>
+								) : values.status !== 'Reject' ? (
+									<Button
+										color="success"
+										variant="contained"
+										onClick={() => handleAction(values.id, 'Approve')}
+									>
+										Duyệt
+									</Button>
+								) : (
+									<Stack direction={{xs: 'row'}} spacing={2}>
+										<Button
+											color="success"
+											variant="contained"
+											onClick={() => handleAction(values.id, 'Approve')}
+										>
+											Duyệt
+										</Button>
+										<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+											Cập nhật
+										</LoadingButton>
+										<Button
+											color="error"
+											variant="contained"
+											onClick={() => handleAction(values.id, 'Reject')}
+										>
+											Từ chối
+										</Button>
+									</Stack>
+								)}
 							</Box>
 						</Card>
 					)}

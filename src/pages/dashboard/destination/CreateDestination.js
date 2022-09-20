@@ -2,7 +2,9 @@
 /* eslint-disable camelcase */
 import {styled} from '@material-ui/core/styles';
 import Page from 'components/Page';
+import useAuth from 'shared/hooks/useAuth';
 import CreateDestinationForm from './CreateDestinationForm';
+import CreateDestinationFormSupplierManager from './CreateDestinationFormSupplierManager';
 
 const RootStyle = styled(Page)(({theme}) => ({
 	[theme.breakpoints.up('md')]: {
@@ -10,10 +12,14 @@ const RootStyle = styled(Page)(({theme}) => ({
 	}
 }));
 export default function CreateDestination() {
+	const {user} = useAuth();
 	return (
 		<RootStyle title="Login | Minimal-UI">
-			<CreateDestinationForm />
+			{user.role.description === 'Quản lý đối tác' ? (
+				<CreateDestinationFormSupplierManager />
+			) : (
+				<CreateDestinationForm />
+			)}
 		</RootStyle>
 	);
 }
-

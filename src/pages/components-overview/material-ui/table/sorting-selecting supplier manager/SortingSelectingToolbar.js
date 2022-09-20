@@ -12,7 +12,7 @@ import axios from 'axios';
 import {useCallback, useEffect, useState} from 'react';
 import {Box} from '@material-ui/system';
 import {LoginForm} from 'components/authentication/login';
-import DestinationDetailForm from 'pages/dashboard/destination/DestinationDetailForm';
+import DestinationDetailFormSupplierManager from 'pages/dashboard/destination/DestinationDetailFormSupplierManager';
 
 // ----------------------------------------------------------------------
 
@@ -136,7 +136,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 				aria-describedby="modal-modal-description"
 			>
 				<Box sx={style}>
-					<DestinationDetailForm destinationID={idSelected} />
+					<DestinationDetailFormSupplierManager destinationID={idSelected} />
 				</Box>
 			</Modal>
 			{idSelected.length > 1 ? (

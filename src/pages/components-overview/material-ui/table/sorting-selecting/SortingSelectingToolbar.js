@@ -13,6 +13,8 @@ import {useCallback, useEffect, useState} from 'react';
 import {Box} from '@material-ui/system';
 import {LoginForm} from 'components/authentication/login';
 import DestinationDetailForm from 'pages/dashboard/destination/DestinationDetailForm';
+import useAuth from 'shared/hooks/useAuth';
+import DestinationDetailFormSupplierManager from 'pages/dashboard/destination/DestinationDetailFormSupplierManager';
 
 // ----------------------------------------------------------------------
 
@@ -59,6 +61,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
 	const [resetToolbar, setResetToolbar] = useState([]);
+	const {user} = useAuth();
 
 	const deleteDestination = useCallback(
 		async (idSelected) => {
@@ -111,7 +114,11 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 					aria-describedby="modal-modal-description"
 				>
 					<Box sx={style}>
-						<DestinationDetailForm destinationID={idSelected} />
+						{user.role.description === 'Quản lý đối tác' ? (
+							<DestinationDetailFormSupplierManager destinationID={idSelected} />
+						) : (
+							<DestinationDetailForm destinationID={idSelected} />
+						)}
 					</Box>
 				</Modal>
 			)}

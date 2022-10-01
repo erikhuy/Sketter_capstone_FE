@@ -29,6 +29,7 @@ const MapField = ({containerProps = {}, ...props}) => {
 
 	const onMapClick = useCallback(
 		(e) => {
+			console.log(e.latLng.lat());
 			const geocoder = geocoderRef.current;
 			if (geocoder) {
 				geocoder
@@ -37,10 +38,8 @@ const MapField = ({containerProps = {}, ...props}) => {
 						setFieldValue({
 							lat: e.latLng.lat(),
 							lng: e.latLng.lng(),
-							destinationAddress: (results[0] || {}).formatted_address || '',
-							time: new Date()
+							destinationAddress: (results[0] || {}).formatted_address || ''
 						});
-						console.log(value);
 					})
 					.catch((error) => console.error(error));
 			}
@@ -53,12 +52,10 @@ const MapField = ({containerProps = {}, ...props}) => {
 	const onMapLoad = useCallback(
 		(map) => {
 			const Geocoder = get(window, 'google.maps.Geocoder', null);
+			mapRef.current = map;
 			if (Geocoder) {
 				geocoderRef.current = new Geocoder();
-			}
-			mapRef.current = map;
-			if (value) {
-				map.panTo(value);
+				console.log('123');
 			}
 		},
 		[value]

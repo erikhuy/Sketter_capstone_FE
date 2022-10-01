@@ -1,0 +1,277 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-nested-ternary */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-undef */
+/* eslint-disable guard-for-in */
+/* eslint-disable camelcase */
+
+import * as Yup from 'yup';
+import React, {useCallback, useEffect, useState} from 'react';
+import {
+	Box,
+	Card,
+	FormHelperText,
+	Grid,
+	InputAdornment,
+	Stack,
+	TextField,
+	Typography,
+	Autocomplete,
+	Checkbox,
+	Chip,
+	Button,
+	FormControl,
+	InputLabel,
+	MenuItem
+} from '@material-ui/core';
+import {useFormik, Form, FormikProvider} from 'formik';
+import {DesktopDatePicker, LoadingButton, LocalizationProvider, TimePicker} from '@material-ui/lab';
+import {useLoading} from 'shared/hooks';
+import {updateMeThunk} from 'shared/redux/thunks/auth';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import PlacesAutocomplete from 'components/placeautocomplete/PlacesAutocomplete';
+import {CheckBoxIcon, CheckBoxOutlineBlankIcon} from '@material-ui/icons/CheckBox';
+import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
+import ImageDropzone from 'components/imagearea/ImageDropzone';
+import PropTypes from 'prop-types';
+import Mapfield from 'components/mapfield';
+import axios from 'axios';
+import {API_URL} from 'shared/constants';
+import useIsMountedRef from 'shared/hooks/useIsMountedRef';
+import imgbbUploader from 'imgbb-uploader/lib/cjs';
+import {useSnackbar} from 'notistack5';
+import Select from 'theme/overrides/Select';
+import AvatarUploadArea from 'components/avatararea/AvatarDropzone';
+
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
+UserDetailForm.propTypes = {
+	userID: PropTypes.object.isRequired
+};
+export default function UserDetailForm({userID}) {
+	// eslint-disable-next-line no-bitwise
+	const isMountedRef = useIsMountedRef();
+	const [gallery, setGallery] = useState([]);
+	const [valueArray, setValueArray] = useState([]);
+	const {enqueueSnackbar} = useSnackbar();
+	const [data, setData] = useState();
+	const [isBusy, setBusy] = useState(true);
+	const [createDestinationMessage, setCreateDestinationMessage] = useState();
+
+	const UpdateUserSchema = Yup.object().shape({
+		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
+		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
+		status: Yup.string().nullable(true, 'Trạng thái không được trống').required('Yêu cầu trạng thái')
+	});
+
+	const formik = useFormik({
+		enableReinitialize: true,
+		validationSchema: UpdateUserSchema,
+		initialValues: data,
+		onSubmit: async (values, {setErrors, setSubmitting}) => {
+			console.log(values);
+			try {
+				await updateUser(values);
+				if (isMountedRef.current) {
+					setSubmitting(false);
+				}
+			} catch (error) {
+				if (isMountedRef.current) {
+					setErrors({afterSubmit: error.message});
+					setSubmitting(false);
+				}
+			}
+		}
+	});
+	const handleImages = (data) => {
+		console.log(data);
+		setGallery(data);
+		if (data.length === 0) {
+			setFieldValue('avatar', null);
+		}
+		// eslint-disable-next-line array-callback-return
+		data.map((images) => {
+			if (!images.url) {
+				try {
+					imgbbUploader({
+						apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
+						base64string: images.image_base64.split('base64,')[1]
+						// OPTIONAL: pass base64-encoded image (max 32Mb)
+					})
+						// eslint-disable-next-line no-const-assign
+						.then((response) => setFieldValue('avatar', response.url))
+						.catch((error) => console.log(error));
+				} catch (e) {
+					console.log(e);
+				}
+			} else {
+				setFieldValue('avatar', response.url);
+			}
+		});
+	};
+	const updateUser = useCallback(async (data) => {
+		try {
+			await axios
+				.patch(`${API_URL.User}/${data.id}`, data)
+				.then((res) => {
+					enqueueSnackbar(res.data.data, {variant: 'success'});
+				})
+				.catch((error) => enqueueSnackbar(e.response.data.message, {variant: 'error'}));
+		} catch (e) {
+			console.log(e);
+		}
+	});
+	const convertToArray = (data) => data;
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				await axios.get(`${API_URL.User}/${userID}`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data);
+						setData(res.data.data);
+						// !res.data.data.avatar ? setGallery([]) : setGallery([res.data.data.avatar]);
+						setGallery(!res.data.data.avatar ? [] : [{url: res.data.data.avatar}]);
+						setBusy(false);
+					}
+				});
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		fetchData();
+	}, []);
+
+	const {errors, touched, isSubmitting, handleSubmit, getFieldProps, setFieldValue, values} = formik;
+	return (
+		<>
+			<FormikProvider value={formik}>
+				<Form autoComplete="off" noValidate onSubmit={handleSubmit}>
+					{isBusy ? (
+						<h1 className="page-title text-center font-weight-bold">Đang tải . . .</h1>
+					) : (
+						<div
+							style={{
+								position: 'absolute',
+								left: '50%',
+								top: '50%',
+								transform: 'translate(-50%, -50%)'
+							}}
+						>
+							<h1
+								className="page-title text-center font-weight-bold"
+								style={{
+									textAlign: 'center'
+								}}
+							>
+								Trang nhập liệu
+							</h1>
+							<Stack direction={{xs: 'column'}} spacing={3.6} sx={{m: 2}}>
+								<AvatarUploadArea setImageList={handleImages} imageList={gallery} />
+								{/* <TextField
+									style={{height: 56, width: 460}}
+									fullWidth
+									type="text"
+									label="Avatar*"
+									{...getFieldProps('avatar')}
+									error={Boolean(touched.email && errors.email)}
+									helperText={touched.email && errors.email}
+								/> */}
+								<TextField
+									style={{height: 56, width: 460}}
+									disabled
+									fullWidth
+									type="email"
+									label="Email*"
+									{...getFieldProps('email')}
+									error={Boolean(touched.email && errors.email)}
+									helperText={touched.email && errors.email}
+								/>
+								<TextField
+									style={{height: 56, width: 460}}
+									fullWidth
+									type="text"
+									label="Tên*"
+									{...getFieldProps('name')}
+									error={Boolean(touched.name && errors.name)}
+									helperText={touched.name && errors.name}
+								/>
+								<Autocomplete
+									id="tags-outlined"
+									// eslint-disable-next-line eqeqeq
+									options={values.status == 'Unverified' ? userStatus : userStatusSup}
+									value={convertToArray(values.status)}
+									getOptionLabel={(option) => option}
+									filterSelectedOptions
+									onChange={(event, value) => {
+										setFieldValue('status', value);
+									}}
+									renderTags={(tagValue, getTagProps) =>
+										tagValue.map((option, index) => (
+											<Chip label={option} {...getTagProps({index})} />
+										))
+									}
+									renderInput={(params) => (
+										<TextField
+											multiline="false"
+											{...params}
+											{...getFieldProps('status')}
+											label="Trạng thái*"
+											error={Boolean(touched.status && errors.status)}
+											helperText={touched.status && errors.status}
+										/>
+									)}
+								/>
+							</Stack>
+							<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
+								<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+									Cập nhật
+								</LoadingButton>
+							</Box>
+						</div>
+					)}
+				</Form>
+			</FormikProvider>
+		</>
+	);
+}
+
+const catalogs = ['Quán ăn', 'Quán cà phê', 'Địa điểm du lịch', 'Homestay', 'Khách sạn', 'Khu nghỉ dưỡng cao cấp'];
+const userStatus = ['Verified', 'Deactivated', 'Unverified'];
+const userStatusSup = ['Verified', 'Deactivated'];
+
+const destinationPersonalities = [
+	'Thích khám phá',
+	'Ưa mạo hiểm',
+	'Tìm kiếm sự thư giãn',
+	'Đam mê với ẩm thực',
+	'Đam mê với lịch sử, văn hóa',
+	'Yêu thiên nhiên',
+	'Giá rẻ là trên hết',
+	'Có nhu cầu vui chơi, giải trí cao'
+];
+const RecommendedTimesFrame = [
+	{
+		start: '04:00',
+		end: '07:00'
+	},
+	{
+		start: '07:00',
+		end: '09:00'
+	},
+	{
+		start: '09:00',
+		end: '12:00'
+	},
+	{
+		start: '12:00',
+		end: '15:00'
+	},
+	{
+		start: '15:00',
+		end: '18:00'
+	},
+	{
+		start: '18:00',
+		end: '21:00'
+	}
+];

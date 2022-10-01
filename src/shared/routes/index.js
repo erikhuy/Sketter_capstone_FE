@@ -105,8 +105,9 @@ export default function Router() {
 						{path: '', element: <Navigate to="/dashboard/user/profile" replace />},
 						{path: 'profile', element: <UserProfile />},
 						{path: 'cards', element: <UserCards />},
-						{path: 'list', element: <UserList />},
 						{path: 'new', element: <UserCreate />},
+						{path: 'userList', element: <UserList />},
+						{path: 'createUser', element: <CreateUser />},
 						{path: ':name/edit', element: <UserCreate />},
 						{path: 'account', element: <UserAccount />}
 					]
@@ -237,6 +238,8 @@ const DestinationList = Loadable(lazy(() => import('pages/dashboard/destination/
 const CreateDestination = Loadable(lazy(() => import('pages/dashboard/destination/CreateDestination')));
 const PendingDestinationList = Loadable(lazy(() => import('pages/dashboard/destination/PendingDestinationList')));
 const RejectDestinationList = Loadable(lazy(() => import('pages/dashboard/destination/RejectDestinationList')));
+const UserList = Loadable(lazy(() => import('pages/dashboard/admin/UserList')));
+const CreateUser = Loadable(lazy(() => import('pages/dashboard/admin/CreateUser')));
 const GeneralApp = Loadable(lazy(() => import('pages/dashboard/GeneralApp')));
 const GeneralEcommerce = Loadable(lazy(() => import('pages/dashboard/GeneralEcommerce')));
 const GeneralAnalytics = Loadable(lazy(() => import('pages/dashboard/GeneralAnalytics')));
@@ -250,7 +253,6 @@ const BlogPost = Loadable(lazy(() => import('pages/dashboard/BlogPost')));
 const BlogNewPost = Loadable(lazy(() => import('pages/dashboard/BlogNewPost')));
 const UserProfile = Loadable(lazy(() => import('pages/dashboard/UserProfile')));
 const UserCards = Loadable(lazy(() => import('pages/dashboard/UserCards')));
-const UserList = Loadable(lazy(() => import('pages/dashboard/UserList')));
 const UserAccount = Loadable(lazy(() => import('pages/dashboard/UserAccount')));
 const UserCreate = Loadable(lazy(() => import('pages/dashboard/UserCreate')));
 const Chat = Loadable(lazy(() => import('pages/dashboard/Chat')));

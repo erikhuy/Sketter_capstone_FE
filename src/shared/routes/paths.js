@@ -61,8 +61,9 @@ export const PATH_DASHBOARD = {
 		root: path(ROOTS_DASHBOARD, '/user'),
 		profile: path(ROOTS_DASHBOARD, '/user/profile'),
 		cards: path(ROOTS_DASHBOARD, '/user/cards'),
-		list: path(ROOTS_DASHBOARD, '/user/list'),
 		newUser: path(ROOTS_DASHBOARD, '/user/new'),
+		userList: path(ROOTS_DASHBOARD, '/user/userList'),
+		createUser: path(ROOTS_DASHBOARD, '/user/createUser'),
 		editById: path(ROOTS_DASHBOARD, '/user/ada-lindgren/edit'),
 		account: path(ROOTS_DASHBOARD, '/user/account')
 	},

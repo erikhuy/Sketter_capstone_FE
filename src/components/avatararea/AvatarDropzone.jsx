@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable camelcase */
 /* eslint-disable spaced-comment */
-import React, {useCallback, useEffect} from 'react';
-import './ImageDropzone.css';
+import React, {useCallback, useEffect, useState} from 'react';
+import './AvatarDropzone.css';
 import {useDropzone} from 'react-dropzone';
 import FlipImageCard from '../flipimagecard/FlipImageCard';
 import UploadSVG from '../../assets/img/upload.svg';
@@ -10,13 +10,15 @@ import {compress} from '../../utils/ImgTools';
 
 const imageMaxSize = 3000000; //3mb
 
-const ImageUploadArea = (props) => {
+const AvatarUploadArea = (props) => {
 	/**
 	 * OnDrop action handler (When you drop an image to this)
 	 */
+	const [avatarContained, setAvatarContained] = useState('');
 	const onDrop = useCallback(
 		(acceptedFiles, rejectedFile) => {
 			//For each accepted Files, we shall read it
+			setAvatarContained('none');
 			acceptedFiles.forEach(async (file) => {
 				//Compress image
 				const compressed_image = await compress(file);
@@ -53,6 +55,7 @@ const ImageUploadArea = (props) => {
 	 */
 	const fileSelectedHandler = async (event) => {
 		const file = event.target.files[0];
+		setAvatarContained('none');
 
 		//Compress image
 		const compressed_image = await compress(file);
@@ -108,7 +111,13 @@ const ImageUploadArea = (props) => {
 		//Set back the the state
 		props.setImageList(rep_imageList);
 	};
-
+	useEffect(() => {
+		const fetchData = async () => {
+			// eslint-disable-next-line no-unused-expressions
+			props.imageList.length === 0 ? setAvatarContained('block') : setAvatarContained('none');
+		};
+		fetchData();
+	});
 	return (
 		<div className="dropzone">
 			<div className="dropimage-group">
@@ -118,6 +127,7 @@ const ImageUploadArea = (props) => {
 						key={index}
 						// Remove function for Flip card
 						remove={(e) => {
+							setAvatarContained('block');
 							e.preventDefault();
 							//Replicate
 							const rep_imageList = props.imageList;
@@ -132,7 +142,7 @@ const ImageUploadArea = (props) => {
 					/>
 				))}
 				{/* Image Placeholder for upload */}
-				<div className="dropzone-card">
+				<div className="dropzone-card" style={{display: avatarContained}}>
 					<div {...getRootProps({className: 'dropinput'})}>
 						<input
 							{...getInputProps({
@@ -156,4 +166,4 @@ const ImageUploadArea = (props) => {
 	);
 };
 
-export default ImageUploadArea;
+export default AvatarUploadArea;

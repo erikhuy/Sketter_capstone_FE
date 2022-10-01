@@ -51,7 +51,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 	const {enqueueSnackbar} = useSnackbar();
 	const [data, setData] = useState();
 	const [isBusy, setBusy] = useState(true);
-	const [createDestinationMessage, setCreateDestinationMessage] = useState();
+	const [suppliers, setSuppliers] = useState([]);
 
 	const UpdateDestinationSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
@@ -88,14 +88,17 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		}
 	};
 	const processData = (data) => {
-		console.log(data);
+		console.log(data.location);
+		const supLocation = data.location;
 		const supArray = Object.assign(data, locationData);
 		supArray.catalogs = convertToArray(data?.catalogs);
 		supArray.destinationPersonalities = convertToArray(data?.destinationPersonalities);
-		supArray.location.lng = data.longitude;
-		supArray.location.lat = data.latitude;
-		supArray.location.destinationAddress = data.address;
-
+		supArray.location.lng = supLocation.lng;
+		supArray.location.lat = supLocation.lat;
+		supArray.location.destinationAddress = supLocation.destinationAddress;
+		supArray.longitude = supLocation.lng;
+		supArray.latitude = supLocation.lat;
+		supArray.address = supLocation.destinationAddress;
 		return supArray;
 	};
 	const formik = useFormik({
@@ -103,6 +106,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		validationSchema: UpdateDestinationSchema,
 		initialValues: data,
 		onSubmit: async (values, {setErrors, setSubmitting}) => {
+			console.log(values.location);
 			console.log(values);
 			try {
 				await updateDestination(processData(values));
@@ -170,7 +174,22 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 			}
 		}
 	});
-
+	useEffect(() => {
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.User}/supplier`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data.suppliers);
+						setSuppliers(res.data.data.suppliers);
+					}
+				});
+			} catch (error) {
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchSupplier();
+	}, []);
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -184,7 +203,6 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 						setData(supArray);
 						setBusy(false);
 						setGallery(res.data.data.destination.images);
-						console.log(supArray);
 					}
 				});
 			} catch (error) {
@@ -223,10 +241,10 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		const supData = [];
 		// eslint-disable-next-line array-callback-return
 		data?.map((x) => {
-			if (!x.name) {
+			if (!x.personalityName) {
 				supData.push(x);
 			} else {
-				supData.push(x.name);
+				supData.push(x.personalityName);
 			}
 		});
 		return supData;
@@ -283,12 +301,29 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											error={Boolean(touched.description && errors.description)}
 											helperText={touched.description && errors.description}
 										/>
-										<TextField
-											fullWidth
-											label="Thông tin địa điểm"
-											{...getFieldProps('supplierID')}
-											error={Boolean(touched.supplierID && errors.supplierID)}
-											helperText={touched.supplierID && errors.supplierID}
+										<Autocomplete
+											onChange={(e, value) => {
+												console.log(value.id);
+												setFieldValue(
+													'supplierID',
+													value !== null ? value.id : initialValues.supplierID
+												);
+											}}
+											id="tags-outlined"
+											options={suppliers}
+											value={values.supplier}
+											getOptionLabel={(option) => `${option.email}-${option.name}`}
+											filterSelectedOptions
+											renderInput={(params) => (
+												<TextField
+													{...params}
+													label="Supplier"
+													{...getFieldProps('supplierID')}
+													required
+													error={Boolean(touched.supplierID && errors.supplierID)}
+													helperText={touched.supplierID && errors.supplierID}
+												/>
+											)}
 										/>
 										<Stack direction={{xs: 'row'}} spacing={2}>
 											<TextField
@@ -557,8 +592,21 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 	);
 }
 
-const catalogs = ['Quán ăn', 'Quán cà phê', 'Địa điểm du lịch', 'Homestay', 'Khách sạn', 'Khu nghỉ dưỡng cao cấp'];
-
+const catalogs = [
+	'Quán ăn',
+	'Quán nước',
+	'Địa điểm du lịch',
+	'Địa điểm ngắm cảnh',
+	'Nông trại',
+	'Vườn hoa',
+	'Cắm trại',
+	'Homestay',
+	'Khách sạn',
+	'Khu nghỉ dưỡng cao cấp',
+	'Bản xứ',
+	'Lịch sử',
+	'Tính ngưỡng'
+];
 const destinationPersonalities = [
 	'Thích khám phá',
 	'Ưa mạo hiểm',

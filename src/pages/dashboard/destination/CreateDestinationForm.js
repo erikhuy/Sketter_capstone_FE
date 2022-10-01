@@ -480,7 +480,21 @@ export default function CreateDestinationForm() {
 // 	{name: 'Khách sạn'},
 // 	{name: 'Khu nghỉ dưỡng cao cấp'}
 // ];
-const catalog = ['Quán ăn', 'Quán cà phê', 'Địa điểm du lịch', 'Homestay', 'Khách sạn', 'Khu nghỉ dưỡng cao cấp'];
+const catalog = [
+	'Quán ăn',
+	'Quán nước',
+	'Địa điểm du lịch',
+	'Địa điểm ngắm cảnh',
+	'Nông trại',
+	'Vườn hoa',
+	'Cắm trại',
+	'Homestay',
+	'Khách sạn',
+	'Khu nghỉ dưỡng cao cấp',
+	'Bản xứ',
+	'Lịch sử',
+	'Tính ngưỡng'
+];
 const TravelPersonalityTypes = [
 	'Thích khám phá',
 	'Ưa mạo hiểm',

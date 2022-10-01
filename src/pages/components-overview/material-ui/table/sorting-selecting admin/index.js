@@ -69,18 +69,15 @@ export default function SortingSelecting() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios.get(`${API_URL.Destination}?page=${page + 1}`).then((res) => {
-					console.log(res.data.data.destinations.length);
-					console.log(res.data.maxPage);
-
-					setData(res.data.data.destinations);
+				await axios.get(`${API_URL.User}?page=${page + 1}`).then((res) => {
+					setData(res.data.data.users);
 					setMaxPage(res.data.maxPage);
 					setCurrentPage(res.data.currentPage);
 					if (res.data.maxPage > res.data.currentPage) {
 						// eslint-disable-next-line no-const-assign
-						setDataNumber(res.data.data.destinations.length + page * 10 + (page === 0 ? (page = 1) : page));
+						setDataNumber(res.data.data.users.length + page * 10 + (page === 0 ? (page = 1) : page));
 					} else {
-						setDataNumber(res.data.data.destinations.length);
+						setDataNumber(res.data.data.users.length);
 					}
 				});
 			} catch (error) {
@@ -98,26 +95,20 @@ export default function SortingSelecting() {
 			label: 'Tên'
 		},
 		{
-			id: 'address',
-			numeric: true,
+			id: 'email',
+			numeric: false,
 			disablePadding: false,
-			label: 'Địa chỉ'
+			label: 'Email'
 		},
 		{
-			id: 'Giá',
-			numeric: true,
+			id: 'role',
+			numeric: false,
 			disablePadding: false,
-			label: 'Giá (vnd)'
+			label: 'Quyền'
 		},
 		{
-			id: 'Đánh_giá',
-			numeric: true,
-			disablePadding: false,
-			label: 'Đánh giá'
-		},
-		{
-			id: 'Trạng_thái',
-			numeric: true,
+			id: 'status',
+			numeric: false,
 			disablePadding: false,
 			label: 'Trạng thái'
 		}
@@ -140,6 +131,7 @@ export default function SortingSelecting() {
 	};
 
 	const handleClick = (event, data) => {
+		console.log(data);
 		const selectedIndex = selected.indexOf(data.name);
 		let newSelected = [];
 
@@ -185,7 +177,10 @@ export default function SortingSelecting() {
 		setDense(event.target.checked);
 	};
 
-	const isSelected = (name) => selected.indexOf(name) !== -1;
+	const isSelected = (name) => {
+		// eslint-disable-next-line no-unused-expressions
+		selected.indexOf(name) !== -1;
+	};
 
 	// Avoid a layout jump when reaching the last page with empty data.
 	const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
@@ -231,10 +226,9 @@ export default function SortingSelecting() {
 										<TableCell component="th" id={labelId} scope="row" padding="none">
 											{row.name}
 										</TableCell>
-										<TableCell align="right">{row.address}</TableCell>
-										<TableCell align="right">{row.lowestPrice}</TableCell>
-										<TableCell align="right">{row.rating}</TableCell>
-										<TableCell align="right">{row.status}</TableCell>
+										<TableCell align="left">{row.email}</TableCell>
+										<TableCell align="left">{row.role.description}</TableCell>
+										<TableCell align="left">{row.status}</TableCell>
 									</TableRow>
 								);
 							})}
@@ -260,7 +254,6 @@ export default function SortingSelecting() {
 					rowsPerPage={10}
 					page={currentPage - 1}
 					onPageChange={handleChangePage}
-					onRowsPerPageChange={handleChangeRowsPerPage}
 				/>
 			</Box>
 		</>

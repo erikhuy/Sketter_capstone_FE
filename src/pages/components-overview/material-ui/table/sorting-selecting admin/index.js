@@ -104,7 +104,7 @@ export default function SortingSelecting() {
 			id: 'role',
 			numeric: false,
 			disablePadding: false,
-			label: 'Quyền'
+			label: 'Vai trò'
 		},
 		{
 			id: 'status',

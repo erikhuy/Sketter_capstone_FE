@@ -236,7 +236,7 @@ export default function UserDetailForm({userID}) {
 }
 
 const catalogs = ['Quán ăn', 'Quán cà phê', 'Địa điểm du lịch', 'Homestay', 'Khách sạn', 'Khu nghỉ dưỡng cao cấp'];
-const userStatus = ['Verified', 'Deactivated', 'Unverified'];
+const userStatus = ['Verified', 'Unverified'];
 const userStatusSup = ['Verified', 'Deactivated'];
 
 const destinationPersonalities = [

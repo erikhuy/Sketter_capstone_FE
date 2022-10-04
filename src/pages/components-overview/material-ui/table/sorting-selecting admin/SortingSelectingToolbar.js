@@ -92,16 +92,15 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 							.then((res) => {
 								reloadData([]);
 								reloadNumber([]);
-								setResetToolbar('');
-								console.log(res.data);
 								enqueueSnackbar('Ngưng hoạt động tài khoản thành công', {variant: 'success'});
+								setOpenDialog(false);
 							})
 							.catch((error) => enqueueSnackbar(error.data.message, {variant: 'error'}));
 					})
 				);
-				setOpenDialog(false);
 			} catch (e) {
 				enqueueSnackbar('Ngưng hoạt động tài khoản không thành công', {variant: 'error'});
+				setOpenDialog(false);
 			}
 		},
 		[resetToolbar]
@@ -150,15 +149,15 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 				>
 					<DialogTitle id="alert-dialog-title">Ngưng hoạt động tài khoản ?</DialogTitle>
 					<DialogActions>
-						<Button onClick={console.log('no')}>Hủy</Button>
-						<Button onClick={deactivatedUser(idSelected)}>Đồng ý</Button>
+						<Button onClick={handleCloseDialog}>Hủy</Button>
+						<Button onClick={() => deactivatedUser(idSelected)}>Đồng ý</Button>
 					</DialogActions>
 				</Dialog>
 			)}
 			{idSelected.length > 1 ? (
 				<IconButton
 					onClick={() => {
-						deactivatedUser(idSelected);
+						handleOpenDialog();
 					}}
 				>
 					<Icon icon={baselineDisabledByDefault} />
@@ -167,7 +166,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 				<Stack direction="row" spacing={1}>
 					<IconButton
 						onClick={() => {
-							deactivatedUser(idSelected);
+							handleOpenDialog();
 						}}
 					>
 						<Icon icon={baselineDisabledByDefault} />

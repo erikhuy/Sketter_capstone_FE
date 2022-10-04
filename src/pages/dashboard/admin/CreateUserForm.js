@@ -157,12 +157,12 @@ export default function CreateUserForm() {
 							helperText={touched.name && errors.name}
 						/>
 						<FormControl sx={{m: 1, minWidth: 80}}>
-							<InputLabel id="demo-simple-select-label">Quyền*</InputLabel>
+							<InputLabel id="demo-simple-select-label">Vai trò*</InputLabel>
 							<Select
 								style={{height: 56, width: 460}}
 								labelId="demo-simple-select-label"
 								id="demo-simple-select"
-								label="Quyền*"
+								label="Vai trò*"
 								onChange={(e, value) => {
 									setFieldValue('roleName', value.props.value);
 									console.log(value.props.value);

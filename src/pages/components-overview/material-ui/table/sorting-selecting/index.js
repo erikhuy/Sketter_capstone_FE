@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable camelcase */
 // material
@@ -234,7 +235,19 @@ export default function SortingSelecting() {
 										<TableCell align="right">{row.address}</TableCell>
 										<TableCell align="right">{row.lowestPrice}</TableCell>
 										<TableCell align="right">{row.rating}</TableCell>
-										<TableCell align="right">{row.status}</TableCell>
+										<TableCell align="right">
+											{row.status === 'Verified'
+												? 'Đã xác thực'
+												: row.status === 'Unverified'
+												? 'Chưa xác thực'
+												: row.status === 'Closed'
+												? 'Đóng cửa'
+												: row.status === 'Rejected'
+												? 'Từ chối'
+												: row.status === 'Pending'
+												? 'Chờ xác thực'
+												: ''}
+										</TableCell>
 									</TableRow>
 								);
 							})}

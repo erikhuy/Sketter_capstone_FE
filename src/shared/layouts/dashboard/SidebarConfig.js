@@ -17,7 +17,8 @@ const sidebarConfig = [
 			{title: 'Địa điểm chờ duyệt', path: PATH_DASHBOARD.destination.pendingDestinationList},
 			{title: 'Địa điểm bị từ chối', path: PATH_DASHBOARD.destination.rejectDestinationList},
 			{title: 'Danh sách tài khoản', path: PATH_DASHBOARD.user.userList},
-			{title: 'Tạo tài khoản', path: PATH_DASHBOARD.user.createUser}
+			{title: 'Tạo tài khoản', path: PATH_DASHBOARD.user.createUser},
+			{title: 'Quản lý loại địa điểm', path: PATH_DASHBOARD.catalog.catalogManagement}
 		]
 	}
 ];

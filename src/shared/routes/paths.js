@@ -46,6 +46,9 @@ export const PATH_DASHBOARD = {
 		pendingDestinationList: path(ROOTS_DASHBOARD, '/pendingDestinationList'),
 		rejectDestinationList: path(ROOTS_DASHBOARD, '/rejectDestinationList')
 	},
+	catalog: {
+		catalogManagement: path(ROOTS_DASHBOARD, '/catalogManagement')
+	},
 	mail: {
 		root: path(ROOTS_DASHBOARD, '/mail'),
 		all: path(ROOTS_DASHBOARD, '/mail/all')

@@ -268,7 +268,7 @@ export default function CreateDestinationFormSupplierManager() {
 										renderInput={(params) => (
 											<TextField
 												{...params}
-												label="Supplier"
+												label="Đối tác"
 												{...getFieldProps('supplierID')}
 												required
 												error={Boolean(touched.supplierID && errors.supplierID)}
@@ -347,7 +347,7 @@ export default function CreateDestinationFormSupplierManager() {
 										error={Boolean(touched.latitude && errors.latitude)}
 										helperText={touched.latitude && errors.latitude}
 									/> */}
-									<Mapfield name="location" label="Địa chỉ" placeholder="Chọn địa điểm" />
+									<Mapfield name="location" label="Địa chỉ*" placeholder="Chọn địa điểm" />
 									<Box
 										sx={{
 											height: 15

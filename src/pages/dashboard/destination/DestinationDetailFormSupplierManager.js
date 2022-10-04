@@ -78,7 +78,6 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		closingTime: Yup.string()
 			.notOneOf([Yup.ref('openingTime')], 'Thời gian đóng cửa không hợp lệ')
 			.required('Yêu cầu thời gian đóng cửa'),
-		recommendedTimes: Yup.array().min(1, 'Khoảng thời gian lý tưởng không được trống')
 	});
 	const locationData = {
 		location: {
@@ -273,21 +272,21 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 									<Stack direction={{xs: 'column'}} spacing={2} sx={{m: 2}}>
 										<TextField
 											fullWidth
-											label="Tên địa điểm"
+											label="Tên địa điểm*"
 											{...getFieldProps('name')}
 											error={Boolean(touched.name && errors.name)}
 											helperText={touched.name && errors.name}
 										/>
 										<TextField
 											fullWidth
-											label="Số điện thoại"
+											label="Số điện thoại*"
 											{...getFieldProps('phone')}
 											error={Boolean(touched.phone && errors.phone)}
 											helperText={touched.phone && errors.phone}
 										/>
 										<TextField
 											fullWidth
-											label="Email"
+											label="Email*"
 											{...getFieldProps('email')}
 											error={Boolean(touched.email && errors.email)}
 											helperText={touched.email && errors.email}
@@ -302,12 +301,10 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											helperText={touched.description && errors.description}
 										/>
 										<Autocomplete
+											disabled
 											onChange={(e, value) => {
 												console.log(value.id);
-												setFieldValue(
-													'supplierID',
-													value !== null ? value.id : initialValues.supplierID
-												);
+												setFieldValue('supplierID', value.id);
 											}}
 											id="tags-outlined"
 											options={suppliers}
@@ -317,7 +314,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											renderInput={(params) => (
 												<TextField
 													{...params}
-													label="Supplier"
+													label="Đối tác"
 													{...getFieldProps('supplierID')}
 													required
 													error={Boolean(touched.supplierID && errors.supplierID)}
@@ -329,7 +326,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											<TextField
 												{...getFieldProps('lowestPrice')}
 												style={{height: 56, width: 360}}
-												label={<span className="labelText">Giá thấp nhất</span>}
+												label={<span className="labelText">Giá thấp nhất*</span>}
 												InputLabelProps={{
 													shrink: true,
 													placeholder: '1000-10000'
@@ -348,7 +345,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											<TextField
 												{...getFieldProps('highestPrice')}
 												style={{height: 56, width: 360}}
-												label={<span className="labelText">Giá cao nhất</span>}
+												label={<span className="labelText">Giá cao nhất*</span>}
 												InputLabelProps={{
 													shrink: true,
 													className: 'labelText2',
@@ -404,7 +401,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 													multiline="false"
 													{...params}
 													{...getFieldProps('catalogs')}
-													label="Loại địa điểm"
+													label="Loại địa điểm*"
 													error={Boolean(touched.catalogs && errors.catalogs)}
 													helperText={touched.catalogs && errors.catalogs}
 												/>
@@ -432,7 +429,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 													multiline="false"
 													{...params}
 													{...getFieldProps('destinationPersonalities')}
-													label="Loại tính cách"
+													label="Loại tính cách*"
 													error={Boolean(
 														touched.destinationPersonalities &&
 															errors.destinationPersonalities
@@ -505,7 +502,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											error={Boolean(touched.estimatedTimeStay && errors.estimatedTimeStay)}
 											helperText={touched.estimatedTimeStay && errors.estimatedTimeStay}
 										/>
-										<Autocomplete
+										{/* <Autocomplete
 											multiple
 											id="tags-outlined"
 											options={RecommendedTimesFrame}
@@ -526,7 +523,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 													helperText={touched.recommendedTimes && errors.recommendedTimes}
 												/>
 											)}
-										/>
+										/> */}
 									</Stack>
 								</Grid>
 								<ImageDropzone setImageList={handleImages} imageList={gallery} />
@@ -584,6 +581,11 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 									</Stack>
 								)}
 							</Box>
+							{/* <Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
+								<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+									Cập nhật
+								</LoadingButton>
+							</Box> */}
 						</Card>
 					)}
 				</Form>

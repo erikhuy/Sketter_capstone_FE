@@ -83,6 +83,7 @@ export default function Router() {
 				{path: 'createDestination', element: <CreateDestination />},
 				{path: 'pendingDestinationList', element: <PendingDestinationList />},
 				{path: 'rejectDestinationList', element: <RejectDestinationList />},
+				{path: 'catalogManagement', element: <CatalogManagement />},
 				{
 					path: 'analytics',
 					element: <GeneralAnalytics />
@@ -240,6 +241,8 @@ const PendingDestinationList = Loadable(lazy(() => import('pages/dashboard/desti
 const RejectDestinationList = Loadable(lazy(() => import('pages/dashboard/destination/RejectDestinationList')));
 const UserList = Loadable(lazy(() => import('pages/dashboard/admin/UserList')));
 const CreateUser = Loadable(lazy(() => import('pages/dashboard/admin/CreateUser')));
+const CatalogManagement = Loadable(lazy(() => import('pages/dashboard/admin/CatalogManagement')));
+
 const GeneralApp = Loadable(lazy(() => import('pages/dashboard/GeneralApp')));
 const GeneralEcommerce = Loadable(lazy(() => import('pages/dashboard/GeneralEcommerce')));
 const GeneralAnalytics = Loadable(lazy(() => import('pages/dashboard/GeneralAnalytics')));

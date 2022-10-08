@@ -77,7 +77,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 			.required('Yêu cầu thời gian mở cửa'),
 		closingTime: Yup.string()
 			.notOneOf([Yup.ref('openingTime')], 'Thời gian đóng cửa không hợp lệ')
-			.required('Yêu cầu thời gian đóng cửa'),
+			.required('Yêu cầu thời gian đóng cửa')
 	});
 	const locationData = {
 		location: {
@@ -90,8 +90,8 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		console.log(data.location);
 		const supLocation = data.location;
 		const supArray = Object.assign(data, locationData);
-		supArray.catalogs = convertToArray(data?.catalogs);
-		supArray.destinationPersonalities = convertToArray(data?.destinationPersonalities);
+		supArray.catalogs = convertCatalogToArray(data?.catalogs);
+		supArray.destinationPersonalities = convertDestinationPersonalityToArray(data?.destinationPersonalities);
 		supArray.location.lng = supLocation.lng;
 		supArray.location.lat = supLocation.lat;
 		supArray.location.destinationAddress = supLocation.destinationAddress;
@@ -126,9 +126,8 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		console.log(data);
 		try {
 			await axios.patch(`${API_URL.Destination}/${data.id}`, data).then((res) => {
-				if (res.data.message === 'success') {
-					enqueueSnackbar('Cập nhật địa điểm thành công', {variant: 'success'});
-				}
+				enqueueSnackbar(res.data.message, {variant: 'success'});
+
 				console.log(res.data);
 			});
 		} catch (e) {
@@ -206,7 +205,6 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 				});
 			} catch (error) {
 				console.log(error);
-				enqueueSnackbar(error.response.data.message, {variant: 'error'});
 			}
 		};
 		fetchData();
@@ -236,14 +234,22 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		setFieldValue('images', imageArray);
 	};
 
-	const convertToArray = (data) => {
+	const convertDestinationPersonalityToArray = (data) => {
 		const supData = [];
 		// eslint-disable-next-line array-callback-return
 		data?.map((x) => {
-			if (!x.personalityName) {
+			supData.push(x.personalityName);
+		});
+		return supData;
+	};
+	const convertCatalogToArray = (data) => {
+		const supData = [];
+		// eslint-disable-next-line array-callback-return
+		data?.map((x) => {
+			if (!x.name) {
 				supData.push(x);
 			} else {
-				supData.push(x.personalityName);
+				supData.push(x.name);
 			}
 		});
 		return supData;
@@ -385,7 +391,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											multiple
 											id="tags-outlined"
 											options={catalogs}
-											value={convertToArray(values.catalogs)}
+											value={convertCatalogToArray(values.catalogs)}
 											getOptionLabel={(option) => option}
 											filterSelectedOptions
 											onChange={(event, value) => {
@@ -409,15 +415,19 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 										/>
 										<h3 className="category-label">Tính cách du lịch người dùng</h3>
 										<Autocomplete
+										disabled
 											multiple
 											id="tags-outlined"
 											options={destinationPersonalities}
-											value={convertToArray(values.destinationPersonalities)}
+											value={convertDestinationPersonalityToArray(
+												values.destinationPersonalities
+											)}
 											// defaultValue={[values.destinationPersonalities]}
-											getOptionLabel={(option) => option}
+											getOptionLabel={(option) => option.personalityName}
 											filterSelectedOptions
 											onChange={(event, value) => {
-												setFieldValue('destinationPersonalities', value);
+												console.log(value);
+												// setFieldValue('destinationPersonalities', value);
 											}}
 											renderTags={(tagValue, getTagProps) =>
 												tagValue.map((option, index) => (
@@ -503,6 +513,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											helperText={touched.estimatedTimeStay && errors.estimatedTimeStay}
 										/>
 										{/* <Autocomplete
+										
 											multiple
 											id="tags-outlined"
 											options={RecommendedTimesFrame}
@@ -610,14 +621,54 @@ const catalogs = [
 	'Tính ngưỡng'
 ];
 const destinationPersonalities = [
-	'Thích khám phá',
-	'Ưa mạo hiểm',
-	'Tìm kiếm sự thư giãn',
-	'Đam mê với ẩm thực',
-	'Đam mê với lịch sử, văn hóa',
-	'Yêu thiên nhiên',
-	'Giá rẻ là trên hết',
-	'Có nhu cầu vui chơi, giải trí cao'
+	{
+		personalityName: 'Thích khám phá',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Ưa mạo hiểm',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Tìm kiếm sự thư giãn',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Đam mê với ẩm thực',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Đam mê với lịch sử, văn hóa',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Yêu thiên nhiên',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Giá rẻ là trên hết',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Có nhu cầu vui chơi, giải trí cao',
+		planCount: 0,
+		visitCount: 0
+	}
+	// 'Thích khám phá',
+	// 'Ưa mạo hiểm',
+	// 'Tìm kiếm sự thư giãn',
+	// 'Đam mê với ẩm thực',
+	// 'Đam mê với lịch sử, văn hóa',
+	// 'Yêu thiên nhiên',
+	// 'Giá rẻ là trên hết',
+	// 'Có nhu cầu vui chơi, giải trí cao'
 ];
 const RecommendedTimesFrame = [
 	{

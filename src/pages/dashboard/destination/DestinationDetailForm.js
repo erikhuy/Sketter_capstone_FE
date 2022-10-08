@@ -194,7 +194,15 @@ export default function DestinationDetailForm({destinationID}) {
 		setFieldValue('images', imageArray);
 	};
 
-	const convertToArray = (data) => {
+	const convertDestinationPersonalityToArray = (data) => {
+		const supData = [];
+		// eslint-disable-next-line array-callback-return
+		data?.map((x) => {
+			supData.push(x.personalityName);
+		});
+		return supData;
+	};
+	const convertCatalogToArray = (data) => {
 		const supData = [];
 		// eslint-disable-next-line array-callback-return
 		data?.map((x) => {
@@ -324,7 +332,7 @@ export default function DestinationDetailForm({destinationID}) {
 											multiple
 											id="tags-outlined"
 											options={catalogs}
-											value={convertToArray(values.catalogs)}
+											value={convertCatalogToArray(values.catalogs)}
 											getOptionLabel={(option) => option}
 											filterSelectedOptions
 											onChange={(event, value) => {
@@ -348,10 +356,11 @@ export default function DestinationDetailForm({destinationID}) {
 										/>
 										<h3 className="category-label">Tính cách du lịch người dùng</h3>
 										<Autocomplete
+										disabled
 											multiple
 											id="tags-outlined"
 											options={destinationPersonalities}
-											value={convertToArray(values.destinationPersonalities)}
+											value={convertDestinationPersonalityToArray(values.destinationPersonalities)}
 											// defaultValue={[values.destinationPersonalities]}
 											getOptionLabel={(option) => option}
 											filterSelectedOptions

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import {Box, Button, CardActionArea, Drawer, Link, Stack, Tooltip, Typography} from '@material-ui/core';
 // material
 import {alpha, styled} from '@material-ui/core/styles';
@@ -17,7 +18,9 @@ import MyAvatar from '../../../components/MyAvatar';
 import NavSection from '../../../components/NavSection';
 import Scrollbar from '../../../components/Scrollbar';
 //
-import sidebarConfig from './SidebarConfig';
+import sidebarConfigAdmin from './SidebarConfigAdmin';
+import sidebarConfigSupplier from './SidebarConfigSupplier';
+import sidebarConfigSupplierManager from './SidebarConfigSupplierManager';
 
 // ----------------------------------------------------------------------
 
@@ -179,7 +182,17 @@ export default function DashboardSidebar({isOpenSidebar, onCloseSidebar}) {
 				)}
 			</Stack>
 
-			<NavSection navConfig={sidebarConfig} isShow={!isCollapse} />
+			<NavSection
+				navConfig={
+					// eslint-disable-next-line no-nested-ternary
+					user.role.description === 'Đối tác'
+						? sidebarConfigSupplier
+						: user.role.description === 'Quản lý đối tác'
+						? sidebarConfigSupplierManager
+						: sidebarConfigAdmin
+				}
+				isShow={!isCollapse}
+			/>
 		</Scrollbar>
 	);
 

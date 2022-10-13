@@ -26,7 +26,7 @@ const AuthProvider = ({children}) => {
 
 	const handleStorageEvent = useCallback(
 		({key, newValue}) => {
-			if (key === ACCESS_TOKEN_KEY && !newValue) {
+			if (key === 'token' && !newValue) {
 				delete axiosInstance.defaults.headers.common.Authorization;
 				initializeAuth();
 			}
@@ -41,7 +41,7 @@ const AuthProvider = ({children}) => {
 
 	useMounting(
 		() => {
-			const accessToken = window.localStorage.getItem(ACCESS_TOKEN_KEY);
+			const accessToken = window.localStorage.getItem('token');
 			if (accessToken && isValidToken(accessToken)) {
 				tokenExpiredRef.current = setSession(accessToken);
 				fetchUser();

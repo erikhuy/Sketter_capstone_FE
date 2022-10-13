@@ -25,7 +25,7 @@ const RootStyle = styled(Card)(({theme}) => ({
 
 AppWelcome.propTypes = {
 	displayName: PropTypes.string,
-	displayRole: PropTypes.number
+	displayRole: PropTypes.string
 };
 
 export default function AppWelcome({displayName, displayRole}) {

@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable array-callback-return */
 /* eslint-disable no-sequences */
 /* eslint-disable no-const-assign */
 /* eslint-disable no-restricted-syntax */
@@ -53,6 +54,8 @@ export default function CreateDestinationFormSupplierManager() {
 	const [gallery, setGallery] = useState([]);
 	const [suppliers, setSuppliers] = useState([]);
 	const [createDestinationMessage, setCreateDestinationMessage] = useState();
+	const [catalogs, setCatalogs] = useState([]);
+	const [personalities, setPersonalities] = useState([]);
 
 	const CreateDestinationSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
@@ -150,6 +153,46 @@ export default function CreateDestinationFormSupplierManager() {
 			}
 		};
 		fetchData();
+	}, []);
+	useEffect(() => {
+		const supList = [];
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.Cata}`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data.catalogs);
+						res.data.data.catalogs.map((value) => {
+							value.sub.map((item) => {
+								// console.log(item.name);
+								supList.push(item.name);
+								setCatalogs(supList);
+							});
+						});
+					}
+				});
+			} catch (error) {
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchSupplier();
+	}, []);
+	useEffect(() => {
+		const supList = [];
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.PT}`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data.personalities);
+						setPersonalities(res.data.data.personalities);
+					}
+				});
+			} catch (error) {
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchSupplier();
 	}, []);
 	useEffect(() => {
 		if (!createDestinationMessage) {
@@ -361,7 +404,7 @@ export default function CreateDestinationFormSupplierManager() {
 										}}
 										multiple
 										id="tags-outlined"
-										options={catalog}
+										options={catalogs}
 										getOptionLabel={(option) => option}
 										filterSelectedOptions
 										renderInput={(params) => (
@@ -379,7 +422,7 @@ export default function CreateDestinationFormSupplierManager() {
 									<Autocomplete
 										multiple
 										id="tags-outlined"
-										options={TravelPersonalityTypes}
+										options={personalities}
 										getOptionLabel={(option) => option}
 										onChange={(e, value) => {
 											setFieldValue(
@@ -518,17 +561,31 @@ export default function CreateDestinationFormSupplierManager() {
 // 	{name: 'Khách sạn'},
 // 	{name: 'Khu nghỉ dưỡng cao cấp'}
 // ];
-const catalog = ['Quán ăn', 'Quán cà phê', 'Địa điểm du lịch', 'Homestay', 'Khách sạn', 'Khu nghỉ dưỡng cao cấp'];
-const TravelPersonalityTypes = [
-	'Thích khám phá',
-	'Ưa mạo hiểm',
-	'Tìm kiếm sự thư giãn',
-	'Đam mê với ẩm thực',
-	'Đam mê với lịch sử, văn hóa',
-	'Yêu thiên nhiên',
-	'Giá rẻ là trên hết',
-	'Có nhu cầu vui chơi, giải trí cao'
-];
+// const catalog = [
+// 	'Quán ăn',
+// 	'Quán nước',
+// 	'Địa điểm du lịch',
+// 	'Địa điểm ngắm cảnh',
+// 	'Nông trại',
+// 	'Vườn hoa',
+// 	'Cắm trại',
+// 	'Homestay',
+// 	'Khách sạn',
+// 	'Khu nghỉ dưỡng cao cấp',
+// 	'Bản xứ',
+// 	'Lịch sử',
+// 	'Tính ngưỡng'
+// ];
+// const TravelPersonalityTypes = [
+// 	'Thích khám phá',
+// 	'Ưa mạo hiểm',
+// 	'Tìm kiếm sự thư giãn',
+// 	'Đam mê với ẩm thực',
+// 	'Đam mê với lịch sử, văn hóa',
+// 	'Yêu thiên nhiên',
+// 	'Giá rẻ là trên hết',
+// 	'Có nhu cầu vui chơi, giải trí cao'
+// ];
 // const TravelPersonalityTypes = [
 // 	{name: 'Thích khám phá'},
 // 	{name: 'Ưa mạo hiểm'},

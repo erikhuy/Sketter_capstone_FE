@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable array-callback-return */
 /* eslint-disable no-sequences */
 /* eslint-disable no-const-assign */
 /* eslint-disable no-restricted-syntax */
@@ -52,6 +53,8 @@ export default function CreateDestinationForm() {
 	const {enqueueSnackbar} = useSnackbar();
 	const [gallery, setGallery] = useState([]);
 	const [createDestinationMessage, setCreateDestinationMessage] = useState();
+	const [catalogs, setCatalogs] = useState([]);
+	const [personalities, setPersonalities] = useState([]);
 
 	const CreateDestinationSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
@@ -133,6 +136,46 @@ export default function CreateDestinationForm() {
 
 		return supArray;
 	};
+	useEffect(() => {
+		const supList = [];
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.Cata}`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data.catalogs);
+						res.data.data.catalogs.map((value) => {
+							value.sub.map((item) => {
+								// console.log(item.name);
+								supList.push(item.name);
+								setCatalogs(supList);
+							});
+						});
+					}
+				});
+			} catch (error) {
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchSupplier();
+	}, []);
+	useEffect(() => {
+		const supList = [];
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.PT}`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data.personalities);
+						setPersonalities(res.data.data.personalities);
+					}
+				});
+			} catch (error) {
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchSupplier();
+	}, []);
 	useEffect(() => {
 		if (!createDestinationMessage) {
 			return;
@@ -319,11 +362,12 @@ export default function CreateDestinationForm() {
 									<h3 className="category-label">Loại địa điểm</h3>
 									<Autocomplete
 										onChange={(e, value) => {
+											console.log(values.catalogs);
 											setFieldValue('catalogs', value !== null ? value : initialValues.catalogs);
 										}}
 										multiple
 										id="tags-outlined"
-										options={catalog}
+										options={catalogs}
 										getOptionLabel={(option) => option}
 										filterSelectedOptions
 										renderInput={(params) => (
@@ -341,9 +385,10 @@ export default function CreateDestinationForm() {
 									<Autocomplete
 										multiple
 										id="tags-outlined"
-										options={TravelPersonalityTypes}
+										options={personalities}
 										getOptionLabel={(option) => option}
 										onChange={(e, value) => {
+											console.log(values.destinationPersonalities);
 											setFieldValue(
 												'destinationPersonalities',
 												value !== null ? value : initialValues.destinationPersonalities
@@ -480,31 +525,31 @@ export default function CreateDestinationForm() {
 // 	{name: 'Khách sạn'},
 // 	{name: 'Khu nghỉ dưỡng cao cấp'}
 // ];
-const catalog = [
-	'Quán ăn',
-	'Quán nước',
-	'Địa điểm du lịch',
-	'Địa điểm ngắm cảnh',
-	'Nông trại',
-	'Vườn hoa',
-	'Cắm trại',
-	'Homestay',
-	'Khách sạn',
-	'Khu nghỉ dưỡng cao cấp',
-	'Bản xứ',
-	'Lịch sử',
-	'Tính ngưỡng'
-];
-const TravelPersonalityTypes = [
-	'Thích khám phá',
-	'Ưa mạo hiểm',
-	'Tìm kiếm sự thư giãn',
-	'Đam mê với ẩm thực',
-	'Đam mê với lịch sử, văn hóa',
-	'Yêu thiên nhiên',
-	'Giá rẻ là trên hết',
-	'Có nhu cầu vui chơi, giải trí cao'
-];
+// const catalog = [
+// 	'Quán ăn',
+// 	'Quán nước',
+// 	'Địa điểm du lịch',
+// 	'Địa điểm ngắm cảnh',
+// 	'Nông trại',
+// 	'Vườn hoa',
+// 	'Cắm trại',
+// 	'Homestay',
+// 	'Khách sạn',
+// 	'Khu nghỉ dưỡng cao cấp',
+// 	'Bản xứ',
+// 	'Lịch sử',
+// 	'Tính ngưỡng'
+// ];
+// const TravelPersonalityTypes = [
+// 	'Thích khám phá',
+// 	'Ưa mạo hiểm',
+// 	'Tìm kiếm sự thư giãn',
+// 	'Đam mê với ẩm thực',
+// 	'Đam mê với lịch sử, văn hóa',
+// 	'Yêu thiên nhiên',
+// 	'Giá rẻ là trên hết',
+// 	'Có nhu cầu vui chơi, giải trí cao'
+// ];
 // const TravelPersonalityTypes = [
 // 	{name: 'Thích khám phá'},
 // 	{name: 'Ưa mạo hiểm'},

@@ -10,5 +10,6 @@ export const API_URL = {
 	User: '/api/v1/users',
 	Destination: '/api/v1/destinations',
 	Auth: '/api/v1/auth',
-	Cata: '/api/v1/catalogs'
+	Cata: '/api/v1/catalogs',
+	PT: '/api/v1/personalities'
 };

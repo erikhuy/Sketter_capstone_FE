@@ -1,4 +1,5 @@
-/* eslint-disable prettier/prettier */
+/* eslint-disable prettier/prettier */ 
+/* eslint-disable array-callback-return */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-undef */
@@ -52,6 +53,8 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 	const [data, setData] = useState();
 	const [isBusy, setBusy] = useState(true);
 	const [suppliers, setSuppliers] = useState([]);
+	const [catalogs, setCatalogs] = useState([]);
+	const [personalities, setPersonalities] = useState([]);
 
 	const UpdateDestinationSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
@@ -137,41 +140,81 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 
 	const handleAction = useCallback(async (id, action) => {
 		console.log(data);
-		if (action === 'Approve') {
-			try {
-				await axios.patch(`${API_URL.Destination}/pending/approve?id=${id}`).then((res) => {
-					if (res.data.message === 'success') {
-						enqueueSnackbar(res.data.data, {variant: 'success'});
-					}
-					console.log(res.data);
-				});
-			} catch (e) {
-				enqueueSnackbar(e.response.data.message, {variant: 'error'});
-			}
-		} else if (action === 'Reject') {
-			try {
-				await axios.patch(`${API_URL.Destination}/pending/reject?id=${id}`).then((res) => {
-					if (res.data.message === 'success') {
-						enqueueSnackbar(res.data.data, {variant: 'success'});
-					}
-					console.log(res.data);
-				});
-			} catch (e) {
-				enqueueSnackbar(e.response.data.message, {variant: 'error'});
-			}
-		} else if (action === 'Close') {
-			try {
-				await axios.patch(`${API_URL.Destination}/pending/close?id=${id}`).then((res) => {
-					if (res.data.message === 'success') {
-						enqueueSnackbar(res.data.data, {variant: 'success'});
-					}
-					console.log(res.data);
-				});
-			} catch (e) {
-				enqueueSnackbar(e.response.data.message, {variant: 'error'});
-			}
-		}
+		// if (action === 'Approve') {
+		// 	try {
+		// 		await axios.patch(`${API_URL.Destination}/pending/approve?id=${id}`).then((res) => {
+		// 			if (res.data.message === 'success') {
+		// 				enqueueSnackbar(res.data.data, {variant: 'success'});
+		// 			}
+		// 			console.log(res.data);
+		// 		});
+		// 	} catch (e) {
+		// 		enqueueSnackbar(e.response.data.message, {variant: 'error'});
+		// 	}
+		// } else if (action === 'Reject') {
+		// 	try {
+		// 		await axios.patch(`${API_URL.Destination}/pending/reject?id=${id}`).then((res) => {
+		// 			if (res.data.message === 'success') {
+		// 				enqueueSnackbar(res.data.data, {variant: 'success'});
+		// 			}
+		// 			console.log(res.data);
+		// 		});
+		// 	} catch (e) {
+		// 		enqueueSnackbar(e.response.data.message, {variant: 'error'});
+		// 	}
+		// } else if (action === 'Close') {
+		// 	try {
+		// 		await axios.patch(`${API_URL.Destination}/pending/close?id=${id}`).then((res) => {
+		// 			if (res.data.message === 'success') {
+		// 				enqueueSnackbar(res.data.data, {variant: 'success'});
+		// 			}
+		// 			console.log(res.data);
+		// 		});
+		// 	} catch (e) {
+		// 		enqueueSnackbar(e.response.data.message, {variant: 'error'});
+		// 	}
+		// }
 	});
+	useEffect(() => {
+		const supList = [];
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.Cata}`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data.catalogs);
+						res.data.data.catalogs.map((value) => {
+							value.sub.map((item) => {
+								// console.log(item.name);
+								supList.push(item.name);
+								setCatalogs(supList);
+							});
+						});
+					}
+				});
+			} catch (error) {
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchSupplier();
+	}, []);
+	useEffect(() => {
+		const supList = [];
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.PT}`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data.personalities);
+						setPersonalities(res.data.data.personalities);
+					}
+				});
+			} catch (error) {
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchSupplier();
+	}, []);
 	useEffect(() => {
 		const fetchSupplier = async () => {
 			try {
@@ -235,6 +278,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 	};
 
 	const convertDestinationPersonalityToArray = (data) => {
+		console.log("1234");
 		const supData = [];
 		// eslint-disable-next-line array-callback-return
 		data?.map((x) => {
@@ -243,6 +287,8 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		return supData;
 	};
 	const convertCatalogToArray = (data) => {
+		console.log("12345");
+
 		const supData = [];
 		// eslint-disable-next-line array-callback-return
 		data?.map((x) => {
@@ -415,25 +461,17 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 										/>
 										<h3 className="category-label">Tính cách du lịch người dùng</h3>
 										<Autocomplete
-										disabled
+											disabled
 											multiple
 											id="tags-outlined"
-											options={destinationPersonalities}
+											options={personalities}
 											value={convertDestinationPersonalityToArray(
 												values.destinationPersonalities
 											)}
 											// defaultValue={[values.destinationPersonalities]}
-											getOptionLabel={(option) => option.personalityName}
+											getOptionLabel={(option) => option}
 											filterSelectedOptions
-											onChange={(event, value) => {
-												console.log(value);
-												// setFieldValue('destinationPersonalities', value);
-											}}
-											renderTags={(tagValue, getTagProps) =>
-												tagValue.map((option, index) => (
-													<Chip label={option} {...getTagProps({index})} />
-												))
-											}
+
 											renderInput={(params) => (
 												<TextField
 													multiline="false"
@@ -541,12 +579,12 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 							</Grid>
 
 							<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
-								{values.status === 'Verified' ? (
+								{values.status === 'Activated' ? (
 									<Stack direction={{xs: 'row'}} spacing={2}>
 										<Button
 											color="success"
 											variant="contained"
-											onClick={() => handleAction(values.id, 'Close')}
+											onClick={() => handleAction(values.id, 'Closed')}
 										>
 											Ngưng hoạt động
 										</Button>
@@ -554,19 +592,19 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											Cập nhật
 										</LoadingButton>
 									</Stack>
-								) : values.status !== 'Close' ? (
+								) : values.status !== 'Closed' ? (
 									<Button
 										color="success"
 										variant="contained"
-										onClick={() => handleAction(values.id, 'Approve')}
+										onClick={() => handleAction(values.id, 'Activated')}
 									>
 										Mở hoạt động
 									</Button>
-								) : values.status !== 'Reject' ? (
+								) : values.status !== 'Inactivated' ? (
 									<Button
 										color="success"
 										variant="contained"
-										onClick={() => handleAction(values.id, 'Approve')}
+										onClick={() => handleAction(values.id, 'Activated')}
 									>
 										Duyệt
 									</Button>
@@ -575,7 +613,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 										<Button
 											color="success"
 											variant="contained"
-											onClick={() => handleAction(values.id, 'Approve')}
+											onClick={() => handleAction(values.id, 'Activated')}
 										>
 											Duyệt
 										</Button>
@@ -585,7 +623,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 										<Button
 											color="error"
 											variant="contained"
-											onClick={() => handleAction(values.id, 'Reject')}
+											onClick={() => handleAction(values.id, 'Deactivated')}
 										>
 											Từ chối
 										</Button>
@@ -605,71 +643,71 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 	);
 }
 
-const catalogs = [
-	'Quán ăn',
-	'Quán nước',
-	'Địa điểm du lịch',
-	'Địa điểm ngắm cảnh',
-	'Nông trại',
-	'Vườn hoa',
-	'Cắm trại',
-	'Homestay',
-	'Khách sạn',
-	'Khu nghỉ dưỡng cao cấp',
-	'Bản xứ',
-	'Lịch sử',
-	'Tính ngưỡng'
-];
-const destinationPersonalities = [
-	{
-		personalityName: 'Thích khám phá',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Ưa mạo hiểm',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Tìm kiếm sự thư giãn',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Đam mê với ẩm thực',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Đam mê với lịch sử, văn hóa',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Yêu thiên nhiên',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Giá rẻ là trên hết',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Có nhu cầu vui chơi, giải trí cao',
-		planCount: 0,
-		visitCount: 0
-	}
-	// 'Thích khám phá',
-	// 'Ưa mạo hiểm',
-	// 'Tìm kiếm sự thư giãn',
-	// 'Đam mê với ẩm thực',
-	// 'Đam mê với lịch sử, văn hóa',
-	// 'Yêu thiên nhiên',
-	// 'Giá rẻ là trên hết',
-	// 'Có nhu cầu vui chơi, giải trí cao'
-];
+// const catalogs = [
+// 	'Quán ăn',
+// 	'Quán nước',
+// 	'Địa điểm du lịch',
+// 	'Địa điểm ngắm cảnh',
+// 	'Nông trại',
+// 	'Vườn hoa',
+// 	'Cắm trại',
+// 	'Homestay',
+// 	'Khách sạn',
+// 	'Khu nghỉ dưỡng cao cấp',
+// 	'Bản xứ',
+// 	'Lịch sử',
+// 	'Tính ngưỡng'
+// ];
+// const destinationPersonalities = [
+// 	{
+// 		personalityName: 'Thích khám phá',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Ưa mạo hiểm',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Tìm kiếm sự thư giãn',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Đam mê với ẩm thực',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Đam mê với lịch sử, văn hóa',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Yêu thiên nhiên',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Giá rẻ là trên hết',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Có nhu cầu vui chơi, giải trí cao',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	}
+// 	// 'Thích khám phá',
+// 	// 'Ưa mạo hiểm',
+// 	// 'Tìm kiếm sự thư giãn',
+// 	// 'Đam mê với ẩm thực',
+// 	// 'Đam mê với lịch sử, văn hóa',
+// 	// 'Yêu thiên nhiên',
+// 	// 'Giá rẻ là trên hết',
+// 	// 'Có nhu cầu vui chơi, giải trí cao'
+// ];
 const RecommendedTimesFrame = [
 	{
 		start: '04:00',

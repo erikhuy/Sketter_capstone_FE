@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable array-callback-return */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-undef */
@@ -40,10 +41,10 @@ import {useSnackbar} from 'notistack5';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-DestinationDetailForm.propTypes = {
+DestinationDetailFormSupplierManager.propTypes = {
 	destinationID: PropTypes.object.isRequired
 };
-export default function DestinationDetailForm({destinationID}) {
+export default function DestinationDetailFormSupplierManager({destinationID}) {
 	// eslint-disable-next-line no-bitwise
 	const isMountedRef = useIsMountedRef();
 	const [gallery, setGallery] = useState([]);
@@ -51,7 +52,8 @@ export default function DestinationDetailForm({destinationID}) {
 	const {enqueueSnackbar} = useSnackbar();
 	const [data, setData] = useState();
 	const [isBusy, setBusy] = useState(true);
-	const [createDestinationMessage, setCreateDestinationMessage] = useState();
+	const [suppliers, setSuppliers] = useState([]);
+	const [catalogs, setCatalogs] = useState([]);
 
 	const UpdateDestinationSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
@@ -77,8 +79,7 @@ export default function DestinationDetailForm({destinationID}) {
 			.required('Yêu cầu thời gian mở cửa'),
 		closingTime: Yup.string()
 			.notOneOf([Yup.ref('openingTime')], 'Thời gian đóng cửa không hợp lệ')
-			.required('Yêu cầu thời gian đóng cửa'),
-		recommendedTimes: Yup.array().min(1, 'Khoảng thời gian lý tưởng không được trống')
+			.required('Yêu cầu thời gian đóng cửa')
 	});
 	const locationData = {
 		location: {
@@ -88,14 +89,17 @@ export default function DestinationDetailForm({destinationID}) {
 		}
 	};
 	const processData = (data) => {
-		console.log(data);
+		console.log(data.location);
+		const supLocation = data.location;
 		const supArray = Object.assign(data, locationData);
-		supArray.catalogs = convertToArray(data?.catalogs);
-		supArray.destinationPersonalities = convertToArray(data?.destinationPersonalities);
-		supArray.location.lng = data.longitude;
-		supArray.location.lat = data.latitude;
-		supArray.location.destinationAddress = data.address;
-
+		supArray.catalogs = convertCatalogToArray(data?.catalogs);
+		supArray.destinationPersonalities = convertDestinationPersonalityToArray(data?.destinationPersonalities);
+		supArray.location.lng = supLocation.lng;
+		supArray.location.lat = supLocation.lat;
+		supArray.location.destinationAddress = supLocation.destinationAddress;
+		supArray.longitude = supLocation.lng;
+		supArray.latitude = supLocation.lat;
+		supArray.address = supLocation.destinationAddress;
 		return supArray;
 	};
 	const formik = useFormik({
@@ -103,6 +107,7 @@ export default function DestinationDetailForm({destinationID}) {
 		validationSchema: UpdateDestinationSchema,
 		initialValues: data,
 		onSubmit: async (values, {setErrors, setSubmitting}) => {
+			console.log(values.location);
 			console.log(values);
 			try {
 				await updateDestination(processData(values));
@@ -123,9 +128,8 @@ export default function DestinationDetailForm({destinationID}) {
 		console.log(data);
 		try {
 			await axios.patch(`${API_URL.Destination}/${data.id}`, data).then((res) => {
-				if (res.data.message === 'success') {
-					enqueueSnackbar('Cập nhật địa điểm thành công', {variant: 'success'});
-				}
+				enqueueSnackbar(res.data.message, {variant: 'success'});
+
 				console.log(res.data);
 			});
 		} catch (e) {
@@ -133,18 +137,66 @@ export default function DestinationDetailForm({destinationID}) {
 		}
 	});
 
-	const handleAction = useCallback(async (id) => {
-		try {
-			await axios.patch(`${API_URL.Destination}/pending/close?id=${id}`).then((res) => {
-				if (res.data.message === 'success') {
-					enqueueSnackbar(res.data.data, {variant: 'success'});
-				}
-				console.log(res.data);
-			});
-		} catch (e) {
-			enqueueSnackbar(e.response.data.message, {variant: 'error'});
+	const handleAction = useCallback(async (id, action) => {
+		console.log(data);
+		if (action === 'Approve') {
+			try {
+				await axios.patch(`${API_URL.Destination}/pending/approve?id=${id}`).then((res) => {
+					if (res.data.message === 'success') {
+						enqueueSnackbar(res.data.data, {variant: 'success'});
+					}
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
+		} else if (action === 'Reject') {
+			try {
+				await axios.patch(`${API_URL.Destination}/pending/reject?id=${id}`).then((res) => {
+					if (res.data.message === 'success') {
+						enqueueSnackbar(res.data.data, {variant: 'success'});
+					}
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
+		} else if (action === 'Close') {
+			try {
+				await axios.patch(`${API_URL.Destination}/pending/close?id=${id}`).then((res) => {
+					if (res.data.message === 'success') {
+						enqueueSnackbar(res.data.data, {variant: 'success'});
+					}
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
 		}
 	});
+	useEffect(() => {
+		const supList = [];
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.Cata}`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data.catalogs);
+						res.data.data.catalogs.map((value) => {
+							value.sub.map((item) => {
+								// console.log(item.name);
+								supList.push(item.name);
+								setCatalogs(supList);
+							});
+						});
+					}
+				});
+			} catch (error) {
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchSupplier();
+	}, []);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -159,12 +211,10 @@ export default function DestinationDetailForm({destinationID}) {
 						setData(supArray);
 						setBusy(false);
 						setGallery(res.data.data.destination.images);
-						console.log(supArray);
 					}
 				});
 			} catch (error) {
 				console.log(error);
-				enqueueSnackbar(error.response.data.message, {variant: 'error'});
 			}
 		};
 		fetchData();
@@ -238,21 +288,21 @@ export default function DestinationDetailForm({destinationID}) {
 									<Stack direction={{xs: 'column'}} spacing={2} sx={{m: 2}}>
 										<TextField
 											fullWidth
-											label="Tên địa điểm"
+											label="Tên địa điểm*"
 											{...getFieldProps('name')}
 											error={Boolean(touched.name && errors.name)}
 											helperText={touched.name && errors.name}
 										/>
 										<TextField
 											fullWidth
-											label="Số điện thoại"
+											label="Số điện thoại*"
 											{...getFieldProps('phone')}
 											error={Boolean(touched.phone && errors.phone)}
 											helperText={touched.phone && errors.phone}
 										/>
 										<TextField
 											fullWidth
-											label="Email"
+											label="Email*"
 											{...getFieldProps('email')}
 											error={Boolean(touched.email && errors.email)}
 											helperText={touched.email && errors.email}
@@ -266,13 +316,11 @@ export default function DestinationDetailForm({destinationID}) {
 											error={Boolean(touched.description && errors.description)}
 											helperText={touched.description && errors.description}
 										/>
-										
 										<Stack direction={{xs: 'row'}} spacing={2}>
 											<TextField
-												type="number"
 												{...getFieldProps('lowestPrice')}
 												style={{height: 56, width: 360}}
-												label={<span className="labelText">Giá thấp nhất</span>}
+												label={<span className="labelText">Giá thấp nhất*</span>}
 												InputLabelProps={{
 													shrink: true,
 													placeholder: '1000-10000'
@@ -289,10 +337,9 @@ export default function DestinationDetailForm({destinationID}) {
 											/>
 											<div>-</div>
 											<TextField
-												type="number"
 												{...getFieldProps('highestPrice')}
 												style={{height: 56, width: 360}}
-												label={<span className="labelText">Giá cao nhất</span>}
+												label={<span className="labelText">Giá cao nhất*</span>}
 												InputLabelProps={{
 													shrink: true,
 													className: 'labelText2',
@@ -348,7 +395,7 @@ export default function DestinationDetailForm({destinationID}) {
 													multiline="false"
 													{...params}
 													{...getFieldProps('catalogs')}
-													label="Loại địa điểm"
+													label="Loại địa điểm*"
 													error={Boolean(touched.catalogs && errors.catalogs)}
 													helperText={touched.catalogs && errors.catalogs}
 												/>
@@ -360,12 +407,15 @@ export default function DestinationDetailForm({destinationID}) {
 											multiple
 											id="tags-outlined"
 											options={destinationPersonalities}
-											value={convertDestinationPersonalityToArray(values.destinationPersonalities)}
+											value={convertDestinationPersonalityToArray(
+												values.destinationPersonalities
+											)}
 											// defaultValue={[values.destinationPersonalities]}
-											getOptionLabel={(option) => option}
+											getOptionLabel={(option) => option.personalityName}
 											filterSelectedOptions
 											onChange={(event, value) => {
-												setFieldValue('destinationPersonalities', value);
+												console.log(value);
+												// setFieldValue('destinationPersonalities', value);
 											}}
 											renderTags={(tagValue, getTagProps) =>
 												tagValue.map((option, index) => (
@@ -377,7 +427,7 @@ export default function DestinationDetailForm({destinationID}) {
 													multiline="false"
 													{...params}
 													{...getFieldProps('destinationPersonalities')}
-													label="Loại tính cách"
+													label="Loại tính cách*"
 													error={Boolean(
 														touched.destinationPersonalities &&
 															errors.destinationPersonalities
@@ -450,7 +500,8 @@ export default function DestinationDetailForm({destinationID}) {
 											error={Boolean(touched.estimatedTimeStay && errors.estimatedTimeStay)}
 											helperText={touched.estimatedTimeStay && errors.estimatedTimeStay}
 										/>
-										<Autocomplete
+										{/* <Autocomplete
+										
 											multiple
 											id="tags-outlined"
 											options={RecommendedTimesFrame}
@@ -471,7 +522,7 @@ export default function DestinationDetailForm({destinationID}) {
 													helperText={touched.recommendedTimes && errors.recommendedTimes}
 												/>
 											)}
-										/>
+										/> */}
 									</Stack>
 								</Grid>
 								<ImageDropzone setImageList={handleImages} imageList={gallery} />
@@ -495,30 +546,70 @@ export default function DestinationDetailForm({destinationID}) {
 	);
 }
 
-const catalogs = [
-	'Quán ăn',
-	'Quán nước',
-	'Địa điểm du lịch',
-	'Địa điểm ngắm cảnh',
-	'Nông trại',
-	'Vườn hoa',
-	'Cắm trại',
-	'Homestay',
-	'Khách sạn',
-	'Khu nghỉ dưỡng cao cấp',
-	'Bản xứ',
-	'Lịch sử',
-	'Tính ngưỡng'
-];
+// const catalogs = [
+// 	'Quán ăn',
+// 	'Quán nước',
+// 	'Địa điểm du lịch',
+// 	'Địa điểm ngắm cảnh',
+// 	'Nông trại',
+// 	'Vườn hoa',
+// 	'Cắm trại',
+// 	'Homestay',
+// 	'Khách sạn',
+// 	'Khu nghỉ dưỡng cao cấp',
+// 	'Bản xứ',
+// 	'Lịch sử',
+// 	'Tính ngưỡng'
+// ];
 const destinationPersonalities = [
-	'Thích khám phá',
-	'Ưa mạo hiểm',
-	'Tìm kiếm sự thư giãn',
-	'Đam mê với ẩm thực',
-	'Đam mê với lịch sử, văn hóa',
-	'Yêu thiên nhiên',
-	'Giá rẻ là trên hết',
-	'Có nhu cầu vui chơi, giải trí cao'
+	{
+		personalityName: 'Thích khám phá',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Ưa mạo hiểm',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Tìm kiếm sự thư giãn',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Đam mê với ẩm thực',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Đam mê với lịch sử, văn hóa',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Yêu thiên nhiên',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Giá rẻ là trên hết',
+		planCount: 0,
+		visitCount: 0
+	},
+	{
+		personalityName: 'Có nhu cầu vui chơi, giải trí cao',
+		planCount: 0,
+		visitCount: 0
+	}
+	// 'Thích khám phá',
+	// 'Ưa mạo hiểm',
+	// 'Tìm kiếm sự thư giãn',
+	// 'Đam mê với ẩm thực',
+	// 'Đam mê với lịch sử, văn hóa',
+	// 'Yêu thiên nhiên',
+	// 'Giá rẻ là trên hết',
+	// 'Có nhu cầu vui chơi, giải trí cao'
 ];
 const RecommendedTimesFrame = [
 	{

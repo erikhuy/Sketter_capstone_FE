@@ -13,7 +13,7 @@ export const fetchUserThunk = createAsyncThunkWithErrorHandler(`${AppContext.Aut
 export const loginThunk = createAsyncThunkWithErrorHandler(`${AppContext.Auth}/login`, async (params) =>
 	axiosInstance.post(`${API_URL.Auth}/login`, params).then((response) => {
 		setSession(response.data.token);
-		console.log(response);
+		console.log(response.data.token);
 		return fetchUserService();
 	})
 );

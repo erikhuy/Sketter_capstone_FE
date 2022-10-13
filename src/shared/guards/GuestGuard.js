@@ -15,6 +15,7 @@ export default function GuestGuard({children}) {
 	const {isAuthenticated} = useAuth();
 
 	if (isAuthenticated) {
+		console.log('yesGuest');
 		return <Navigate to={PATH_DASHBOARD.root} />;
 	}
 

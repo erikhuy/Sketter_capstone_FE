@@ -236,16 +236,14 @@ export default function SortingSelecting() {
 										<TableCell align="right">{row.lowestPrice}</TableCell>
 										<TableCell align="right">{row.rating}</TableCell>
 										<TableCell align="right">
-											{row.status === 'Verified'
-												? 'Đã xác thực'
-												: row.status === 'Unverified'
-												? 'Chưa xác thực'
+											{row.status === 'Activated'
+												? 'Hoạt động'
+												: row.status === 'Deactivated'
+												? 'Bị ngưng hoạt động'
+												: row.status === 'Inactivated'
+												? 'Ngưng hoạt động'
 												: row.status === 'Closed'
 												? 'Đóng cửa'
-												: row.status === 'Rejected'
-												? 'Từ chối'
-												: row.status === 'Pending'
-												? 'Chờ xác thực'
 												: ''}
 										</TableCell>
 									</TableRow>

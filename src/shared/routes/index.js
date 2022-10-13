@@ -3,6 +3,9 @@
 import LoadingScreen from 'components/LoadingScreen';
 import {lazy, Suspense} from 'react';
 import {Navigate, useLocation, useRoutes} from 'react-router-dom';
+import AdminGuard from 'shared/guards/AdminGuard';
+import SupplierGuard from 'shared/guards/SupplierGuard';
+import SupplierManagerGuard from 'shared/guards/SupplierManagerGuard';
 import AuthGuard from '../guards/AuthGuard';
 import GuestGuard from '../guards/GuestGuard';
 import DashboardLayout from '../layouts/dashboard';
@@ -78,12 +81,46 @@ export default function Router() {
 				{path: '', element: <Navigate to="/dashboard/app" replace />},
 				{path: 'app', element: <GeneralApp />},
 				{path: 'ecommerce', element: <GeneralEcommerce />},
-				{path: 'userManagement', element: <UserManegement />},
-				{path: 'destinationList', element: <DestinationList />},
-				{path: 'createDestination', element: <CreateDestination />},
-				{path: 'pendingDestinationList', element: <PendingDestinationList />},
-				{path: 'rejectDestinationList', element: <RejectDestinationList />},
-				{path: 'catalogManagement', element: <CatalogManagement />},
+				{
+					path: 'destinationList',
+					element: (
+						<SupplierGuard>
+							<DestinationList />
+						</SupplierGuard>
+					)
+				},
+				{
+					path: 'createDestination',
+					element: (
+						<SupplierGuard>
+							<CreateDestination />
+						</SupplierGuard>
+					)
+				},
+				{
+					path: 'pendingDestinationList',
+					element: (
+						<SupplierManagerGuard>
+							<PendingDestinationList />
+						</SupplierManagerGuard>
+					)
+				},
+				{
+					path: 'rejectDestinationList',
+					element: (
+						<SupplierManagerGuard>
+							<RejectDestinationList />
+						</SupplierManagerGuard>
+					)
+				},
+				{
+					path: 'catalogManagement',
+					element: (
+						<AdminGuard>
+							<CatalogManagement />
+						</AdminGuard>
+					)
+				},
 				{
 					path: 'analytics',
 					element: <GeneralAnalytics />
@@ -107,8 +144,22 @@ export default function Router() {
 						{path: 'profile', element: <UserProfile />},
 						{path: 'cards', element: <UserCards />},
 						{path: 'new', element: <UserCreate />},
-						{path: 'userList', element: <UserList />},
-						{path: 'createUser', element: <CreateUser />},
+						{
+							path: 'userList',
+							element: (
+								<AdminGuard>
+									<UserList />
+								</AdminGuard>
+							)
+						},
+						{
+							path: 'createUser',
+							element: (
+								<AdminGuard>
+									<CreateUser />
+								</AdminGuard>
+							)
+						},
 						{path: ':name/edit', element: <UserCreate />},
 						{path: 'account', element: <UserAccount />}
 					]
@@ -234,7 +285,6 @@ const ResetPassword = Loadable(lazy(() => import('pages/authentication/ResetPass
 const ResetNewPassword = Loadable(lazy(() => import('pages/authentication/ResetNewPassword')));
 const VerifyCode = Loadable(lazy(() => import('pages/authentication/VerifyCode')));
 // Dashboard
-const UserManegement = Loadable(lazy(() => import('pages/dashboard/admin/UserManagement')));
 const DestinationList = Loadable(lazy(() => import('pages/dashboard/destination/DestinationList')));
 const CreateDestination = Loadable(lazy(() => import('pages/dashboard/destination/CreateDestination')));
 const PendingDestinationList = Loadable(lazy(() => import('pages/dashboard/destination/PendingDestinationList')));

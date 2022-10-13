@@ -67,7 +67,7 @@ function AuthProvider({children}) {
 	useEffect(() => {
 		const initialize = async () => {
 			try {
-				const accessToken = window.localStorage.getItem('accessToken');
+				const accessToken = window.localStorage.getItem('token');
 
 				if (accessToken && isValidToken(accessToken)) {
 					setSession(accessToken);

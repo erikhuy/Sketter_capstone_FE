@@ -210,7 +210,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 						supArray.location.destinationAddress = res.data.data.destination.address;
 						setData(supArray);
 						setBusy(false);
-						setGallery(res.data.data.destination.images);
+						setGallery(res.data.data.destination.gallery);
 					}
 				});
 			} catch (error) {
@@ -241,7 +241,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 				imageArray.push({url: images.url});
 			}
 		});
-		setFieldValue('images', imageArray);
+		setFieldValue('gallery', imageArray);
 	};
 
 	const convertDestinationPersonalityToArray = (data) => {
@@ -403,20 +403,15 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 										/>
 										<h3 className="category-label">Tính cách du lịch người dùng</h3>
 										<Autocomplete
-										disabled
+											disabled
 											multiple
 											id="tags-outlined"
 											options={destinationPersonalities}
 											value={convertDestinationPersonalityToArray(
 												values.destinationPersonalities
 											)}
-											// defaultValue={[values.destinationPersonalities]}
-											getOptionLabel={(option) => option.personalityName}
+											getOptionLabel={(option) => console.log(option)}
 											filterSelectedOptions
-											onChange={(event, value) => {
-												console.log(value);
-												// setFieldValue('destinationPersonalities', value);
-											}}
 											renderTags={(tagValue, getTagProps) =>
 												tagValue.map((option, index) => (
 													<Chip label={option} {...getTagProps({index})} />
@@ -426,7 +421,6 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 												<TextField
 													multiline="false"
 													{...params}
-													{...getFieldProps('destinationPersonalities')}
 													label="Loại tính cách*"
 													error={Boolean(
 														touched.destinationPersonalities &&

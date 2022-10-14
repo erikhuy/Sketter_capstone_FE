@@ -107,7 +107,7 @@ export default function CreateDestinationFormSupplierManager() {
 			recommendedTimes: [],
 			destinationPersonalities: [],
 			catalogs: [],
-			images: []
+			gallery: []
 		},
 		validationSchema: CreateDestinationSchema,
 		onSubmit: async (values, {setErrors, setSubmitting}) => {
@@ -241,7 +241,7 @@ export default function CreateDestinationFormSupplierManager() {
 				console.log(e);
 			}
 		});
-		setFieldValue('images', imageArray);
+		setFieldValue('gallery', imageArray);
 	};
 
 	const handleOpeningTime = (data) => {

@@ -243,7 +243,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 						supArray.location.destinationAddress = res.data.data.destination.address;
 						setData(supArray);
 						setBusy(false);
-						setGallery(res.data.data.destination.images);
+						setGallery(res.data.data.destination.gallery);
 					}
 				});
 			} catch (error) {
@@ -274,7 +274,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 				imageArray.push({url: images.url});
 			}
 		});
-		setFieldValue('images', imageArray);
+		setFieldValue('gallery', imageArray);
 	};
 
 	const convertDestinationPersonalityToArray = (data) => {
@@ -550,7 +550,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											error={Boolean(touched.estimatedTimeStay && errors.estimatedTimeStay)}
 											helperText={touched.estimatedTimeStay && errors.estimatedTimeStay}
 										/>
-										{/* <Autocomplete
+										<Autocomplete
 										
 											multiple
 											id="tags-outlined"
@@ -572,7 +572,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 													helperText={touched.recommendedTimes && errors.recommendedTimes}
 												/>
 											)}
-										/> */}
+										/>
 									</Stack>
 								</Grid>
 								<ImageDropzone setImageList={handleImages} imageList={gallery} />

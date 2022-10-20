@@ -23,7 +23,7 @@ import {
 	Button
 } from '@material-ui/core';
 import {useFormik, Form, FormikProvider} from 'formik';
-import {DesktopDatePicker, LoadingButton, LocalizationProvider, TimePicker} from '@material-ui/lab';
+import {DesktopDatePicker, LoadingButton, LocalizationProvider, MobileTimePicker, TimePicker} from '@material-ui/lab';
 import {useLoading} from 'shared/hooks';
 import {updateMeThunk} from 'shared/redux/thunks/auth';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
@@ -54,32 +54,45 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 	const [isBusy, setBusy] = useState(true);
 	const [suppliers, setSuppliers] = useState([]);
 	const [catalogs, setCatalogs] = useState([]);
+	const [personalities, setPersonalities] = useState([]);
 
 	const UpdateDestinationSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
 		phone: Yup.string()
 			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
 			.min(7, 'Số điện thoại không tồn tại!')
-			.max(13, 'Số điện thoại không tồn tại!')
-			.required('Yêu cầu nhập số điện thoại'),
-		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
-		lowestPrice: Yup.number().integer().min(10).required('Yêu cầu giá thấp nhất'),
-		highestPrice: Yup.number()
-			.integer()
-			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
+			.max(13, 'Số điện thoại không tồn tại!'),
+		email: Yup.string().email('Email không hợp lệ'),
+		lowestPrice: Yup.number()
+			.integer('Giá là số nguyên')
+			.test('len', 'Giá không quá hàng chục triệu', (val) => {
+				if (val) return val.toString().length < 6;
+			})
+			.min(10)
 			.required('Yêu cầu giá thấp nhất'),
+		highestPrice: Yup.number()
+			.integer('Giá là số nguyên')
+			.test('len', 'Giá không quá hàng chục triệu', (val) => {
+				if (val) return val.toString().length < 6;
+			})
+			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
+			.required('Yêu cầu giá cao nhất'),
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		estimatedTimeStay: Yup.number()
+			.test('len', 'Thời gian không hợp lệ!', (val) => {
+				if (val) return val.toString().length < 5;
+			})
+			.integer('Thời gian phải là số nguyên')
+
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(1440, 'Thời gian không quá 1 ngày!')
 			.required('Yêu cầu thời gian dự kiến ở lại'),
-		openingTime: Yup.string()
-			.notOneOf([Yup.ref('closingTime')], 'Thời gian mở cửa không hợp lệ')
-			.required('Yêu cầu thời gian mở cửa'),
+		openingTime: Yup.string().nullable(true, 'Thời gian không được trống').required('Yêu cầu thời gian mở cửa'),
 		closingTime: Yup.string()
-			.notOneOf([Yup.ref('openingTime')], 'Thời gian đóng cửa không hợp lệ')
+			.nullable(true, 'Thời gian không được trống')
 			.required('Yêu cầu thời gian đóng cửa')
+			.notOneOf([Yup.ref('openingTime')], 'Thời gian đóng cửa không hợp lệ')
 	});
 	const locationData = {
 		location: {
@@ -197,7 +210,23 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		};
 		fetchSupplier();
 	}, []);
-
+	useEffect(() => {
+		const supList = [];
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.PT}`).then((res) => {
+					if (res.status === 200) {
+						console.log(res.data.data.personalities);
+						setPersonalities(res.data.data.personalities);
+					}
+				});
+			} catch (error) {
+				console.log(error);
+				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchSupplier();
+	}, []);
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -248,7 +277,11 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		const supData = [];
 		// eslint-disable-next-line array-callback-return
 		data?.map((x) => {
-			supData.push(x.personalityName);
+			if (typeof x === 'object') {
+				supData.push(x.personalityName);
+			} else {
+				supData.push(x);
+			}
 		});
 		return supData;
 	};
@@ -295,14 +328,14 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 										/>
 										<TextField
 											fullWidth
-											label="Số điện thoại*"
+											label="Số điện thoại"
 											{...getFieldProps('phone')}
 											error={Boolean(touched.phone && errors.phone)}
 											helperText={touched.phone && errors.phone}
 										/>
 										<TextField
 											fullWidth
-											label="Email*"
+											label="Email"
 											{...getFieldProps('email')}
 											error={Boolean(touched.email && errors.email)}
 											helperText={touched.email && errors.email}
@@ -406,7 +439,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											disabled
 											multiple
 											id="tags-outlined"
-											options={destinationPersonalities}
+											options={personalities}
 											value={convertDestinationPersonalityToArray(
 												values.destinationPersonalities
 											)}
@@ -435,7 +468,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 										/>
 										<h3>Thông tin về thời gian</h3>
 										<LocalizationProvider dateAdapter={AdapterDateFns}>
-											<TimePicker
+											<MobileTimePicker
 												ampm={false}
 												views={['hours', 'minutes']}
 												label={<span className="labelText">Thời gian mở cửa*</span>}
@@ -454,7 +487,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											/>
 										</LocalizationProvider>
 										<LocalizationProvider dateAdapter={AdapterDateFns}>
-											<TimePicker
+											<MobileTimePicker
 												ampm={false}
 												label={<span className="labelText">Thời gian đóng cửa*</span>}
 												value={handleStringToTime(values.closingTime)}
@@ -555,56 +588,56 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 // 	'Lịch sử',
 // 	'Tính ngưỡng'
 // ];
-const destinationPersonalities = [
-	{
-		personalityName: 'Thích khám phá',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Ưa mạo hiểm',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Tìm kiếm sự thư giãn',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Đam mê với ẩm thực',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Đam mê với lịch sử, văn hóa',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Yêu thiên nhiên',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Giá rẻ là trên hết',
-		planCount: 0,
-		visitCount: 0
-	},
-	{
-		personalityName: 'Có nhu cầu vui chơi, giải trí cao',
-		planCount: 0,
-		visitCount: 0
-	}
-	// 'Thích khám phá',
-	// 'Ưa mạo hiểm',
-	// 'Tìm kiếm sự thư giãn',
-	// 'Đam mê với ẩm thực',
-	// 'Đam mê với lịch sử, văn hóa',
-	// 'Yêu thiên nhiên',
-	// 'Giá rẻ là trên hết',
-	// 'Có nhu cầu vui chơi, giải trí cao'
-];
+// const destinationPersonalities = [
+// 	{
+// 		personalityName: 'Thích khám phá',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Ưa mạo hiểm',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Tìm kiếm sự thư giãn',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Đam mê với ẩm thực',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Đam mê với lịch sử, văn hóa',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Yêu thiên nhiên',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Giá rẻ là trên hết',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	},
+// 	{
+// 		personalityName: 'Có nhu cầu vui chơi, giải trí cao',
+// 		planCount: 0,
+// 		visitCount: 0
+// 	}
+// 	// 'Thích khám phá',
+// 	// 'Ưa mạo hiểm',
+// 	// 'Tìm kiếm sự thư giãn',
+// 	// 'Đam mê với ẩm thực',
+// 	// 'Đam mê với lịch sử, văn hóa',
+// 	// 'Yêu thiên nhiên',
+// 	// 'Giá rẻ là trên hết',
+// 	// 'Có nhu cầu vui chơi, giải trí cao'
+// ];
 const RecommendedTimesFrame = [
 	{
 		start: '04:00',

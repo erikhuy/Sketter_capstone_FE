@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */ 
+/* eslint-disable prettier/prettier */
 /* eslint-disable array-callback-return */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-restricted-syntax */
@@ -23,7 +23,7 @@ import {
 	Button
 } from '@material-ui/core';
 import {useFormik, Form, FormikProvider} from 'formik';
-import {DesktopDatePicker, LoadingButton, LocalizationProvider, TimePicker} from '@material-ui/lab';
+import {DesktopDatePicker, LoadingButton, LocalizationProvider, MobileTimePicker, TimePicker} from '@material-ui/lab';
 import {useLoading} from 'shared/hooks';
 import {updateMeThunk} from 'shared/redux/thunks/auth';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
@@ -61,26 +61,38 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		phone: Yup.string()
 			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
 			.min(7, 'Số điện thoại không tồn tại!')
-			.max(13, 'Số điện thoại không tồn tại!')
-			.required('Yêu cầu nhập số điện thoại'),
-		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
-		lowestPrice: Yup.number().integer().min(10).required('Yêu cầu giá thấp nhất'),
-		highestPrice: Yup.number()
-			.integer()
-			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
+			.max(13, 'Số điện thoại không tồn tại!'),
+		email: Yup.string().email('Email không hợp lệ'),
+		lowestPrice: Yup.number()
+			.integer('Giá là số nguyên')
+			.test('len', 'Giá không quá hàng chục triệu', (val) => {
+				if (val) return val.toString().length < 6;
+			})
+			.min(10)
 			.required('Yêu cầu giá thấp nhất'),
+		highestPrice: Yup.number()
+			.integer('Giá là số nguyên')
+			.test('len', 'Giá không quá hàng chục triệu', (val) => {
+				if (val) return val.toString().length < 6;
+			})
+			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
+			.required('Yêu cầu giá cao nhất'),
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		estimatedTimeStay: Yup.number()
+			.test('len', 'Thời gian không hợp lệ!', (val) => {
+				if (val) return val.toString().length < 5;
+			})
+			.integer('Thời gian phải là số nguyên')
+
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(1440, 'Thời gian không quá 1 ngày!')
 			.required('Yêu cầu thời gian dự kiến ở lại'),
-		openingTime: Yup.string()
-			.notOneOf([Yup.ref('closingTime')], 'Thời gian mở cửa không hợp lệ')
-			.required('Yêu cầu thời gian mở cửa'),
+		openingTime: Yup.string().nullable(true, 'Thời gian không được trống').required('Yêu cầu thời gian mở cửa'),
 		closingTime: Yup.string()
-			.notOneOf([Yup.ref('openingTime')], 'Thời gian đóng cửa không hợp lệ')
+			.nullable(true, 'Thời gian không được trống')
 			.required('Yêu cầu thời gian đóng cửa')
+			.notOneOf([Yup.ref('openingTime')], 'Thời gian mở cửa không hợp lệ')
 	});
 	const locationData = {
 		location: {
@@ -278,16 +290,20 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 	};
 
 	const convertDestinationPersonalityToArray = (data) => {
-		console.log("1234");
+		console.log('1234');
 		const supData = [];
 		// eslint-disable-next-line array-callback-return
 		data?.map((x) => {
-			supData.push(x.personalityName);
+			if (typeof x === 'object') {
+				supData.push(x.personalityName);
+			} else {
+				supData.push(x);
+			}
 		});
 		return supData;
 	};
 	const convertCatalogToArray = (data) => {
-		console.log("12345");
+		console.log('12345');
 
 		const supData = [];
 		// eslint-disable-next-line array-callback-return
@@ -301,12 +317,16 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		return supData;
 	};
 	const handleTimeToString = (data) => {
+		if (data !== null) {
 		console.log(data);
 		return data?.toString().substr(16, 5);
+	}
 	};
 	const handleStringToTime = (data) => {
+		if (data !== null) {
 		const hms = data;
 		return new Date(`1970-01-01 ${hms}`);
+	}
 	};
 
 	const {errors, touched, isSubmitting, handleSubmit, getFieldProps, setFieldValue, values} = formik;
@@ -331,14 +351,14 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 										/>
 										<TextField
 											fullWidth
-											label="Số điện thoại*"
+											label="Số điện thoại"
 											{...getFieldProps('phone')}
 											error={Boolean(touched.phone && errors.phone)}
 											helperText={touched.phone && errors.phone}
 										/>
 										<TextField
 											fullWidth
-											label="Email*"
+											label="Email"
 											{...getFieldProps('email')}
 											error={Boolean(touched.email && errors.email)}
 											helperText={touched.email && errors.email}
@@ -468,10 +488,13 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											value={convertDestinationPersonalityToArray(
 												values.destinationPersonalities
 											)}
-											// defaultValue={[values.destinationPersonalities]}
 											getOptionLabel={(option) => option}
 											filterSelectedOptions
-
+											renderTags={(tagValue, getTagProps) =>
+												tagValue.map((option, index) => (
+													<Chip label={option} {...getTagProps({index})} />
+												))
+											}
 											renderInput={(params) => (
 												<TextField
 													multiline="false"
@@ -491,7 +514,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 										/>
 										<h3>Thông tin về thời gian</h3>
 										<LocalizationProvider dateAdapter={AdapterDateFns}>
-											<TimePicker
+											<MobileTimePicker
 												ampm={false}
 												views={['hours', 'minutes']}
 												label={<span className="labelText">Thời gian mở cửa*</span>}
@@ -510,7 +533,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											/>
 										</LocalizationProvider>
 										<LocalizationProvider dateAdapter={AdapterDateFns}>
-											<TimePicker
+											<MobileTimePicker
 												ampm={false}
 												label={<span className="labelText">Thời gian đóng cửa*</span>}
 												value={handleStringToTime(values.closingTime)}
@@ -551,7 +574,6 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											helperText={touched.estimatedTimeStay && errors.estimatedTimeStay}
 										/>
 										<Autocomplete
-										
 											multiple
 											id="tags-outlined"
 											options={RecommendedTimesFrame}

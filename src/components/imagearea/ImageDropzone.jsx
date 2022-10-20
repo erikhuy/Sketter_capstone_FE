@@ -9,7 +9,10 @@ import UploadSVG from '../../assets/img/upload.svg';
 import {compress} from '../../utils/ImgTools';
 
 const imageMaxSize = 3000000; //3mb
-
+const fileImage = () => {
+	// console.log(document.getElementById('file').value);
+	document.getElementById('file').value = '';
+};
 const ImageUploadArea = (props) => {
 	/**
 	 * OnDrop action handler (When you drop an image to this)
@@ -55,33 +58,37 @@ const ImageUploadArea = (props) => {
 		const file = event.target.files[0];
 
 		//Compress image
-		const compressed_image = await compress(file);
+		console.log(file);
+		if (file) {
+			// fileImage();
+			const compressed_image = await compress(file);
 
-		//Create a file reader & read as DataURL (Base64)
-		const reader = new FileReader();
+			//Create a file reader & read as DataURL (Base64)
+			const reader = new FileReader();
 
-		reader.readAsDataURL(compressed_image);
+			reader.readAsDataURL(compressed_image);
 
-		//When file is uploading, disable the button
-		//reader.onprogress = () => console.log('ON Progress');
+			//When file is uploading, disable the button
+			//reader.onprogress = () => console.log('ON Progress');
 
-		//When file is successfully loaded
-		reader.onload = (event) => {
-			//Replicate imageList
-			const rep_imageList = [...props.imageList];
+			//When file is successfully loaded
+			reader.onload = (event) => {
+				//Replicate imageList
+				const rep_imageList = [...props.imageList];
 
-			//Add image to the replicate list
-			rep_imageList.push({
-				image_base64: event.target.result,
-				image_title: '',
-				image_description: '',
-				image_url: '',
-				image_file: compressed_image
-			});
+				//Add image to the replicate list
+				rep_imageList.push({
+					image_base64: event.target.result,
+					image_title: '',
+					image_description: '',
+					image_url: '',
+					image_file: compressed_image
+				});
 
-			//Set state using replicate list
-			props.setImageList(rep_imageList);
-		};
+				//Set state using replicate list
+				props.setImageList(rep_imageList);
+			};
+		}
 	};
 
 	const {getRootProps, getInputProps} = useDropzone({
@@ -118,11 +125,13 @@ const ImageUploadArea = (props) => {
 						key={index}
 						// Remove function for Flip card
 						remove={(e) => {
+							fileImage();
 							e.preventDefault();
 							//Replicate
 							const rep_imageList = props.imageList;
 							//remove index
 							rep_imageList.splice(index, 1);
+
 							//Set back to state
 							props.setImageList(rep_imageList);
 						}}
@@ -147,7 +156,7 @@ const ImageUploadArea = (props) => {
 
 						<div className="dropinput-button btn btn-outline-primary">
 							Tìm ảnh
-							<input type="file" name="file" onChange={fileSelectedHandler} />
+							<input type="file" name="file" id="file" onChange={fileSelectedHandler} />
 						</div>
 					</div>
 				</div>

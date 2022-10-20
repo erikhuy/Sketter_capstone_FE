@@ -25,7 +25,7 @@ import {
 } from '@material-ui/core';
 import axios from 'axios';
 import {useFormik, Form, FormikProvider} from 'formik';
-import {DesktopDatePicker, LoadingButton, LocalizationProvider, TimePicker} from '@material-ui/lab';
+import {DesktopDatePicker, LoadingButton, LocalizationProvider, MobileTimePicker, TimePicker} from '@material-ui/lab';
 import {useLoading} from 'shared/hooks';
 import {updateMeThunk} from 'shared/redux/thunks/auth';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
@@ -62,24 +62,36 @@ export default function CreateDestinationForm() {
 		phone: Yup.string()
 			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
 			.min(8, 'Số điện thoại không tồn tại!')
-			.max(13, 'Số điện thoại không tồn tại!')
-			.required('Yêu cầu nhập số điện thoại'),
-		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
-		lowestPrice: Yup.number().integer().min(10).required('Yêu cầu giá thấp nhất'),
+			.max(13, 'Số điện thoại không tồn tại!'),
+		email: Yup.string().max(50, 'Tên không hợp lệ!').email('Email không hợp lệ'),
+		lowestPrice: Yup.number()
+			.integer('Giá phải là số nguyên')
+			.test('len', 'Giá không quá hàng chục triệu', (val) => {
+				if (val) return val.toString().length < 6;
+			})
+			.min(10)
+			.required('Yêu cầu giá thấp nhất'),
 		highestPrice: Yup.number()
-			.integer()
+			.integer('Giá phải là số nguyên')
+			.test('len', 'Giá không quá hàng chục triệu', (val) => {
+				if (val) return val.toString().length < 6;
+			})
 			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
 			.required('Yêu cầu giá cao nhất'),
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		openingTime: Yup.string().nullable(true, 'Thời gian không được trống').required('Yêu cầu thời gian mở cửa'),
-
 		closingTime: Yup.string()
 			.nullable(true, 'Thời gian không được trống')
 			.required('Yêu cầu thời gian đóng cửa')
 			.notOneOf([Yup.ref('openingTime')], 'Thời gian mở cửa không hợp lệ'),
 
 		estimatedTimeStay: Yup.number()
+			.test('len', 'Thời gian không hợp lệ!', (val) => {
+				if (val) return val.toString().length < 5;
+			})
+			.integer('Thời gian phải là số nguyên')
+
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(1440, 'Thời gian không quá 1 ngày!')
 			.required('Yêu cầu thời gian dự kiến ở lại'),
@@ -133,7 +145,6 @@ export default function CreateDestinationForm() {
 		supArray.longitude = data.location.lng;
 		supArray.latitude = data.location.lat;
 		supArray.address = data.location.destinationAddress;
-
 		return supArray;
 	};
 	useEffect(() => {
@@ -229,12 +240,16 @@ export default function CreateDestinationForm() {
 	};
 
 	const handleOpeningTime = (data) => {
-		setFieldValue('openingTimeSup', data);
-		setFieldValue('openingTime', data.toString().substr(16, 5));
+		if (data !== null) {
+			setFieldValue('openingTimeSup', data);
+			setFieldValue('openingTime', data.toString().substr(16, 5));
+		}
 	};
 	const handleClosingTime = (data) => {
-		setFieldValue('closingTimeSup', data);
-		setFieldValue('closingTime', data.toString().substr(16, 5));
+		if (data !== null) {
+			setFieldValue('closingTimeSup', data);
+			setFieldValue('closingTime', data.toString().substr(16, 5));
+		}
 	};
 	const handleRecommendedTime = (data) => {
 		// setFieldValue('destinationPersonalities', value !== null ? value : initialValues.destinationPersonalities);
@@ -259,14 +274,14 @@ export default function CreateDestinationForm() {
 									/>
 									<TextField
 										fullWidth
-										label="Số điện thoại*"
+										label="Số điện thoại"
 										{...getFieldProps('phone')}
 										error={Boolean(touched.phone && errors.phone)}
 										helperText={touched.phone && errors.phone}
 									/>
 									<TextField
 										fullWidth
-										label="Email*"
+										label="Email"
 										{...getFieldProps('email')}
 										error={Boolean(touched.email && errors.email)}
 										helperText={touched.email && errors.email}
@@ -415,7 +430,7 @@ export default function CreateDestinationForm() {
 									<Stack direction={{xs: 'column'}} spacing={5} sx={{m: 2}}>
 										<Stack direction={{xs: 'row'}} spacing={2}>
 											<LocalizationProvider dateAdapter={AdapterDateFns}>
-												<TimePicker
+												<MobileTimePicker
 													ampm={false}
 													views={['hours', 'minutes']}
 													label={<span className="labelText">Thời gian mở cửa*</span>}
@@ -435,7 +450,7 @@ export default function CreateDestinationForm() {
 												/>
 											</LocalizationProvider>
 											<LocalizationProvider dateAdapter={AdapterDateFns}>
-												<TimePicker
+												<MobileTimePicker
 													ampm={false}
 													label={<span className="labelText">Thời gian đóng cửa*</span>}
 													value={values.closingTimeSup}
@@ -505,7 +520,7 @@ export default function CreateDestinationForm() {
 							</Grid>
 							<ImageDropzone setImageList={handleImages} imageList={gallery} />
 						</Grid>
-						<Box sx={{mt: 3, display: 'flex', justifyContent: 'flex-end'}}>
+						<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
 							<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
 								Tạo địa điểm
 							</LoadingButton>

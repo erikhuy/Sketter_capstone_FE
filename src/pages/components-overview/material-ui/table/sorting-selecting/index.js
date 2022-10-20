@@ -71,17 +71,16 @@ export default function SortingSelecting() {
 		const fetchData = async () => {
 			try {
 				await axios.get(`${API_URL.Destination}?page=${page + 1}`).then((res) => {
-					console.log(res.data.data.destinations.length);
-					console.log(res.data.maxPage);
+					console.log(dataNumber);
 
 					setData(res.data.data.destinations);
 					setMaxPage(res.data.maxPage);
 					setCurrentPage(res.data.currentPage);
 					if (res.data.maxPage > res.data.currentPage) {
 						// eslint-disable-next-line no-const-assign
-						setDataNumber(res.data.data.destinations.length + page * 10 + (page === 0 ? (page = 1) : page));
+						setDataNumber(res.data.data.destinations.length + page * 10 + (page === 0 ? 1 : page));
 					} else {
-						setDataNumber(res.data.data.destinations.length);
+						setDataNumber(res.data.data.destinations.length + page * 10);
 					}
 				});
 			} catch (error) {
@@ -177,11 +176,6 @@ export default function SortingSelecting() {
 		setPage(newPage);
 	};
 
-	const handleChangeRowsPerPage = (event) => {
-		setRowsPerPage(parseInt(event.target.value, 10));
-		setPage(0);
-	};
-
 	const handleChangeDense = (event) => {
 		setDense(event.target.checked);
 	};
@@ -249,15 +243,6 @@ export default function SortingSelecting() {
 									</TableRow>
 								);
 							})}
-							{emptyRows > 0 && (
-								<TableRow
-									style={{
-										height: (dense ? 33 : 53) * emptyRows
-									}}
-								>
-									<TableCell colSpan={6} />
-								</TableRow>
-							)}
 						</TableBody>
 					</Table>
 				</TableContainer>
@@ -271,7 +256,6 @@ export default function SortingSelecting() {
 					rowsPerPage={10}
 					page={currentPage - 1}
 					onPageChange={handleChangePage}
-					onRowsPerPageChange={handleChangeRowsPerPage}
 				/>
 			</Box>
 		</>

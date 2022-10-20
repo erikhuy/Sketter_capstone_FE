@@ -116,7 +116,7 @@ export default function UserDetailForm({userID}) {
 				.then((res) => {
 					enqueueSnackbar(res.data.data, {variant: 'success'});
 				})
-				.catch((error) => enqueueSnackbar(e.response.data.message, {variant: 'error'}));
+				.catch((e) => enqueueSnackbar(e.response.data.message, {variant: 'error'}));
 		} catch (e) {
 			console.log(e);
 		}

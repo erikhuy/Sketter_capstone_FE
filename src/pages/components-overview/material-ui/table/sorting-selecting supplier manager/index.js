@@ -90,6 +90,7 @@ export default function SortingSelectingSupplierManager({listType}) {
 			} else {
 				try {
 					await axios.get(`${API_URL.Destination}/reject?page=${page + 1}`).then((res) => {
+						console.log(dataNumber);
 						setData(res.data.data.destinations);
 						setMaxPage(res.data.maxPage);
 						setCurrentPage(res.data.currentPage);
@@ -279,19 +280,6 @@ export default function SortingSelectingSupplierManager({listType}) {
 					onPageChange={handleChangePage}
 					onRowsPerPageChange={handleChangeRowsPerPage}
 				/>
-				<Box
-					sx={{
-						px: 3,
-						py: 1.5,
-						top: 0,
-						position: {md: 'absolute'}
-					}}
-				>
-					<FormControlLabel
-						control={<Switch checked={dense} onChange={handleChangeDense} />}
-						label="Dense padding"
-					/>
-				</Box>
 			</Box>
 		</>
 	);

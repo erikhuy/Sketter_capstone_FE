@@ -25,7 +25,7 @@ import {
 } from '@material-ui/core';
 import axios from 'axios';
 import {useFormik, Form, FormikProvider} from 'formik';
-import {DesktopDatePicker, LoadingButton, LocalizationProvider, TimePicker} from '@material-ui/lab';
+import {DesktopDatePicker, LoadingButton, LocalizationProvider, MobileTimePicker, TimePicker} from '@material-ui/lab';
 import {useLoading} from 'shared/hooks';
 import {updateMeThunk} from 'shared/redux/thunks/auth';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
@@ -53,7 +53,6 @@ export default function CreateDestinationFormSupplierManager() {
 	const {enqueueSnackbar} = useSnackbar();
 	const [gallery, setGallery] = useState([]);
 	const [suppliers, setSuppliers] = useState([]);
-	const [createDestinationMessage, setCreateDestinationMessage] = useState();
 	const [catalogs, setCatalogs] = useState([]);
 	const [personalities, setPersonalities] = useState([]);
 
@@ -63,24 +62,36 @@ export default function CreateDestinationFormSupplierManager() {
 		phone: Yup.string()
 			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
 			.min(8, 'Số điện thoại không tồn tại!')
-			.max(13, 'Số điện thoại không tồn tại!')
-			.required('Yêu cầu nhập số điện thoại'),
-		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
-		lowestPrice: Yup.number().integer().min(10).required('Yêu cầu giá thấp nhất'),
+			.max(13, 'Số điện thoại không tồn tại!'),
+		email: Yup.string().max(50, 'Tên không hợp lệ!').email('Email không hợp lệ'),
+		lowestPrice: Yup.number()
+			.integer('Giá là số nguyên')
+			.test('len', 'Giá không quá hàng chục triệu', (val) => {
+				if (val) return val.toString().length < 6;
+			})
+			.min(10)
+			.required('Yêu cầu giá thấp nhất'),
 		highestPrice: Yup.number()
-			.integer()
+			.integer('Giá là số nguyên')
+			.test('len', 'Giá không quá hàng chục triệu', (val) => {
+				if (val) return val.toString().length < 6;
+			})
 			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
 			.required('Yêu cầu giá cao nhất'),
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		openingTime: Yup.string().nullable(true, 'Thời gian không được trống').required('Yêu cầu thời gian mở cửa'),
-		supplierID: Yup.string().required('Yêu cầu chọn đối tác'),
 		closingTime: Yup.string()
 			.nullable(true, 'Thời gian không được trống')
 			.required('Yêu cầu thời gian đóng cửa')
 			.notOneOf([Yup.ref('openingTime')], 'Thời gian mở cửa không hợp lệ'),
 
 		estimatedTimeStay: Yup.number()
+			.test('len', 'Thời gian không hợp lệ!', (val) => {
+				if (val) return val.toString().length < 5;
+			})
+			.integer('Thời gian phải là số nguyên')
+
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(1440, 'Thời gian không quá 1 ngày!')
 			.required('Yêu cầu thời gian dự kiến ở lại'),
@@ -96,7 +107,7 @@ export default function CreateDestinationFormSupplierManager() {
 			phone: '',
 			email: '',
 			description: '',
-			supplierID: '',
+			supplierID: null,
 			lowestPrice: '',
 			highestPrice: '',
 			openingTimeSup: null,
@@ -124,7 +135,6 @@ export default function CreateDestinationFormSupplierManager() {
 				if (isMountedRef.current) {
 					setErrors({afterSubmit: error.message});
 					setSubmitting(false);
-					setCreateDestinationMessage(null);
 				}
 			}
 		}
@@ -194,17 +204,6 @@ export default function CreateDestinationFormSupplierManager() {
 		};
 		fetchSupplier();
 	}, []);
-	useEffect(() => {
-		if (!createDestinationMessage) {
-			return;
-		}
-		const message = createDestinationMessage;
-		if (message === 'success') {
-			enqueueSnackbar('Tạo địa điểm thành công', {variant: 'success'});
-		} else {
-			enqueueSnackbar(message, {variant: createDestinationMessage ? 'error' : 'success'});
-		}
-	}, [createDestinationMessage]);
 
 	const navigate = useNavigate();
 
@@ -214,13 +213,15 @@ export default function CreateDestinationFormSupplierManager() {
 	const createDestination = useCallback(async (data) => {
 		console.log(data);
 		try {
-			await axios.post(`${API_URL.Destination}`, data).then((res) => {
-				setCreateDestinationMessage(res.data.message);
-				console.log(res.data);
-			});
+			await axios
+				.post(`${API_URL.Destination}`, data)
+				.then((res) => {
+					enqueueSnackbar('Tạo địa điểm thành công', {variant: 'success'});
+					console.log(res.data);
+				})
+				.catch((error) => enqueueSnackbar(error.data.message, {variant: 'error'}));
 		} catch (e) {
 			console.log(e.response.data.message);
-			setCreateDestinationMessage(e.response.data.message);
 		}
 	});
 
@@ -245,12 +246,16 @@ export default function CreateDestinationFormSupplierManager() {
 	};
 
 	const handleOpeningTime = (data) => {
-		setFieldValue('openingTimeSup', data);
-		setFieldValue('openingTime', data.toString().substr(16, 5));
+		if (data !== null) {
+			setFieldValue('openingTimeSup', data);
+			setFieldValue('openingTime', data.toString().substr(16, 5));
+		}
 	};
 	const handleClosingTime = (data) => {
-		setFieldValue('closingTimeSup', data);
-		setFieldValue('closingTime', data.toString().substr(16, 5));
+		if (data !== null) {
+			setFieldValue('closingTimeSup', data);
+			setFieldValue('closingTime', data.toString().substr(16, 5));
+		}
 	};
 	const handleRecommendedTime = (data) => {
 		// setFieldValue('destinationPersonalities', value !== null ? value : initialValues.destinationPersonalities);
@@ -275,14 +280,14 @@ export default function CreateDestinationFormSupplierManager() {
 									/>
 									<TextField
 										fullWidth
-										label="Số điện thoại*"
+										label="Số điện thoại"
 										{...getFieldProps('phone')}
 										error={Boolean(touched.phone && errors.phone)}
 										helperText={touched.phone && errors.phone}
 									/>
 									<TextField
 										fullWidth
-										label="Email*"
+										label="Email"
 										{...getFieldProps('email')}
 										error={Boolean(touched.email && errors.email)}
 										helperText={touched.email && errors.email}
@@ -298,11 +303,7 @@ export default function CreateDestinationFormSupplierManager() {
 									/>
 									<Autocomplete
 										onChange={(e, value) => {
-											console.log(value.id);
-											setFieldValue(
-												'supplierID',
-												value !== null ? value.id : initialValues.supplierID
-											);
+											setFieldValue('supplierID', value !== null ? value.id : '');
 										}}
 										id="tags-outlined"
 										options={suppliers}
@@ -313,7 +314,6 @@ export default function CreateDestinationFormSupplierManager() {
 												{...params}
 												label="Đối tác"
 												{...getFieldProps('supplierID')}
-												required
 												error={Boolean(touched.supplierID && errors.supplierID)}
 												helperText={touched.supplierID && errors.supplierID}
 											/>
@@ -451,7 +451,7 @@ export default function CreateDestinationFormSupplierManager() {
 									<Stack direction={{xs: 'column'}} spacing={5} sx={{m: 2}}>
 										<Stack direction={{xs: 'row'}} spacing={2}>
 											<LocalizationProvider dateAdapter={AdapterDateFns}>
-												<TimePicker
+												<MobileTimePicker
 													ampm={false}
 													views={['hours', 'minutes']}
 													label={<span className="labelText">Thời gian mở cửa*</span>}
@@ -471,12 +471,14 @@ export default function CreateDestinationFormSupplierManager() {
 												/>
 											</LocalizationProvider>
 											<LocalizationProvider dateAdapter={AdapterDateFns}>
-												<TimePicker
+												<MobileTimePicker
 													ampm={false}
 													label={<span className="labelText">Thời gian đóng cửa*</span>}
 													value={values.closingTimeSup}
 													minTime={values.openingTimeSup}
 													onChange={(value) => handleClosingTime(value)}
+													// acceptRegex="[0-2][0-9]:[0-6][0-9]"
+													// disableMaskedInput
 													renderInput={(params) => (
 														<TextField
 															{...params}
@@ -541,7 +543,7 @@ export default function CreateDestinationFormSupplierManager() {
 							</Grid>
 							<ImageDropzone setImageList={handleImages} imageList={gallery} />
 						</Grid>
-						<Box sx={{mt: 3, display: 'flex', justifyContent: 'flex-end'}}>
+						<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
 							<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
 								Tạo địa điểm
 							</LoadingButton>

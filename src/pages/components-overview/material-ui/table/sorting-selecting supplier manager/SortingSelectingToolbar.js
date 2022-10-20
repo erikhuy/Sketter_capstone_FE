@@ -2,8 +2,9 @@
 /* eslint-disable no-nested-ternary */
 import trash2Fill from '@iconify/icons-eva/trash-2-fill';
 import CreateIcon from '@material-ui/icons/Create';
+import Reviews from '@material-ui/icons/Reviews';
 import {Icon} from '@iconify/react';
-import {IconButton, Modal, Stack, Toolbar, Tooltip, Typography} from '@material-ui/core';
+import {Button, IconButton, Modal, Stack, Toolbar, Tooltip, Typography} from '@material-ui/core';
 // material
 import {styled, useTheme} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
@@ -136,6 +137,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 				aria-describedby="modal-modal-description"
 			>
 				<Box sx={style}>
+					<Button>Review</Button>
 					<DestinationDetailFormSupplierManager destinationID={idSelected} />
 				</Box>
 			</Modal>
@@ -162,6 +164,13 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 						}}
 					>
 						<CreateIcon />
+					</IconButton>
+					<IconButton
+						onClick={() => {
+							handleOpen();
+						}}
+					>
+						<Reviews />
 					</IconButton>
 				</Stack>
 			) : null}

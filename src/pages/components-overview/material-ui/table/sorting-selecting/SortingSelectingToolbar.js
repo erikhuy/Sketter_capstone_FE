@@ -2,6 +2,7 @@
 /* eslint-disable no-nested-ternary */
 import trash2Fill from '@iconify/icons-eva/trash-2-fill';
 import CreateIcon from '@material-ui/icons/Create';
+import Reviews from '@material-ui/icons/Reviews';
 import {Icon} from '@iconify/react';
 import {IconButton, Modal, Stack, Toolbar, Tooltip, Typography} from '@material-ui/core';
 // material
@@ -15,6 +16,7 @@ import {LoginForm} from 'components/authentication/login';
 import DestinationDetailForm from 'pages/dashboard/destination/DestinationDetailForm';
 import useAuth from 'shared/hooks/useAuth';
 import DestinationDetailFormSupplierManager from 'pages/dashboard/destination/DestinationDetailFormSupplierManager';
+import ReviewList from 'pages/dashboard/destination/review/ReviewList';
 
 // ----------------------------------------------------------------------
 
@@ -58,8 +60,11 @@ const style = {
 };
 export default function SortingSelectingToolbar({numSelected, idSelected, reloadData, reloadNumber}) {
 	const [open, setOpen] = useState(false);
+	const [openReview, setReviewOpen] = useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
+	const handleReviewOpen = () => setReviewOpen(true);
+	const handleReviewClose = () => setReviewOpen(false);
 	const [resetToolbar, setResetToolbar] = useState([]);
 	const {user} = useAuth();
 
@@ -122,7 +127,20 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 					</Box>
 				</Modal>
 			)}
-
+			{openReview && (
+				<Modal
+					sx={styles}
+					// eslint-disable-next-line react/jsx-boolean-value
+					open={true}
+					onClose={handleReviewClose}
+					aria-labelledby="modal-modal-title"
+					aria-describedby="modal-modal-description"
+				>
+					<Box sx={style}>
+						<ReviewList destinationID={idSelected} />
+					</Box>
+				</Modal>
+			)}
 			{idSelected.length > 1 ? (
 				<IconButton
 					onClick={() => {
@@ -146,6 +164,13 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 						}}
 					>
 						<CreateIcon />
+					</IconButton>
+					<IconButton
+						onClick={() => {
+							handleReviewOpen();
+						}}
+					>
+						<Reviews />
 					</IconButton>
 				</Stack>
 			) : null}

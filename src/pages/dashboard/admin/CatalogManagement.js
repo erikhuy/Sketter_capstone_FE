@@ -44,12 +44,6 @@ export default function CatalogManagement() {
 
 	const {enqueueSnackbar} = useSnackbar();
 
-	const [chipData, setChipData] = useState([
-		{key: 0, label: 'Angular'},
-		{key: 1, label: 'jQuery'},
-		{key: 2, label: 'Polymer'},
-		{key: 3, label: 'Vue.js'}
-	]);
 
 	const catalogAction = useCallback(async (catalog, status) => {
 		try {

@@ -75,9 +75,9 @@ export default function SortingSelecting() {
 					setCurrentPage(res.data.currentPage);
 					if (res.data.maxPage > res.data.currentPage) {
 						// eslint-disable-next-line no-const-assign
-						setDataNumber(res.data.data.users.length + page * 10 + (page === 0 ? (page = 1) : page));
+						setDataNumber(res.data.data.users.length + page * 10 + (page === 0 ? 1 : page));
 					} else {
-						setDataNumber(res.data.data.users.length);
+						setDataNumber(res.data.data.users.length + page * 10);
 					}
 				});
 			} catch (error) {
@@ -232,15 +232,6 @@ export default function SortingSelecting() {
 									</TableRow>
 								);
 							})}
-							{emptyRows > 0 && (
-								<TableRow
-									style={{
-										height: (dense ? 33 : 53) * emptyRows
-									}}
-								>
-									<TableCell colSpan={6} />
-								</TableRow>
-							)}
 						</TableBody>
 					</Table>
 				</TableContainer>

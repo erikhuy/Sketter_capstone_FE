@@ -60,24 +60,22 @@ export default function CreateDestinationFormSupplierManager() {
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
 		// address: Yup.string().min(5, 'Địa chỉ không hợp lệ').required('Yêu cầu nhập địa chỉ'),
 		phone: Yup.string()
-			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
+			.nullable(true)
+			.matches(/(\+84|0)((2[0-9])|(3)|(5)|(7)|(8)|(9))+([0-9]{8})\b/g, 'Số điện thoại không hợp lệ')
 			.min(8, 'Số điện thoại không tồn tại!')
 			.max(13, 'Số điện thoại không tồn tại!'),
-		email: Yup.string().max(50, 'Tên không hợp lệ!').email('Email không hợp lệ'),
+		email: Yup.string().nullable(true).max(50, 'Tên không hợp lệ!').email('Email không hợp lệ'),
 		lowestPrice: Yup.number()
 			.integer('Giá là số nguyên')
-			.test('len', 'Giá không quá hàng chục triệu', (val) => {
-				if (val) return val.toString().length < 6;
-			})
-			.min(10)
+			.min(0, 'Giá phải là số nguyên dương')
+			.max(99999, 'Giá không quá hàng chục triệu')
 			.required('Yêu cầu giá thấp nhất'),
 		highestPrice: Yup.number()
 			.integer('Giá là số nguyên')
-			.test('len', 'Giá không quá hàng chục triệu', (val) => {
-				if (val) return val.toString().length < 6;
-			})
-			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
+			.min(0, 'Giá phải là số nguyên dương')
+			.max(99999, 'Giá không quá hàng chục triệu')
 			.required('Yêu cầu giá cao nhất'),
+		description: Yup.string().max(500, 'Không quá 500 ký tự!'),
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		openingTime: Yup.string().nullable(true, 'Thời gian không được trống').required('Yêu cầu thời gian mở cửa'),
@@ -93,7 +91,7 @@ export default function CreateDestinationFormSupplierManager() {
 			.integer('Thời gian phải là số nguyên')
 
 			.min(0, 'Thời gian không hợp lệ!')
-			.max(1440, 'Thời gian không quá 1 ngày!')
+			.max(240, 'Thời gian không quá 4 tiếng!')
 			.required('Yêu cầu thời gian dự kiến ở lại'),
 		recommendedTimes: Yup.array().min(1, 'Khoảng thời gian lý tưởng không được trống')
 	});
@@ -104,12 +102,12 @@ export default function CreateDestinationFormSupplierManager() {
 			longitude: '',
 			latitude: '',
 			location: null,
-			phone: '',
-			email: '',
+			phone: null,
+			email: null,
 			description: '',
 			supplierID: null,
-			lowestPrice: '',
-			highestPrice: '',
+			lowestPrice: 0,
+			highestPrice: 0,
 			openingTimeSup: null,
 			openingTime: null,
 			closingTimeSup: null,
@@ -213,15 +211,13 @@ export default function CreateDestinationFormSupplierManager() {
 	const createDestination = useCallback(async (data) => {
 		console.log(data);
 		try {
-			await axios
-				.post(`${API_URL.Destination}`, data)
-				.then((res) => {
-					enqueueSnackbar('Tạo địa điểm thành công', {variant: 'success'});
-					console.log(res.data);
-				})
-				.catch((error) => enqueueSnackbar(error.data.message, {variant: 'error'}));
+			await axios.post(`${API_URL.Destination}`, data).then((res) => {
+				enqueueSnackbar('Tạo địa điểm thành công', {variant: 'success'});
+				console.log(res.data);
+			});
 		} catch (e) {
-			console.log(e.response.data.message);
+			enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			// console.log(e.response.data.message);
 		}
 	});
 
@@ -282,6 +278,9 @@ export default function CreateDestinationFormSupplierManager() {
 										fullWidth
 										label="Số điện thoại"
 										{...getFieldProps('phone')}
+										onChange={(value) => {
+											setFieldValue('phone', value.target.value !== '' ? value.target.value : null);
+										}}
 										error={Boolean(touched.phone && errors.phone)}
 										helperText={touched.phone && errors.phone}
 									/>
@@ -289,6 +288,10 @@ export default function CreateDestinationFormSupplierManager() {
 										fullWidth
 										label="Email"
 										{...getFieldProps('email')}
+										onChange={(value) => {
+											setFieldValue('email', value.target.value !== '' ? value.target.value : null);
+										}}
+										erro
 										error={Boolean(touched.email && errors.email)}
 										helperText={touched.email && errors.email}
 									/>
@@ -303,7 +306,7 @@ export default function CreateDestinationFormSupplierManager() {
 									/>
 									<Autocomplete
 										onChange={(e, value) => {
-											setFieldValue('supplierID', value !== null ? value.id : '');
+											setFieldValue('supplierID', value !== null ? value.id : null);
 										}}
 										id="tags-outlined"
 										options={suppliers}
@@ -497,7 +500,7 @@ export default function CreateDestinationFormSupplierManager() {
 											type="number"
 											className="form-control"
 											style={{height: 56, width: 740}}
-											label={<span className="labelText">Thời gian dự kiến ở lại</span>}
+											label={<span className="labelText">Thời gian tham quan</span>}
 											InputProps={{
 												className: 'text-field-style',
 												endAdornment: (

@@ -44,7 +44,10 @@ export default function CreateUserForm() {
 	const CreateUserSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
 		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
-		password: Yup.string().min(6, 'Mật khẩu có ít nhất 6 ký tự').required('Yêu cầu mật khẩu'),
+		password: Yup.string()
+			.min(6, 'Mật khẩu có ít nhất 6 ký tự')
+			.max(16, 'Mật khẩu có không quá 16 ký tự')
+			.required('Yêu cầu mật khẩu'),
 		confirmPassword: Yup.string()
 			.required('Yêu cầu xác nhận mật khẩu')
 			.oneOf([Yup.ref('password'), null], 'Mật khẩu không khớp'),

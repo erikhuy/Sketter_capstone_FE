@@ -38,7 +38,7 @@ const SearchItem = ({option, ...props}) => {
 	);
 };
 
-const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedRef, placeAddress}) => {
+const SearchBar = ({onSelect, fieldProps, forwardedRef, placeAddress}) => {
 	const {placesService, placePredictions, getPlacePredictions, isPlacePredictionsLoading} = usePlacesService({
 		apiKey: process.env.REACT_APP_GOOGLE_KEY,
 		debounce: 500,
@@ -113,15 +113,7 @@ const SearchBar = ({onSelect, isError, error, helperText, fieldProps, forwardedR
 			value={value}
 			defaultValue={{description: {...placeAddress}}}
 			isOptionEqualToValue={isOptionEqualToValue}
-			renderInput={(params) => (
-				<TextField
-					fullWidth
-					{...params}
-					{...fieldProps}
-					error={isError}
-					helperText={value ? '' : 'Địa chỉ không được trống'}
-				/>
-			)}
+			renderInput={(params) => <TextField fullWidth {...params} {...fieldProps} />}
 			onInputChange={onInputChange}
 			renderOption={(props, option) => <SearchItem key={option.place_id} {...props} option={option} />}
 			loadingText={<CircularProgress size={20} />}

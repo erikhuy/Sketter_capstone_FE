@@ -28,7 +28,7 @@ export default function GeneralApp() {
 	const {user} = useAuth();
 
 	return (
-		<Page title="General: App | Minimal-UI">
+		<Page title="Sketter">
 			<Container maxWidth={themeStretch ? false : 'xl'}>
 				<Grid container spacing={2}>
 					<Grid item xs={12} md={12}>

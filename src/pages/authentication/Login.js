@@ -40,7 +40,7 @@ export default function Login() {
 	const {method} = useAuth();
 
 	return (
-		<RootStyle title="Login | Minimal-UI">
+		<RootStyle title="Sketter">
 			<AuthLayout>
 				Không có tài khoản ? &nbsp;
 				<Link underline="none" variant="subtitle2" component={RouterLink} to={PATH_AUTH.register}>

@@ -75,8 +75,7 @@ export default function CreateDestinationFormSupplierManager() {
 			.min(0, 'Giá phải là số nguyên dương')
 			.max(99999, 'Giá không quá hàng chục triệu')
 			.required('Yêu cầu giá cao nhất'),
-		description: Yup.string().max(500, 'Không quá 500 ký tự!'),
-		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
+		description: Yup.string().nullable(true).required('Yêu cầu mô tả địa điểm').max(500, 'Không quá 500 ký tự!'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		openingTime: Yup.string().nullable(true, 'Thời gian không được trống').required('Yêu cầu thời gian mở cửa'),
 		closingTime: Yup.string()
@@ -279,7 +278,10 @@ export default function CreateDestinationFormSupplierManager() {
 										label="Số điện thoại"
 										{...getFieldProps('phone')}
 										onChange={(value) => {
-											setFieldValue('phone', value.target.value !== '' ? value.target.value : null);
+											setFieldValue(
+												'phone',
+												value.target.value !== '' ? value.target.value : null
+											);
 										}}
 										error={Boolean(touched.phone && errors.phone)}
 										helperText={touched.phone && errors.phone}
@@ -289,18 +291,26 @@ export default function CreateDestinationFormSupplierManager() {
 										label="Email"
 										{...getFieldProps('email')}
 										onChange={(value) => {
-											setFieldValue('email', value.target.value !== '' ? value.target.value : null);
+											setFieldValue(
+												'email',
+												value.target.value !== '' ? value.target.value : null
+											);
 										}}
-										erro
 										error={Boolean(touched.email && errors.email)}
 										helperText={touched.email && errors.email}
 									/>
 									<TextField
 										fullWidth
 										multiline
-										label="Thông tin địa điểm"
+										label="Thông tin địa điểm*"
 										rows={22}
 										{...getFieldProps('description')}
+										onChange={(value) => {
+											setFieldValue(
+												'description',
+												value.target.value !== '' ? value.target.value : null
+											);
+										}}
 										error={Boolean(touched.description && errors.description)}
 										helperText={touched.description && errors.description}
 									/>
@@ -603,27 +613,103 @@ export default function CreateDestinationFormSupplierManager() {
 // ];
 const RecommendedTimesFrame = [
 	{
+		start: '00:00',
+		end: '23:59'
+	},
+	{
+		start: '00:00',
+		end: '01:00'
+	},
+	{
+		start: '01:00',
+		end: '02:00'
+	},
+	{
+		start: '02:00',
+		end: '03:00'
+	},
+	{
+		start: '03:00',
+		end: '04:00'
+	},
+	{
 		start: '04:00',
+		end: '05:00'
+	},
+	{
+		start: '05:00',
+		end: '06:00'
+	},
+	{
+		start: '06:00',
 		end: '07:00'
 	},
 	{
 		start: '07:00',
+		end: '08:00'
+	},
+	{
+		start: '08:00',
 		end: '09:00'
 	},
 	{
 		start: '09:00',
+		end: '10:00'
+	},
+	{
+		start: '10:00',
+		end: '11:00'
+	},
+	{
+		start: '11:00',
 		end: '12:00'
 	},
 	{
 		start: '12:00',
+		end: '13:00'
+	},
+	{
+		start: '13:00',
+		end: '14:00'
+	},
+	{
+		start: '14:00',
 		end: '15:00'
 	},
 	{
 		start: '15:00',
+		end: '16:00'
+	},
+	{
+		start: '16:00',
+		end: '17:00'
+	},
+	{
+		start: '17:00',
 		end: '18:00'
 	},
 	{
 		start: '18:00',
+		end: '19:00'
+	},
+	{
+		start: '19:00',
+		end: '20:00'
+	},
+	{
+		start: '20:00',
 		end: '21:00'
+	},
+	{
+		start: '21:00',
+		end: '22:00'
+	},
+	{
+		start: '22:00',
+		end: '23:00'
+	},
+	{
+		start: '23:00',
+		end: '24:00'
 	}
 ];

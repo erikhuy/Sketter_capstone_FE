@@ -14,7 +14,7 @@ const RootStyle = styled(Page)(({theme}) => ({
 export default function CreateDestination() {
 	const {user} = useAuth();
 	return (
-		<RootStyle title="Login | Minimal-UI">
+		<RootStyle title="Sketter">
 			{user.role.description === 'Quản lý đối tác' ? (
 				<CreateDestinationFormSupplierManager />
 			) : (

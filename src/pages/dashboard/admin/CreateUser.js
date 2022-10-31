@@ -12,7 +12,7 @@ const RootStyle = styled(Page)(({theme}) => ({
 }));
 export default function CreateDestination() {
 	return (
-		<RootStyle title="Login | Minimal-UI">
+		<RootStyle title="Sketter">
 			<CreateUserForm />
 		</RootStyle>
 	);

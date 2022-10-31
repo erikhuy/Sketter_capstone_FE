@@ -20,7 +20,7 @@ const MapField = ({containerProps = {}, ...props}) => {
 	const {name, ...fieldProps} = props;
 	const [_, meta, helpers] = useField({name});
 	const {setValue: setFieldValue} = helpers;
-	const {error, touched, value} = meta;
+	const {value} = meta;
 	const {isLoaded, loadError} = useLoadScript({
 		googleMapsApiKey: MAPS_KEY,
 		libraries
@@ -55,7 +55,6 @@ const MapField = ({containerProps = {}, ...props}) => {
 			mapRef.current = map;
 			if (Geocoder) {
 				geocoderRef.current = new Geocoder();
-				console.log('123');
 			}
 		},
 		[value]
@@ -116,10 +115,8 @@ const MapField = ({containerProps = {}, ...props}) => {
 				ref={searchRef}
 				// dùng để load địa chỉ từ data và từ khi onClick vào map
 				placeAddress={value ? value.destinationAddress : ''}
-				error={error}
 				fieldProps={fieldProps}
 				onSelect={setFieldValue}
-				isError={touched && error}
 			/>
 			<GoogleMap
 				zoom={16}

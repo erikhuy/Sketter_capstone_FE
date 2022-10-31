@@ -41,6 +41,8 @@ import {API_URL} from 'shared/constants';
 import {useSnackbar} from 'notistack5';
 import {isNull} from 'lodash';
 import {useNavigate} from 'react-router-dom';
+import {storage} from 'utils/firebase';
+import {ref, uploadBytes, uploadString} from 'firebase/storage';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -60,24 +62,23 @@ export default function CreateDestinationForm() {
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
 		// address: Yup.string().min(5, 'Địa chỉ không hợp lệ').required('Yêu cầu nhập địa chỉ'),
 		phone: Yup.string()
+			.nullable(true)
 			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
 			.min(8, 'Số điện thoại không tồn tại!')
 			.max(13, 'Số điện thoại không tồn tại!'),
-		email: Yup.string().max(50, 'Tên không hợp lệ!').email('Email không hợp lệ'),
+		email: Yup.string().nullable(true).max(50, 'Tên không hợp lệ!').email('Email không hợp lệ'),
 		lowestPrice: Yup.number()
 			.integer('Giá phải là số nguyên')
-			.test('len', 'Giá không quá hàng chục triệu', (val) => {
-				if (val) return val.toString().length < 6;
-			})
-			.min(10)
+			.min(0, 'Giá phải là số nguyên dương')
+			.max(99999, 'Giá không quá hàng chục triệu')
 			.required('Yêu cầu giá thấp nhất'),
 		highestPrice: Yup.number()
 			.integer('Giá phải là số nguyên')
-			.test('len', 'Giá không quá hàng chục triệu', (val) => {
-				if (val) return val.toString().length < 6;
-			})
-			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
+			.min(0, 'Giá phải là số nguyên dương')
+			.max(99999, 'Giá không quá hàng chục triệu')
 			.required('Yêu cầu giá cao nhất'),
+		description: Yup.string().nullable(true).required('Yêu cầu mô tả địa điểm').max(500, 'Không quá 500 ký tự!'),
+
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		openingTime: Yup.string().nullable(true, 'Thời gian không được trống').required('Yêu cầu thời gian mở cửa'),
@@ -93,7 +94,7 @@ export default function CreateDestinationForm() {
 			.integer('Thời gian phải là số nguyên')
 
 			.min(0, 'Thời gian không hợp lệ!')
-			.max(1440, 'Thời gian không quá 1 ngày!')
+			.max(240, 'Thời gian không quá 4 tiếng!')
 			.required('Yêu cầu thời gian dự kiến ở lại'),
 		recommendedTimes: Yup.array().min(1, 'Khoảng thời gian lý tưởng không được trống')
 	});
@@ -104,11 +105,11 @@ export default function CreateDestinationForm() {
 			longitude: '',
 			latitude: '',
 			location: null,
-			phone: '',
-			email: '',
+			phone: null,
+			email: null,
 			description: '',
-			lowestPrice: '',
-			highestPrice: '',
+			lowestPrice: 0,
+			highestPrice: 0,
 			openingTimeSup: null,
 			openingTime: null,
 			closingTimeSup: null,
@@ -140,12 +141,17 @@ export default function CreateDestinationForm() {
 		}
 	});
 	const processData = (data) => {
-		console.log(data.location);
-		const supArray = data;
-		supArray.longitude = data.location.lng;
-		supArray.latitude = data.location.lat;
-		supArray.address = data.location.destinationAddress;
-		return supArray;
+		// eslint-disable-next-line no-unreachable
+		if (data.location) {
+			const supArray = data;
+			supArray.longitude = data.location.lng;
+			supArray.latitude = data.location.lat;
+			supArray.address = data.location.destinationAddress;
+			return supArray;
+		}
+		enqueueSnackbar('Vui lòng nhập địa điểm', {variant: 'error'});
+
+		// return data;
 	};
 	useEffect(() => {
 		const supList = [];
@@ -209,36 +215,53 @@ export default function CreateDestinationForm() {
 		console.log(data);
 		try {
 			await axios.post(`${API_URL.Destination}`, data).then((res) => {
-				setCreateDestinationMessage(res.data.message);
+				enqueueSnackbar('Tạo địa điểm thành công', {variant: 'success'});
 				console.log(res.data);
-				// navigateToViewDestination();
 			});
 		} catch (e) {
 			console.log(e.response.data.message);
-			setCreateDestinationMessage(e.response.data.message);
+			enqueueSnackbar(e.response.data.message, {variant: 'error'});
 		}
 	});
+
+	// const handleImages = (data) => {
+	// 	setGallery(data);
+	// 	const imageArray = [];
+	// 	// eslint-disable-next-line array-callback-return
+	// 	data.map((images) => {
+	// 		try {
+	// 			imgbbUploader({
+	// 				apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
+	// 				base64string: images.image_base64.split('base64,')[1]
+	// 				// OPTIONAL: pass base64-encoded image (max 32Mb)
+	// 			})
+	// 				.then((response) => imageArray.push({url: response.url}))
+	// 				.catch((error) => setCreateDestinationMessage(error));
+	// 		} catch (e) {
+	// 			console.log(e);
+	// 		}
+	// 	});
+	// 	setFieldValue('gallery', imageArray);
+	// };
 
 	const handleImages = (data) => {
 		setGallery(data);
 		const imageArray = [];
 		// eslint-disable-next-line array-callback-return
 		data.map((images) => {
+			console.log(images);
 			try {
-				imgbbUploader({
-					apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
-					base64string: images.image_base64.split('base64,')[1]
-					// OPTIONAL: pass base64-encoded image (max 32Mb)
-				})
-					.then((response) => imageArray.push({url: response.url}))
-					.catch((error) => setCreateDestinationMessage(error));
+				const imageRef = ref(storage, `images/destination/${images.image_file.name}`);
+				uploadString(imageRef, images.image_base64, 'data_url').then((e) => {
+					console.log(getDownloadURL(ref(storage, `images/destination/${images.image_file.name}`)));
+					console.log(`upload ${images.image_file.name} thành công`);
+				});
 			} catch (e) {
 				console.log(e);
 			}
 		});
 		setFieldValue('gallery', imageArray);
 	};
-
 	const handleOpeningTime = (data) => {
 		if (data !== null) {
 			setFieldValue('openingTimeSup', data);
@@ -276,6 +299,12 @@ export default function CreateDestinationForm() {
 										fullWidth
 										label="Số điện thoại"
 										{...getFieldProps('phone')}
+										onChange={(value) => {
+											setFieldValue(
+												'phone',
+												value.target.value !== '' ? value.target.value : null
+											);
+										}}
 										error={Boolean(touched.phone && errors.phone)}
 										helperText={touched.phone && errors.phone}
 									/>
@@ -283,15 +312,27 @@ export default function CreateDestinationForm() {
 										fullWidth
 										label="Email"
 										{...getFieldProps('email')}
+										onChange={(value) => {
+											setFieldValue(
+												'email',
+												value.target.value !== '' ? value.target.value : null
+											);
+										}}
 										error={Boolean(touched.email && errors.email)}
 										helperText={touched.email && errors.email}
 									/>
 									<TextField
 										fullWidth
 										multiline
-										label="Thông tin địa điểm"
+										label="Thông tin địa điểm*"
 										rows={22}
 										{...getFieldProps('description')}
+										onChange={(value) => {
+											setFieldValue(
+												'description',
+												value.target.value !== '' ? value.target.value : null
+											);
+										}}
 										error={Boolean(touched.description && errors.description)}
 										helperText={touched.description && errors.description}
 									/>
@@ -577,27 +618,103 @@ export default function CreateDestinationForm() {
 // ];
 const RecommendedTimesFrame = [
 	{
+		start: '00:00',
+		end: '23:59'
+	},
+	{
+		start: '00:00',
+		end: '01:00'
+	},
+	{
+		start: '01:00',
+		end: '02:00'
+	},
+	{
+		start: '02:00',
+		end: '03:00'
+	},
+	{
+		start: '03:00',
+		end: '04:00'
+	},
+	{
 		start: '04:00',
+		end: '05:00'
+	},
+	{
+		start: '05:00',
+		end: '06:00'
+	},
+	{
+		start: '06:00',
 		end: '07:00'
 	},
 	{
 		start: '07:00',
+		end: '08:00'
+	},
+	{
+		start: '08:00',
 		end: '09:00'
 	},
 	{
 		start: '09:00',
+		end: '10:00'
+	},
+	{
+		start: '10:00',
+		end: '11:00'
+	},
+	{
+		start: '11:00',
 		end: '12:00'
 	},
 	{
 		start: '12:00',
+		end: '13:00'
+	},
+	{
+		start: '13:00',
+		end: '14:00'
+	},
+	{
+		start: '14:00',
 		end: '15:00'
 	},
 	{
 		start: '15:00',
+		end: '16:00'
+	},
+	{
+		start: '16:00',
+		end: '17:00'
+	},
+	{
+		start: '17:00',
 		end: '18:00'
 	},
 	{
 		start: '18:00',
+		end: '19:00'
+	},
+	{
+		start: '19:00',
+		end: '20:00'
+	},
+	{
+		start: '20:00',
 		end: '21:00'
+	},
+	{
+		start: '21:00',
+		end: '22:00'
+	},
+	{
+		start: '22:00',
+		end: '23:00'
+	},
+	{
+		start: '23:00',
+		end: '24:00'
 	}
 ];

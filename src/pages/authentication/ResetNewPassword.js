@@ -32,7 +32,7 @@ export default function ResetNewPassword() {
 	const {resetToken} = useParams();
 	const navigate = useNavigate();
 	return (
-		<RootStyle title="Reset Password | Minimal UI">
+		<RootStyle title="Sketter">
 			<LogoOnlyLayout />
 
 			<Container>

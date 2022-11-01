@@ -41,6 +41,8 @@ import {API_URL} from 'shared/constants';
 import {useSnackbar} from 'notistack5';
 import {isNull} from 'lodash';
 import {useNavigate} from 'react-router-dom';
+import {storage} from 'utils/firebase';
+import {getDownloadURL, ref, uploadBytes, uploadString} from 'firebase/storage';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -75,6 +77,8 @@ export default function CreateDestinationFormSupplierManager() {
 			.min(0, 'Giá phải là số nguyên dương')
 			.max(99999, 'Giá không quá hàng chục triệu')
 			.required('Yêu cầu giá cao nhất'),
+		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
+
 		description: Yup.string().nullable(true).required('Yêu cầu mô tả địa điểm').max(500, 'Không quá 500 ký tự!'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		openingTime: Yup.string().nullable(true, 'Thời gian không được trống').required('Yêu cầu thời gian mở cửa'),
@@ -92,7 +96,7 @@ export default function CreateDestinationFormSupplierManager() {
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(240, 'Thời gian không quá 4 tiếng!')
 			.required('Yêu cầu thời gian dự kiến ở lại'),
-		recommendedTimes: Yup.array().min(1, 'Khoảng thời gian lý tưởng không được trống')
+		recommendedTimes: Yup.array().nullable(true).min(1, 'Khoảng thời gian lý tưởng không được trống')
 	});
 	const formik = useFormik({
 		initialValues: {
@@ -137,7 +141,9 @@ export default function CreateDestinationFormSupplierManager() {
 		}
 	});
 	const processData = (data) => {
-		console.log(data.location);
+		if (!data.location) {
+			enqueueSnackbar('Vui lòng nhập địa điểm', {variant: 'error'});
+		}
 		const supArray = data;
 		supArray.longitude = data.location.lng;
 		supArray.latitude = data.location.lat;
@@ -220,26 +226,46 @@ export default function CreateDestinationFormSupplierManager() {
 		}
 	});
 
+	// const handleImages = (data) => {
+	// 	setGallery(data);
+	// 	const imageArray = [];
+	// 	// eslint-disable-next-line array-callback-return
+	// 	data.map((images) => {
+	// 		try {
+	// 			imgbbUploader({
+	// 				apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
+	// 				base64string: images.image_base64.split('base64,')[1]
+	// 				// OPTIONAL: pass base64-encoded image (max 32Mb)
+	// 			})
+	// 				.then((response) => imageArray.push({url: response.url}))
+	// 				.catch((error) => setCreateDestinationMessage(error));
+	// 		} catch (e) {
+	// 			console.log(e);
+	// 		}
+	// 	});
+	// 	setFieldValue('gallery', imageArray);
+	// };
 	const handleImages = (data) => {
 		setGallery(data);
 		const imageArray = [];
 		// eslint-disable-next-line array-callback-return
 		data.map((images) => {
+			console.log(images);
 			try {
-				imgbbUploader({
-					apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
-					base64string: images.image_base64.split('base64,')[1]
-					// OPTIONAL: pass base64-encoded image (max 32Mb)
-				})
-					.then((response) => imageArray.push({url: response.url}))
-					.catch((error) => setCreateDestinationMessage(error));
+				const imageRef = ref(storage, `images/destination/${images.image_file.name}`);
+				uploadString(imageRef, images.image_base64, 'data_url').then((e) => {
+					getDownloadURL(ref(storage, `images/destination/${images.image_file.name}`)).then((e) => {
+						console.log(e.split('&token')[0]);
+						imageArray.push({url: e.split('&token')[0]});
+					});
+					console.log(`upload ${images.image_file.name} thành công`);
+				});
 			} catch (e) {
 				console.log(e);
 			}
 		});
 		setFieldValue('gallery', imageArray);
 	};
-
 	const handleOpeningTime = (data) => {
 		if (data !== null) {
 			setFieldValue('openingTimeSup', data);

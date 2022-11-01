@@ -42,7 +42,7 @@ import {useSnackbar} from 'notistack5';
 import {isNull} from 'lodash';
 import {useNavigate} from 'react-router-dom';
 import {storage} from 'utils/firebase';
-import {ref, uploadBytes, uploadString} from 'firebase/storage';
+import {getDownloadURL, ref, uploadBytes, uploadString} from 'firebase/storage';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -96,7 +96,7 @@ export default function CreateDestinationForm() {
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(240, 'Thời gian không quá 4 tiếng!')
 			.required('Yêu cầu thời gian dự kiến ở lại'),
-		recommendedTimes: Yup.array().min(1, 'Khoảng thời gian lý tưởng không được trống')
+		recommendedTimes: Yup.array().nullable(true).min(1, 'Khoảng thời gian lý tưởng không được trống')
 	});
 	const formik = useFormik({
 		initialValues: {
@@ -141,16 +141,14 @@ export default function CreateDestinationForm() {
 		}
 	});
 	const processData = (data) => {
-		// eslint-disable-next-line no-unreachable
-		if (data.location) {
-			const supArray = data;
-			supArray.longitude = data.location.lng;
-			supArray.latitude = data.location.lat;
-			supArray.address = data.location.destinationAddress;
-			return supArray;
+		if (!data.location) {
+			enqueueSnackbar('Vui lòng nhập địa điểm', {variant: 'error'});
 		}
-		enqueueSnackbar('Vui lòng nhập địa điểm', {variant: 'error'});
-
+		const supArray = data;
+		supArray.longitude = data.location.lng;
+		supArray.latitude = data.location.lat;
+		supArray.address = data.location.destinationAddress;
+		return supArray;		
 		// return data;
 	};
 	useEffect(() => {
@@ -253,7 +251,10 @@ export default function CreateDestinationForm() {
 			try {
 				const imageRef = ref(storage, `images/destination/${images.image_file.name}`);
 				uploadString(imageRef, images.image_base64, 'data_url').then((e) => {
-					console.log(getDownloadURL(ref(storage, `images/destination/${images.image_file.name}`)));
+					getDownloadURL(ref(storage, `images/destination/${images.image_file.name}`)).then((e) => {
+						console.log(e.split('&token')[0]);
+						imageArray.push({url: e.split('&token')[0]});
+					});
 					console.log(`upload ${images.image_file.name} thành công`);
 				});
 			} catch (e) {

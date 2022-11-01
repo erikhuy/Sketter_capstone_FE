@@ -38,6 +38,8 @@ import {API_URL} from 'shared/constants';
 import useIsMountedRef from 'shared/hooks/useIsMountedRef';
 import imgbbUploader from 'imgbb-uploader/lib/cjs';
 import {useSnackbar} from 'notistack5';
+import {storage} from 'utils/firebase';
+import {getDownloadURL, ref, uploadBytes, uploadString} from 'firebase/storage';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -59,26 +61,26 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 	const UpdateDestinationSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
 		phone: Yup.string()
+			.nullable(true)
 			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
-			.min(7, 'Số điện thoại không tồn tại!')
+			.min(8, 'Số điện thoại không tồn tại!')
 			.max(13, 'Số điện thoại không tồn tại!'),
-		email: Yup.string().email('Email không hợp lệ'),
+		email: Yup.string().nullable(true).max(50, 'Tên không hợp lệ!').email('Email không hợp lệ'),
 		lowestPrice: Yup.number()
-			.integer('Giá là số nguyên')
-			.test('len', 'Giá không quá hàng chục triệu', (val) => {
-				if (val) return val.toString().length < 6;
-			})
-			.min(10)
+			.integer('Giá phải là số nguyên')
+			.min(0, 'Giá phải là số nguyên dương')
+			.max(99999, 'Giá không quá hàng chục triệu')
 			.required('Yêu cầu giá thấp nhất'),
 		highestPrice: Yup.number()
-			.integer('Giá là số nguyên')
-			.test('len', 'Giá không quá hàng chục triệu', (val) => {
-				if (val) return val.toString().length < 6;
-			})
-			.min(Yup.ref('lowestPrice'), 'Giá phải cao hơn giá thấp nhất')
+			.integer('Giá phải là số nguyên')
+			.min(0, 'Giá phải là số nguyên dương')
+			.max(99999, 'Giá không quá hàng chục triệu')
 			.required('Yêu cầu giá cao nhất'),
+		description: Yup.string().nullable(true).required('Yêu cầu mô tả địa điểm').max(500, 'Không quá 500 ký tự!'),
+
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
+
 		estimatedTimeStay: Yup.number()
 			.test('len', 'Thời gian không hợp lệ!', (val) => {
 				if (val) return val.toString().length < 5;
@@ -86,13 +88,14 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 			.integer('Thời gian phải là số nguyên')
 
 			.min(0, 'Thời gian không hợp lệ!')
-			.max(1440, 'Thời gian không quá 1 ngày!')
+			.max(240, 'Thời gian không quá 4 tiếng!')
 			.required('Yêu cầu thời gian dự kiến ở lại'),
 		openingTime: Yup.string().nullable(true, 'Thời gian không được trống').required('Yêu cầu thời gian mở cửa'),
 		closingTime: Yup.string()
 			.nullable(true, 'Thời gian không được trống')
 			.required('Yêu cầu thời gian đóng cửa')
-			.notOneOf([Yup.ref('openingTime')], 'Thời gian đóng cửa không hợp lệ')
+			.notOneOf([Yup.ref('openingTime')], 'Thời gian mở cửa không hợp lệ'),
+		recommendedTimes: Yup.array().nullable(true).min(1, 'Khoảng thời gian lý tưởng không được trống')
 	});
 	const locationData = {
 		location: {
@@ -249,6 +252,30 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		fetchData();
 	}, []);
 
+	// const handleImages = (data) => {
+	// 	setGallery(data);
+	// 	const imageArray = [];
+	// 	// eslint-disable-next-line array-callback-return
+	// 	data.map((images) => {
+	// 		if (!images.url) {
+	// 			try {
+	// 				imgbbUploader({
+	// 					apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
+	// 					base64string: images.image_base64.split('base64,')[1]
+	// 					// OPTIONAL: pass base64-encoded image (max 32Mb)
+	// 				})
+	// 					.then((response) => imageArray.push({url: response.url}))
+	// 					.catch((error) => setCreateDestinationMessage(error));
+	// 			} catch (e) {
+	// 				console.log(e);
+	// 			}
+	// 		} else {
+	// 			imageArray.push({url: images.url});
+	// 		}
+	// 	});
+	// 	setFieldValue('gallery', imageArray);
+	// };
+
 	const handleImages = (data) => {
 		setGallery(data);
 		const imageArray = [];
@@ -256,13 +283,14 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		data.map((images) => {
 			if (!images.url) {
 				try {
-					imgbbUploader({
-						apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
-						base64string: images.image_base64.split('base64,')[1]
-						// OPTIONAL: pass base64-encoded image (max 32Mb)
-					})
-						.then((response) => imageArray.push({url: response.url}))
-						.catch((error) => setCreateDestinationMessage(error));
+					const imageRef = ref(storage, `images/destination/${images.image_file.name}`);
+					uploadString(imageRef, images.image_base64, 'data_url').then((e) => {
+						getDownloadURL(ref(storage, `images/destination/${images.image_file.name}`)).then((e) => {
+							console.log(e.split('&token')[0]);
+							imageArray.push({url: e.split('&token')[0]});
+						});
+						console.log(`upload ${images.image_file.name} thành công`);
+					});
 				} catch (e) {
 					console.log(e);
 				}
@@ -272,7 +300,6 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		});
 		setFieldValue('gallery', imageArray);
 	};
-
 	const convertDestinationPersonalityToArray = (data) => {
 		const supData = [];
 		// eslint-disable-next-line array-callback-return
@@ -330,6 +357,12 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											fullWidth
 											label="Số điện thoại"
 											{...getFieldProps('phone')}
+											onChange={(value) => {
+												setFieldValue(
+													'phone',
+													value.target.value !== '' ? value.target.value : null
+												);
+											}}
 											error={Boolean(touched.phone && errors.phone)}
 											helperText={touched.phone && errors.phone}
 										/>
@@ -337,20 +370,27 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											fullWidth
 											label="Email"
 											{...getFieldProps('email')}
+											onChange={(value) => {
+												setFieldValue(
+													'email',
+													value.target.value !== '' ? value.target.value : null
+												);
+											}}
 											error={Boolean(touched.email && errors.email)}
 											helperText={touched.email && errors.email}
 										/>
 										<TextField
 											fullWidth
 											multiline
-											label="Thông tin địa điểm"
-											rows={12}
+											label="Thông tin địa điểm*"
+											rows={22}
 											{...getFieldProps('description')}
 											error={Boolean(touched.description && errors.description)}
 											helperText={touched.description && errors.description}
 										/>
 										<Stack direction={{xs: 'row'}} spacing={2}>
 											<TextField
+												type="number"
 												{...getFieldProps('lowestPrice')}
 												style={{height: 56, width: 360}}
 												label={<span className="labelText">Giá thấp nhất*</span>}
@@ -361,7 +401,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 												InputProps={{
 													endAdornment: (
 														<InputAdornment position="end">
-															<span className="adorment-text">vnđ</span>
+															<span className="adorment-text">x 1000 vnđ</span>
 														</InputAdornment>
 													)
 												}}
@@ -370,6 +410,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											/>
 											<div>-</div>
 											<TextField
+												type="number"
 												{...getFieldProps('highestPrice')}
 												style={{height: 56, width: 360}}
 												label={<span className="labelText">Giá cao nhất*</span>}
@@ -383,7 +424,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 
 													endAdornment: (
 														<InputAdornment position="end">
-															<span className="adorment-text">vnđ</span>
+															<span className="adorment-text">x 1000 vnđ</span>
 														</InputAdornment>
 													)
 												}}
@@ -415,8 +456,8 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											value={convertCatalogToArray(values.catalogs)}
 											getOptionLabel={(option) => option}
 											filterSelectedOptions
-											onChange={(event, value) => {
-												setFieldValue('catalogs', value);
+											onChange={(e, value) => {
+												setFieldValue('catalogs', value !== null ? value : []);
 											}}
 											renderTags={(tagValue, getTagProps) =>
 												tagValue.map((option, index) => (

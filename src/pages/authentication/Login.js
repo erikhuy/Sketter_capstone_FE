@@ -44,7 +44,7 @@ export default function Login() {
 			<AuthLayout>
 				Không có tài khoản ? &nbsp;
 				<Link underline="none" variant="subtitle2" component={RouterLink} to={PATH_AUTH.register}>
-					Bắt đầu
+					Đăng ký
 				</Link>
 			</AuthLayout>
 
@@ -71,7 +71,7 @@ export default function Login() {
 						<Typography variant="body2" align="center" sx={{mt: 3}}>
 							Không có tài khoản ?&nbsp;
 							<Link variant="subtitle2" component={RouterLink} to={PATH_AUTH.register}>
-								Bắt đầu
+								Đăng ký
 							</Link>
 						</Typography>
 					</MHidden>

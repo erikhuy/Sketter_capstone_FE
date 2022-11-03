@@ -28,5 +28,5 @@ export const updatePasswordThunk = createAsyncThunkWithErrorHandler(
 );
 
 export const registerThunk = createAsyncThunkWithErrorHandler(`${AppContext.Auth}/signup/supplier`, async (data) =>
-	axiosInstance.post(`${API_URL.Auth}/signup/supplier`, data).then(() => data)
+	axiosInstance.post(`${API_URL.Auth}/signup/supplier`, data).then(() => console.log('thanhf coong'))
 );

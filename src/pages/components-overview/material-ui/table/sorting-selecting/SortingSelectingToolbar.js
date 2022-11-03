@@ -4,7 +4,18 @@ import trash2Fill from '@iconify/icons-eva/trash-2-fill';
 import CreateIcon from '@material-ui/icons/Create';
 import Reviews from '@material-ui/icons/Reviews';
 import {Icon} from '@iconify/react';
-import {IconButton, Modal, Stack, Toolbar, Tooltip, Typography} from '@material-ui/core';
+import {
+	Button,
+	Dialog,
+	DialogActions,
+	DialogTitle,
+	IconButton,
+	Modal,
+	Stack,
+	Toolbar,
+	Tooltip,
+	Typography
+} from '@material-ui/core';
 // material
 import {styled, useTheme} from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
@@ -17,6 +28,7 @@ import DestinationDetailForm from 'pages/dashboard/destination/DestinationDetail
 import useAuth from 'shared/hooks/useAuth';
 import DestinationDetailFormSupplierManager from 'pages/dashboard/destination/DestinationDetailFormSupplierManager';
 import ReviewList from 'pages/dashboard/destination/review/ReviewList';
+import {useSnackbar} from 'notistack5';
 
 // ----------------------------------------------------------------------
 
@@ -65,8 +77,12 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 	const handleClose = () => setOpen(false);
 	const handleReviewOpen = () => setReviewOpen(true);
 	const handleReviewClose = () => setReviewOpen(false);
+	const handleOpenDialog = () => setOpenDialog(true);
+	const handleCloseDialog = () => setOpenDialog(false);
 	const [resetToolbar, setResetToolbar] = useState([]);
 	const {user} = useAuth();
+	const [openDialog, setOpenDialog] = useState(false);
+	const {enqueueSnackbar} = useSnackbar();
 
 	const deleteDestination = useCallback(
 		async (idSelected) => {
@@ -81,7 +97,10 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 							}
 						});
 					})
-				);
+				).then(() => {
+					handleCloseDialog();
+					enqueueSnackbar('Đóng cửa thành công', {variant: 'success'});
+				});
 			} catch (e) {
 				console.log('');
 			}
@@ -108,6 +127,24 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 				<Typography variant="h6" id="tableTitle" component="div">
 					Danh sách địa điểm
 				</Typography>
+			)}
+			{openDialog && (
+				<Dialog
+					open={openDialog}
+					onClose={handleCloseDialog}
+					aria-labelledby="alert-dialog-title"
+					aria-describedby="alert-dialog-description"
+				>
+					<DialogTitle id="alert-dialog-title">
+						{idSelected.length === 1 ? 'Đóng cửa địa điểm này?' : 'Đóng cửa những địa điểm này?'}
+					</DialogTitle>
+					<DialogActions>
+						<Button onClick={handleCloseDialog}>Hủy</Button>
+						<Button onClick={() => deleteDestination(idSelected)}>Đồng ý</Button>
+
+						{/* <Button onClick={() => deactivatedUser(idSelected)}>Đồng ý</Button> */}
+					</DialogActions>
+				</Dialog>
 			)}
 			{open && (
 				<Modal
@@ -144,7 +181,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 			{idSelected.length > 1 ? (
 				<IconButton
 					onClick={() => {
-						deleteDestination(idSelected);
+						handleOpenDialog();
 					}}
 				>
 					<Icon icon={trash2Fill} />
@@ -153,7 +190,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 				<Stack direction="row" spacing={1}>
 					<IconButton
 						onClick={() => {
-							deleteDestination(idSelected);
+							handleOpenDialog();
 						}}
 					>
 						<Icon icon={trash2Fill} />

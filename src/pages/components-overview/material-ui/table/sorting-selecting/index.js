@@ -6,23 +6,29 @@ import {
 	Box,
 	Checkbox,
 	FormControlLabel,
+	IconButton,
+	InputAdornment,
 	Switch,
 	Table,
 	TableBody,
 	TableCell,
 	TableContainer,
 	TablePagination,
-	TableRow
+	TableRow,
+	TextField
 } from '@material-ui/core';
 import axios from 'axios';
 import {useCallback, useEffect, useState} from 'react';
 import {API_URL} from 'shared/constants';
 // components
+import {Icon} from '@iconify/react';
+import searchFill from '@iconify/icons-eva/search-fill';
+import {useSnackbar} from 'notistack5';
+import Clear from '@material-ui/icons/Clear';
 import Scrollbar from '../../../../../components/Scrollbar';
 //
 import SortingSelectingHead from './SortingSelectingHead';
 import SortingSelectingToolbar from './SortingSelectingToolbar';
-
 // ----------------------------------------------------------------------
 
 function createData(name, address, lowestPrice, rating, status) {
@@ -67,6 +73,9 @@ export default function SortingSelecting() {
 	const [dataNumber, setDataNumber] = useState();
 	const [maxPage, setMaxPage] = useState();
 	const [currentPage, setCurrentPage] = useState();
+	const [searchInput, setSearchInput] = useState('');
+	const {enqueueSnackbar} = useSnackbar();
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -90,6 +99,16 @@ export default function SortingSelecting() {
 		fetchData();
 	}, [page, selectedID]);
 
+	const searchDestination = useCallback(async (keyword) => {
+		try {
+			await axios.get(`${API_URL.Destination}/search?name=${keyword}&catalog=&page=1&skipStay=`).then((res) => {
+				console.log(res.data.data.destinations);
+				setData(res.data.data.destinations);
+			});
+		} catch (e) {
+			console.log(e.response.data.message);
+		}
+	});
 	const TABLE_HEAD = [
 		{
 			id: 'name',
@@ -187,6 +206,54 @@ export default function SortingSelecting() {
 
 	return (
 		<>
+			<TextField
+				fullWidth
+				value={searchInput}
+				placeholder="Search post..."
+				sx={{
+					'& fieldset': {
+						borderRadius: '16px'
+					}
+				}}
+				onChange={(e) => {
+					setSearchInput(e.target.value);
+				}}
+				onKeyPress={(e) => {
+					if (e.key === 'Enter') {
+						console.log(e.target.value);
+						searchDestination(e.target.value);
+					}
+				}}
+				InputProps={{
+					startAdornment: (
+						<>
+							<InputAdornment position="start">
+								<Box
+									component={Icon}
+									icon={searchFill}
+									sx={{
+										ml: 1,
+										width: 20,
+										height: 20,
+										color: 'text.disabled'
+									}}
+								/>
+							</InputAdornment>
+						</>
+					),
+					endAdornment: (
+						<IconButton
+							sx={{visibility: searchInput ? 'visible' : 'hidden'}}
+							onClick={() => {
+								setSearchInput('');
+								console.log('clear');
+							}}
+						>
+							<Clear />
+						</IconButton>
+					)
+				}}
+			/>
 			<SortingSelectingToolbar
 				numSelected={selected}
 				idSelected={selectedID}
@@ -228,7 +295,7 @@ export default function SortingSelecting() {
 										</TableCell>
 										<TableCell align="right">{row.address}</TableCell>
 										<TableCell align="right">{row.lowestPrice}</TableCell>
-										<TableCell align="right">{row.rating}</TableCell>
+										<TableCell align="right">{row.avgRating}</TableCell>
 										<TableCell align="right">
 											{row.status === 'Activated'
 												? 'Hoạt động'

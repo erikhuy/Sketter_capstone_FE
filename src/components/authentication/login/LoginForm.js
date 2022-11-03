@@ -2,7 +2,17 @@ import closeFill from '@iconify/icons-eva/close-fill';
 import eyeFill from '@iconify/icons-eva/eye-fill';
 import eyeOffFill from '@iconify/icons-eva/eye-off-fill';
 import {Icon} from '@iconify/react';
-import {Alert, Checkbox, FormControlLabel, IconButton, InputAdornment, Link, Stack, TextField} from '@material-ui/core';
+import {
+	Alert,
+	Box,
+	Checkbox,
+	FormControlLabel,
+	IconButton,
+	InputAdornment,
+	Link,
+	Stack,
+	TextField
+} from '@material-ui/core';
 import {LoadingButton} from '@material-ui/lab';
 import {Form, FormikProvider, useFormik} from 'formik';
 import {isEmpty} from 'lodash';
@@ -100,8 +110,13 @@ export default function LoginForm() {
 				</Stack>
 
 				<Stack direction="row" alignItems="center" justifyContent="space-between" sx={{my: 2}}>
+					<Box
+						sx={{
+							height: 15
+						}}
+					/>
 					<Link component={RouterLink} variant="subtitle2" to={PATH_AUTH.resetPassword}>
-						Forgot password?
+						Quên mật khẩu ?
 					</Link>
 				</Stack>
 

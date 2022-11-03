@@ -5,10 +5,14 @@ import {Icon} from '@iconify/react';
 // material
 import {Alert, IconButton, InputAdornment, Stack, TextField} from '@material-ui/core';
 import {LoadingButton} from '@material-ui/lab';
+import axios from 'axios';
 import {Form, FormikProvider, useFormik} from 'formik';
 import {isNull} from 'lodash';
 import {useSnackbar} from 'notistack5';
-import {useEffect, useState} from 'react';
+import Login from 'pages/authentication/Login';
+import {useCallback, useEffect, useState} from 'react';
+import {useNavigate} from 'react-router';
+import {API_URL} from 'shared/constants';
 import {useDispatchAction} from 'shared/hooks';
 // hooks
 import useAuth from 'shared/hooks/useAuth';
@@ -21,18 +25,19 @@ import {MIconButton} from '../../@material-extend';
 // ----------------------------------------------------------------------
 
 export default function RegisterForm() {
-	const registerSupplier = useDispatchAction(registerThunk);
+	// const registerSupplier = useDispatchAction(registerThunk);
 	const {registerErrorMessage} = useAuth();
 	const isMountedRef = useIsMountedRef();
 	const {enqueueSnackbar} = useSnackbar();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (isNull(registerErrorMessage)) {
 			return;
 		}
-
+		console.log(registerErrorMessage);
 		const message = registerErrorMessage || 'Update success';
 		enqueueSnackbar(message, {variant: registerErrorMessage ? 'error' : 'success'});
 	}, [enqueueSnackbar, registerErrorMessage]);
@@ -75,6 +80,17 @@ export default function RegisterForm() {
 					setSubmitting(false);
 				}
 			}
+		}
+	});
+	const registerSupplier = useCallback(async (data) => {
+		try {
+			await axios.post(`${API_URL.Auth}/signup/supplier`, data).then((res) => {
+				enqueueSnackbar('Tạo địa tài khoản thành công', {variant: 'success'});
+				navigate('/dashboard');
+			});
+		} catch (e) {
+			// console.log(e.response.data.message);
+			enqueueSnackbar(e.response.data.message, {variant: 'error'});
 		}
 	});
 

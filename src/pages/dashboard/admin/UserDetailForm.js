@@ -42,13 +42,14 @@ import imgbbUploader from 'imgbb-uploader/lib/cjs';
 import {useSnackbar} from 'notistack5';
 import Select from 'theme/overrides/Select';
 import AvatarUploadArea from 'components/avatararea/AvatarDropzone';
+import {useNavigate} from 'react-router';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 UserDetailForm.propTypes = {
 	userID: PropTypes.object.isRequired
 };
-export default function UserDetailForm({userID}) {
+export default function UserDetailForm({userID, onReload,onOpenModal}) {
 	// eslint-disable-next-line no-bitwise
 	const isMountedRef = useIsMountedRef();
 	const [gallery, setGallery] = useState([]);
@@ -57,6 +58,7 @@ export default function UserDetailForm({userID}) {
 	const [data, setData] = useState();
 	const [isBusy, setBusy] = useState(true);
 	const [createDestinationMessage, setCreateDestinationMessage] = useState();
+	const navigate = useNavigate();
 
 	const UpdateUserSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
@@ -114,11 +116,14 @@ export default function UserDetailForm({userID}) {
 			await axios
 				.patch(`${API_URL.User}/${data.id}`, data)
 				.then((res) => {
-					enqueueSnackbar(res.data.data, {variant: 'success'});
+					enqueueSnackbar('Cập nhật thông tin thành công', {variant: 'success'});
+					onReload(data);
+					onOpenModal(false)
 				})
 				.catch((e) => enqueueSnackbar(e.response.data.message, {variant: 'error'}));
 		} catch (e) {
-			console.log(e);
+			console.log(e.response.data.message);
+			enqueueSnackbar(e.response.data.message, {variant: 'error'});
 		}
 	});
 	const convertToArray = (data) => data;
@@ -196,13 +201,21 @@ export default function UserDetailForm({userID}) {
 									helperText={touched.name && errors.name}
 								/>
 								<Autocomplete
+									disableClearable
 									id="tags-outlined"
 									// eslint-disable-next-line eqeqeq
-									options={values.status == 'Unverified' ? userStatus : userStatusSup}
+									options={
+										values.status === 'Unverified'
+											? userStatus
+											: values.status === ''
+											? userStatusNone
+											: userStatusSup
+									}
 									value={convertToArray(values.status)}
 									getOptionLabel={(option) => option}
 									filterSelectedOptions
 									onChange={(event, value) => {
+										console.log(value);
 										setFieldValue('status', value);
 									}}
 									renderTags={(tagValue, getTagProps) =>
@@ -238,40 +251,4 @@ export default function UserDetailForm({userID}) {
 const catalogs = ['Quán ăn', 'Quán cà phê', 'Địa điểm du lịch', 'Homestay', 'Khách sạn', 'Khu nghỉ dưỡng cao cấp'];
 const userStatus = ['Verified', 'Unverified'];
 const userStatusSup = ['Verified', 'Deactivated'];
-
-const destinationPersonalities = [
-	'Thích khám phá',
-	'Ưa mạo hiểm',
-	'Tìm kiếm sự thư giãn',
-	'Đam mê với ẩm thực',
-	'Đam mê với lịch sử, văn hóa',
-	'Yêu thiên nhiên',
-	'Giá rẻ là trên hết',
-	'Có nhu cầu vui chơi, giải trí cao'
-];
-const RecommendedTimesFrame = [
-	{
-		start: '04:00',
-		end: '07:00'
-	},
-	{
-		start: '07:00',
-		end: '09:00'
-	},
-	{
-		start: '09:00',
-		end: '12:00'
-	},
-	{
-		start: '12:00',
-		end: '15:00'
-	},
-	{
-		start: '15:00',
-		end: '18:00'
-	},
-	{
-		start: '18:00',
-		end: '21:00'
-	}
-];
+const userStatusNone = ['Verified', 'Unverified', 'Deactivated'];

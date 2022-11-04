@@ -24,10 +24,6 @@ import SortingSelectingToolbar from './SortingSelectingToolbar';
 
 // ----------------------------------------------------------------------
 
-function createData(name, address, lowestPrice, rating, status) {
-	return {name, address, lowestPrice, rating, status};
-}
-
 function descendingComparator(a, b, orderBy) {
 	if (b[orderBy] < a[orderBy]) {
 		return -1;
@@ -63,6 +59,7 @@ export default function SortingSelecting() {
 	const [dense, setDense] = useState(false);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const [data, setData] = useState([]);
+	const [reloadList, setReloadList] = useState();
 	const [dataNumber, setDataNumber] = useState();
 	const [maxPage, setMaxPage] = useState();
 	const [currentPage, setCurrentPage] = useState();
@@ -85,8 +82,10 @@ export default function SortingSelecting() {
 			}
 		};
 		fetchData();
-	}, [page, selectedID]);
-
+	}, [page, selectedID, reloadList]);
+	useEffect(() => {
+		setSelectedID([]);
+	}, [reloadList]);
 	const TABLE_HEAD = [
 		{
 			id: 'name',
@@ -177,10 +176,7 @@ export default function SortingSelecting() {
 		setDense(event.target.checked);
 	};
 
-	const isSelected = (name) => {
-		// eslint-disable-next-line no-unused-expressions
-		selected.indexOf(name) !== -1;
-	};
+	const isSelected = (name) => selected.indexOf(name) !== -1;
 
 	// Avoid a layout jump when reaching the last page with empty data.
 	const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
@@ -192,6 +188,7 @@ export default function SortingSelecting() {
 				idSelected={selectedID}
 				reloadData={setSelectedID}
 				reloadNumber={setSelected}
+				onReloadList={setReloadList}
 			/>
 
 			<Scrollbar>

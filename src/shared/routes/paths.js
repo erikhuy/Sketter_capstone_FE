@@ -43,7 +43,8 @@ export const PATH_DASHBOARD = {
 		destinationList: path(ROOTS_DASHBOARD, '/destinationList'),
 		createDestination: path(ROOTS_DASHBOARD, '/createDestination'),
 		pendingDestinationList: path(ROOTS_DASHBOARD, '/pendingDestinationList'),
-		rejectDestinationList: path(ROOTS_DASHBOARD, '/rejectDestinationList')
+		rejectDestinationList: path(ROOTS_DASHBOARD, '/rejectDestinationList'),
+		testZalo: path(ROOTS_DASHBOARD, '/testZalo')
 	},
 	catalog: {
 		catalogManagement: path(ROOTS_DASHBOARD, '/catalogManagement')

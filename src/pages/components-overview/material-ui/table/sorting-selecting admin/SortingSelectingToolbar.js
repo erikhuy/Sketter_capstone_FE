@@ -69,11 +69,12 @@ const style = {
 	boxShadow: 24,
 	p: 4
 };
-export default function SortingSelectingToolbar({numSelected, idSelected, reloadData, reloadNumber}) {
+export default function SortingSelectingToolbar({onReloadList, numSelected, idSelected, reloadData, reloadNumber}) {
 	const [open, setOpen] = useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
 	const [openDialog, setOpenDialog] = useState(false);
+	const [reloadList, setReload] = useState();
 	const {enqueueSnackbar} = useSnackbar();
 	const handleOpenDialog = () => setOpenDialog(true);
 	const handleCloseDialog = () => setOpenDialog(false);
@@ -105,7 +106,11 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 		},
 		[resetToolbar]
 	);
-
+	useEffect(() => {
+		onReloadList(reloadList);
+		reloadData([]);
+		reloadNumber([]);
+	}, [reloadList]);
 	const theme = useTheme();
 	const isLight = theme.palette.mode === 'light';
 	return (
@@ -136,7 +141,7 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 					aria-describedby="modal-modal-description"
 				>
 					<Box sx={style}>
-						<UserDetailForm userID={idSelected} />
+						<UserDetailForm userID={idSelected} onReload={setReload} onOpenModal={handleClose} />
 					</Box>
 				</Modal>
 			)}

@@ -23,6 +23,7 @@ import {Form, FormikProvider, useFormik} from 'formik';
 import {isNull} from 'lodash';
 import {useSnackbar} from 'notistack5';
 import {useCallback, useEffect, useState} from 'react';
+import {useNavigate} from 'react-router';
 import {API_URL} from 'shared/constants';
 import {useDispatchAction} from 'shared/hooks';
 // hooks
@@ -40,9 +41,23 @@ export default function CreateUserForm() {
 	const {enqueueSnackbar} = useSnackbar();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const navigate = useNavigate();
 
 	const CreateUserSchema = Yup.object().shape({
-		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
+		phone: Yup.string()
+			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
+			.min(7, 'Số điện thoại không hợp lệ!')
+			.max(13, 'Số điện thoại không hợp lệ!')
+			.required('Yêu cầu nhập số điện thoại'),
+		address: Yup.string().min(5, 'Địa chỉ không hợp lệ').required('Yêu cầu nhập địa chỉ'),
+		owner: Yup.string()
+			.min(2, 'Tên chủ sở hữu không hợp lệ!')
+			.max(50, 'Tên chủ sở hữu không hợp lệ!')
+			.required('Yêu cầu nhập tên chủ sở hữu'),
+		name: Yup.string()
+			.min(2, 'Tên hiển thị không hợp lệ!')
+			.max(50, 'Tên hiển thị không hợp lệ!')
+			.required('Yêu cầu nhập tên hiển thị'),
 		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
 		password: Yup.string()
 			.min(6, 'Mật khẩu có ít nhất 6 ký tự')
@@ -56,6 +71,9 @@ export default function CreateUserForm() {
 
 	const formik = useFormik({
 		initialValues: {
+			phone: '',
+			address: '',
+			owner: '',
 			name: '',
 			password: '',
 			confirmPassword: '',
@@ -83,6 +101,7 @@ export default function CreateUserForm() {
 		try {
 			await axios.post(`${API_URL.User}`, data).then((res) => {
 				console.log(res.data);
+				navigate('/dashboard/user/userList');
 				enqueueSnackbar('Tạo người dùng thành công', {variant: 'success'});
 			});
 		} catch (e) {
@@ -158,6 +177,30 @@ export default function CreateUserForm() {
 							{...getFieldProps('name')}
 							error={Boolean(touched.name && errors.name)}
 							helperText={touched.name && errors.name}
+						/>
+						<TextField
+							fullWidth
+							type="text"
+							label="Chủ sở hữu*"
+							{...getFieldProps('owner')}
+							error={Boolean(touched.owner && errors.owner)}
+							helperText={touched.owner && errors.owner}
+						/>
+						<TextField
+							fullWidth
+							type="text"
+							label="Số điện thoại*"
+							{...getFieldProps('phone')}
+							error={Boolean(touched.phone && errors.phone)}
+							helperText={touched.phone && errors.phone}
+						/>
+						<TextField
+							fullWidth
+							type="text"
+							label="Địa chỉ*"
+							{...getFieldProps('address')}
+							error={Boolean(touched.address && errors.address)}
+							helperText={touched.address && errors.address}
 						/>
 						<FormControl sx={{m: 1, minWidth: 80}}>
 							<InputLabel id="demo-simple-select-label">Vai trò*</InputLabel>

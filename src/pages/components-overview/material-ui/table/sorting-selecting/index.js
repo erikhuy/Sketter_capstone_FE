@@ -31,10 +31,6 @@ import SortingSelectingHead from './SortingSelectingHead';
 import SortingSelectingToolbar from './SortingSelectingToolbar';
 // ----------------------------------------------------------------------
 
-function createData(name, address, lowestPrice, rating, status) {
-	return {name, address, lowestPrice, rating, status};
-}
-
 function descendingComparator(a, b, orderBy) {
 	if (b[orderBy] < a[orderBy]) {
 		return -1;

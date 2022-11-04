@@ -45,15 +45,26 @@ export default function RegisterForm() {
 	const RegisterSchema = Yup.object().shape({
 		phone: Yup.string()
 			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
-			.min(7, 'Quá ngắn!')
-			.max(13, 'Quá dài!')
+			.min(7, 'Số điện thoại không hợp lệ!')
+			.max(13, 'Số điện thoại không hợp lệ!')
 			.required('Yêu cầu nhập số điện thoại'),
 		address: Yup.string().min(5, 'Địa chỉ không hợp lệ').required('Yêu cầu nhập địa chỉ'),
-		owner: Yup.string().min(2, 'Quá ngắn!').max(50, 'Quá dài!').required('Yêu cầu nhập họ'),
-		name: Yup.string().min(2, 'Quá ngắn!').max(50, 'Quá dài!').required('Yêu cầu nhập tên'),
+		owner: Yup.string()
+			.min(2, 'Tên chủ sở hữu không hợp lệ!')
+			.max(50, 'Tên chủ sở hữu không hợp lệ!')
+			.required('Yêu cầu nhập tên chủ sở hữu'),
+		name: Yup.string()
+			.min(2, 'Tên hiển thị không hợp lệ!')
+			.max(50, 'Tên hiển thị không hợp lệ!')
+			.required('Yêu cầu nhập tên hiển thị'),
 		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
-		password: Yup.string().min(6, 'Mật khẩu có ít nhất 6 ký tự').required('Yêu cầu mật khẩu'),
-		confirmPassword: Yup.string().oneOf([Yup.ref('password'), null], 'Mật khẩu không khớp')
+		password: Yup.string()
+			.min(6, 'Mật khẩu có ít nhất 6 ký tự')
+			.max(16, 'Mật khẩu có không quá 16 ký tự')
+			.required('Yêu cầu mật khẩu'),
+		confirmPassword: Yup.string()
+			.required('Yêu cầu xác nhận mật khẩu')
+			.oneOf([Yup.ref('password'), null], 'Mật khẩu không khớp')
 	});
 
 	const formik = useFormik({

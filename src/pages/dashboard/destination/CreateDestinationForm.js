@@ -42,7 +42,7 @@ import {useSnackbar} from 'notistack5';
 import {isNull} from 'lodash';
 import {useNavigate} from 'react-router-dom';
 import {storage} from 'utils/firebase';
-import {getDownloadURL, ref, uploadBytes, uploadString} from 'firebase/storage';
+import {getDownloadURL, ref, uploadString} from 'firebase/storage';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;

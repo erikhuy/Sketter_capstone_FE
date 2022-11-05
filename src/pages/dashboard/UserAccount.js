@@ -25,24 +25,17 @@ import Page from '../../components/Page';
 export default function UserAccount() {
 	const {themeStretch} = useSettings();
 	const [currentTab, setCurrentTab] = useState('general');
-	const dispatch = useDispatch();
-
-	useEffect(() => {
-		dispatch(getCards());
-		dispatch(getAddressBook());
-		dispatch(getInvoices());
-		dispatch(getNotifications());
-		dispatch(getProfile());
-	}, [dispatch]);
 
 	const ACCOUNT_TABS = [
 		{
 			value: 'general',
+			description: 'Thông tin',
 			icon: <Icon icon={roundAccountBox} width={20} height={20} />,
 			component: <AccountGeneral />
 		},
 		{
 			value: 'change_password',
+			description: 'Đổi mật khẩu',
 			icon: <Icon icon={roundVpnKey} width={20} height={20} />,
 			component: <AccountChangePassword />
 		}
@@ -56,8 +49,8 @@ export default function UserAccount() {
 		<Page title="Sketter">
 			<Container maxWidth={themeStretch ? false : 'lg'}>
 				<HeaderBreadcrumbs
-					heading="Account"
-					links={[{name: 'Dashboard', href: PATH_DASHBOARD.root}, {name: 'User'}]}
+					heading="Tài khoản"
+					links={[{name: 'Dashboard', href: PATH_DASHBOARD.root}, {name: 'Người dùng'}]}
 				/>
 
 				<Stack spacing={5}>
@@ -72,7 +65,7 @@ export default function UserAccount() {
 							<Tab
 								disableRipple
 								key={tab.value}
-								label={capitalCase(tab.value)}
+								label={tab.description}
 								icon={tab.icon}
 								value={tab.value}
 							/>

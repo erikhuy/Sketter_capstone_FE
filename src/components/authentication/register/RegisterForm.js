@@ -116,7 +116,7 @@ export default function RegisterForm() {
 					<TextField
 						fullWidth
 						type="email"
-						label="Email"
+						label="Email*"
 						{...getFieldProps('email')}
 						error={Boolean(touched.email && errors.email)}
 						helperText={touched.email && errors.email}
@@ -125,7 +125,7 @@ export default function RegisterForm() {
 					<TextField
 						fullWidth
 						type={showPassword ? 'text' : 'password'}
-						label="Mật khẩu"
+						label="Mật khẩu*"
 						{...getFieldProps('password')}
 						InputProps={{
 							endAdornment: (
@@ -142,7 +142,7 @@ export default function RegisterForm() {
 					<TextField
 						fullWidth
 						type={showConfirmPassword ? 'text' : 'password'}
-						label="Nhập lại mật khẩu"
+						label="Nhập lại mật khẩu*"
 						{...getFieldProps('confirmPassword')}
 						InputProps={{
 							endAdornment: (
@@ -159,7 +159,7 @@ export default function RegisterForm() {
 					<TextField
 						fullWidth
 						type="text"
-						label="Tên"
+						label="Tên hiển thị*"
 						{...getFieldProps('name')}
 						error={Boolean(touched.name && errors.name)}
 						helperText={touched.name && errors.name}
@@ -167,7 +167,7 @@ export default function RegisterForm() {
 					<TextField
 						fullWidth
 						type="text"
-						label="Chủ sở hữu"
+						label="Chủ sở hữu*"
 						{...getFieldProps('owner')}
 						error={Boolean(touched.owner && errors.owner)}
 						helperText={touched.owner && errors.owner}
@@ -175,7 +175,7 @@ export default function RegisterForm() {
 					<TextField
 						fullWidth
 						type="text"
-						label="Số điện thoại"
+						label="Số điện thoại*"
 						{...getFieldProps('phone')}
 						error={Boolean(touched.phone && errors.phone)}
 						helperText={touched.phone && errors.phone}
@@ -183,7 +183,7 @@ export default function RegisterForm() {
 					<TextField
 						fullWidth
 						type="text"
-						label="Địa chỉ"
+						label="Địa chỉ*"
 						{...getFieldProps('address')}
 						error={Boolean(touched.address && errors.address)}
 						helperText={touched.address && errors.address}

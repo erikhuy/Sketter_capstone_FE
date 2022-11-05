@@ -43,13 +43,15 @@ import {useSnackbar} from 'notistack5';
 import Select from 'theme/overrides/Select';
 import AvatarUploadArea from 'components/avatararea/AvatarDropzone';
 import {useNavigate} from 'react-router';
+import {storage} from 'utils/firebase';
+import {getDownloadURL, ref, uploadString} from 'firebase/storage';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 UserDetailForm.propTypes = {
 	userID: PropTypes.object.isRequired
 };
-export default function UserDetailForm({userID, onReload,onOpenModal}) {
+export default function UserDetailForm({userID, onReload, onOpenModal}) {
 	// eslint-disable-next-line no-bitwise
 	const isMountedRef = useIsMountedRef();
 	const [gallery, setGallery] = useState([]);
@@ -85,29 +87,48 @@ export default function UserDetailForm({userID, onReload,onOpenModal}) {
 			}
 		}
 	});
+	// const handleImages = (data) => {
+	// 	console.log(data);
+	// 	setGallery(data);
+	// 	if (data.length === 0) {
+	// 		setFieldValue('avatar', null);
+	// 	}
+	// 	// eslint-disable-next-line array-callback-return
+	// 	data.map((images) => {
+	// 		if (!images.url) {
+	// 			try {
+	// 				imgbbUploader({
+	// 					apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
+	// 					base64string: images.image_base64.split('base64,')[1]
+	// 					// OPTIONAL: pass base64-encoded image (max 32Mb)
+	// 				})
+	// 					// eslint-disable-next-line no-const-assign
+	// 					.then((response) => setFieldValue('avatar', response.url))
+	// 					.catch((error) => console.log(error));
+	// 			} catch (e) {
+	// 				console.log(e);
+	// 			}
+	// 		} else {
+	// 			setFieldValue('avatar', response.url);
+	// 		}
+	// 	});
+	// };
 	const handleImages = (data) => {
-		console.log(data);
 		setGallery(data);
-		if (data.length === 0) {
-			setFieldValue('avatar', null);
-		}
 		// eslint-disable-next-line array-callback-return
 		data.map((images) => {
-			if (!images.url) {
-				try {
-					imgbbUploader({
-						apiKey: '80129f4ae650eb206ddfe55e3184196c', // MANDATORY
-						base64string: images.image_base64.split('base64,')[1]
-						// OPTIONAL: pass base64-encoded image (max 32Mb)
-					})
-						// eslint-disable-next-line no-const-assign
-						.then((response) => setFieldValue('avatar', response.url))
-						.catch((error) => console.log(error));
-				} catch (e) {
-					console.log(e);
-				}
-			} else {
-				setFieldValue('avatar', response.url);
+			console.log(images);
+			try {
+				const imageRef = ref(storage, `images/destination/${images.image_file.name}`);
+				uploadString(imageRef, images.image_base64, 'data_url').then((e) => {
+					getDownloadURL(ref(storage, `images/destination/${images.image_file.name}`)).then((e) => {
+						console.log(e.split('&token')[0]);
+						setFieldValue('avatar', e.split('&token')[0]);
+					});
+					console.log(`upload ${images.image_file.name} thành công`);
+				});
+			} catch (e) {
+				console.log(e);
 			}
 		});
 	};
@@ -118,7 +139,7 @@ export default function UserDetailForm({userID, onReload,onOpenModal}) {
 				.then((res) => {
 					enqueueSnackbar('Cập nhật thông tin thành công', {variant: 'success'});
 					onReload(data);
-					onOpenModal(false)
+					onOpenModal(false);
 				})
 				.catch((e) => enqueueSnackbar(e.response.data.message, {variant: 'error'}));
 		} catch (e) {

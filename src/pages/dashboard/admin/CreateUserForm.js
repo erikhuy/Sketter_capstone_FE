@@ -173,7 +173,7 @@ export default function CreateUserForm() {
 							style={{height: 56, width: 460}}
 							fullWidth
 							type="text"
-							label="Tên*"
+							label="Tên hiển thị*"
 							{...getFieldProps('name')}
 							error={Boolean(touched.name && errors.name)}
 							helperText={touched.name && errors.name}

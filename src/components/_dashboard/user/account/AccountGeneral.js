@@ -1,4 +1,4 @@
-import {useCallback, useEffect} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Form, FormikProvider, useFormik} from 'formik';
 import {useSnackbar} from 'notistack5';
 import useAuth from 'shared/hooks/useAuth';
@@ -11,7 +11,9 @@ import {useDispatchAction, useLoading} from 'shared/hooks';
 import {updateMeThunk} from 'shared/redux/thunks/auth';
 import {isNull} from 'lodash';
 import {cleanUpUIStateAction} from 'shared/redux/slices/auth';
-import {UploadAvatar} from '../../../upload';
+import AvatarUploadArea from 'components/avatararea/AvatarDropzone';
+import {storage} from 'utils/firebase';
+import {getDownloadURL, ref, uploadString} from 'firebase/storage';
 
 export default function AccountGeneral() {
 	const updateMe = useDispatchAction(updateMeThunk);
@@ -20,9 +22,19 @@ export default function AccountGeneral() {
 	const {user, updateMeErrorMessage} = useAuth();
 	const cleanUpUIState = useDispatchAction(cleanUpUIStateAction);
 	const isUpdatingMe = useLoading([updateMeThunk]);
+	const [gallery, setGallery] = useState([]);
 
 	const UpdateUserSchema = Yup.object().shape({
-		name: Yup.string().required('Name is required')
+		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
+		phone: Yup.string()
+			.nullable(true)
+			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
+			.min(8, 'Số điện thoại không tồn tại!')
+			.max(13, 'Số điện thoại không tồn tại!'),
+		address: Yup.string()
+			.min(2, 'Địa chỉ không hợp lệ!')
+			.max(50, 'Địa chỉ không hợp lệ!')
+			.required('Yêu cầu nhập địa chỉ')
 	});
 
 	useEffect(
@@ -31,13 +43,18 @@ export default function AccountGeneral() {
 		},
 		[]
 	);
+	useEffect(() => {
+		const imageArray = [];
+		imageArray.push({url: user.avatar});
+		console.log(imageArray);
+	});
 
 	useEffect(() => {
 		if (isNull(updateMeErrorMessage)) {
 			return;
 		}
 
-		const message = updateMeErrorMessage || 'Update success';
+		const message = updateMeErrorMessage || 'Cập nhật thành công';
 		enqueueSnackbar(message, {variant: updateMeErrorMessage ? 'error' : 'success'});
 	}, [updateMeErrorMessage]);
 
@@ -65,7 +82,25 @@ export default function AccountGeneral() {
 			}
 		}
 	});
-
+	const handleImages = (data) => {
+		setGallery(data);
+		// eslint-disable-next-line array-callback-return
+		data.map((images) => {
+			console.log(images);
+			try {
+				const imageRef = ref(storage, `images/destination/${images.image_file.name}`);
+				uploadString(imageRef, images.image_base64, 'data_url').then((e) => {
+					getDownloadURL(ref(storage, `images/destination/${images.image_file.name}`)).then((e) => {
+						console.log(e.split('&token')[0]);
+						setFieldValue('avatar', e.split('&token')[0]);
+					});
+					console.log(`upload ${images.image_file.name} thành công`);
+				});
+			} catch (e) {
+				console.log(e);
+			}
+		});
+	};
 	const {values, errors, touched, handleSubmit, getFieldProps, setFieldValue} = formik;
 
 	const handleDrop = useCallback(
@@ -83,33 +118,11 @@ export default function AccountGeneral() {
 			<Form autoComplete="off" noValidate onSubmit={handleSubmit}>
 				<Grid container spacing={3}>
 					<Grid item xs={12} md={4}>
-						<Card sx={{py: 10, px: 3, textAlign: 'center'}}>
-							<UploadAvatar
-								accept="image/*"
-								file={values.avatar}
-								maxSize={3145728}
-								onDrop={handleDrop}
-								error={Boolean(touched.photoURL && errors.photoURL)}
-								caption={
-									<Typography
-										variant="caption"
-										sx={{
-											mt: 2,
-											mx: 'auto',
-											display: 'block',
-											textAlign: 'center',
-											color: 'text.secondary'
-										}}
-									>
-										Allowed *.jpeg, *.jpg, *.png, *.gif
-										<br /> max size of {fData(3145728)}
-									</Typography>
-								}
+						<Card sx={{py: 1, px: 1, textAlign: 'center'}}>
+							<AvatarUploadArea
+								setImageList={handleImages}
+								imageList={user.avatar ? [{url: user.avatar}] : gallery}
 							/>
-
-							<FormHelperText error sx={{px: 2, textAlign: 'center'}}>
-								{touched.photoURL && errors.photoURL}
-							</FormHelperText>
 						</Card>
 					</Grid>
 
@@ -117,18 +130,18 @@ export default function AccountGeneral() {
 						<Card sx={{p: 3}}>
 							<Stack spacing={{xs: 2, md: 3}}>
 								<Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
-									<TextField fullWidth label="Name" {...getFieldProps('name')} />
-									<TextField fullWidth disabled label="Email Address" {...getFieldProps('email')} />
+									<TextField fullWidth label="Họ & Tên*" {...getFieldProps('name')} />
+									<TextField fullWidth disabled label="Email" {...getFieldProps('email')} />
 								</Stack>
 
 								<Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
-									<TextField fullWidth label="Phone Number" {...getFieldProps('phone')} />
-									<TextField fullWidth label="Address" {...getFieldProps('address')} />
+									<TextField fullWidth label="Số điện thoại*" {...getFieldProps('phone')} />
+									<TextField fullWidth label="Địa chỉ*" {...getFieldProps('address')} />
 								</Stack>
 							</Stack>
 							<Box sx={{mt: 3, display: 'flex', justifyContent: 'flex-end'}}>
 								<LoadingButton type="submit" variant="contained" loading={isUpdatingMe}>
-									Save Changes
+									Lưu
 								</LoadingButton>
 							</Box>
 						</Card>

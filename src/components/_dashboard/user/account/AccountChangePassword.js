@@ -34,14 +34,16 @@ export default function AccountChangePassword() {
 			return;
 		}
 
-		const message = updatePasswordErrorMessage || 'Update success';
+		const message = updatePasswordErrorMessage || 'Cập nhật mật khẩu thành công';
 		enqueueSnackbar(message, {variant: updatePasswordErrorMessage ? 'error' : 'success'});
 	}, [updatePasswordErrorMessage]);
 
 	const ChangePassWordSchema = Yup.object().shape({
-		currentPassword: Yup.string().required('Old Password is required'),
-		newPassword: Yup.string().min(6, 'Password must be at least 6 characters').required('New Password is required'),
-		confirmNewPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], 'Passwords must match')
+		currentPassword: Yup.string().required('Yêu cầu nhập lại mật khẩu cũ'),
+		newPassword: Yup.string().min(6, 'Mật khẩu yêu cầu 6 ký tự trở lên').required('Yêu cầu nhập mật khẩu'),
+		confirmNewPassword: Yup.string()
+			.oneOf([Yup.ref('newPassword'), null], 'Mật khẩu không khớp')
+			.required('Yêu cầu nhập mật khẩu')
 	});
 
 	const formik = useFormik({
@@ -77,7 +79,7 @@ export default function AccountChangePassword() {
 							fullWidth
 							autoComplete="on"
 							type="password"
-							label="Old Password"
+							label="Mật khẩu cũ*"
 							error={Boolean(touched.currentPassword && errors.currentPassword)}
 							helperText={touched.currentPassword && errors.currentPassword}
 						/>
@@ -87,9 +89,11 @@ export default function AccountChangePassword() {
 							fullWidth
 							autoComplete="on"
 							type="password"
-							label="New Password"
+							label="Mật khẩu mới*"
 							error={Boolean(touched.newPassword && errors.newPassword)}
-							helperText={(touched.newPassword && errors.newPassword) || 'Password must be minimum 6+'}
+							helperText={
+								(touched.newPassword && errors.newPassword) || 'Mật khẩu phải gồm có 6 ký tự trở lên'
+							}
 						/>
 
 						<TextField
@@ -97,13 +101,13 @@ export default function AccountChangePassword() {
 							fullWidth
 							autoComplete="on"
 							type="password"
-							label="Confirm New Password"
+							label="Nhập lại mật khẩu mới*"
 							error={Boolean(touched.confirmNewPassword && errors.confirmNewPassword)}
 							helperText={touched.confirmNewPassword && errors.confirmNewPassword}
 						/>
 
 						<LoadingButton type="submit" variant="contained" loading={isUpdatingMe}>
-							Save Changes
+							Lưu
 						</LoadingButton>
 					</Stack>
 				</Form>

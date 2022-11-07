@@ -21,12 +21,12 @@ import MyAvatar from '../../../components/MyAvatar';
 
 const MENU_OPTIONS = [
 	{
-		label: 'Home',
+		label: 'Trang chủ',
 		icon: homeFill,
 		linkTo: '/'
 	},
 	{
-		label: 'Profile',
+		label: 'Thông tin',
 		icon: personFill,
 		linkTo: PATH_DASHBOARD.user.account
 	}
@@ -58,7 +58,7 @@ export default function AccountPopover() {
 			}
 		} catch (error) {
 			console.error(error);
-			enqueueSnackbar('Unable to logout', {variant: 'error'});
+			enqueueSnackbar('Không thể đăng xuất', {variant: 'error'});
 		}
 	};
 

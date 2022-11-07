@@ -96,11 +96,14 @@ export default function SortingSelectingToolbar({onReloadList, numSelected, idSe
 								enqueueSnackbar('Ngưng hoạt động tài khoản thành công', {variant: 'success'});
 								setOpenDialog(false);
 							})
-							.catch((error) => enqueueSnackbar(error.data.message, {variant: 'error'}));
+							.catch((e) => {
+								console.log(e.response.data.message);
+								enqueueSnackbar(e.response.data.message, {variant: 'error'});
+							});
 					})
 				);
 			} catch (e) {
-				enqueueSnackbar('Ngưng hoạt động tài khoản không thành công', {variant: 'error'});
+				enqueueSnackbar(e.data.message, {variant: 'error'});
 				setOpenDialog(false);
 			}
 		},

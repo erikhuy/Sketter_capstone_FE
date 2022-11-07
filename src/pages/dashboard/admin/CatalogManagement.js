@@ -120,7 +120,7 @@ export default function CatalogManagement() {
 			)}
 			{openAddDialog && (
 				<Dialog open={openAddDialog} onClose={handleCloseAddDialog}>
-					<DialogTitle>Thêm địa điểm phụ vào {mainCatalog}</DialogTitle>
+					<DialogTitle>Thêm loại địa điểm phụ vào {mainCatalog}</DialogTitle>
 					<DialogContent>
 						<TextField
 							autoFocus

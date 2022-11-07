@@ -44,10 +44,12 @@ export default function AccountGeneral() {
 		[]
 	);
 	useEffect(() => {
-		const imageArray = [];
-		imageArray.push({url: user.avatar});
-		console.log(imageArray);
-	});
+		if (user.avatar) {
+			setGallery([{url: user.avatar}]);
+		} else {
+			setGallery([]);
+		}
+	}, []);
 
 	useEffect(() => {
 		if (isNull(updateMeErrorMessage)) {
@@ -69,8 +71,13 @@ export default function AccountGeneral() {
 		),
 		validationSchema: UpdateUserSchema,
 		onSubmit: async (values, {setErrors, setSubmitting}) => {
+			console.log(values);
 			try {
-				updateMe(values);
+				if (values.avatar !== null) {
+					updateMe(values);
+				} else {
+					enqueueSnackbar('Vui lòng chọn hình ảnh', {variant: 'error'});
+				}
 				if (isMountedRef.current) {
 					setSubmitting(false);
 				}
@@ -84,22 +91,29 @@ export default function AccountGeneral() {
 	});
 	const handleImages = (data) => {
 		setGallery(data);
+		console.log(data);
 		// eslint-disable-next-line array-callback-return
-		data.map((images) => {
-			console.log(images);
-			try {
-				const imageRef = ref(storage, `images/destination/${images.image_file.name}`);
-				uploadString(imageRef, images.image_base64, 'data_url').then((e) => {
-					getDownloadURL(ref(storage, `images/destination/${images.image_file.name}`)).then((e) => {
-						console.log(e.split('&token')[0]);
-						setFieldValue('avatar', e.split('&token')[0]);
+		if (data.length !== 0) {
+			// eslint-disable-next-line array-callback-return
+			data.map((images) => {
+				console.log(images);
+				try {
+					const imageRef = ref(storage, `images/destination/${images.image_file.name}`);
+					uploadString(imageRef, images.image_base64, 'data_url').then((e) => {
+						getDownloadURL(ref(storage, `images/destination/${images.image_file.name}`)).then((e) => {
+							console.log(e.split('&token')[0]);
+							setFieldValue('avatar', e.split('&token')[0]);
+						});
+						console.log(`upload ${images.image_file.name} thành công`);
 					});
-					console.log(`upload ${images.image_file.name} thành công`);
-				});
-			} catch (e) {
-				console.log(e);
-			}
-		});
+				} catch (e) {
+					console.log(e);
+				}
+			});
+		} else {
+			setFieldValue('avatar', null);
+			enqueueSnackbar('Vui lòng chọn hình ảnh', {variant: 'error'});
+		}
 	};
 	const {values, errors, touched, handleSubmit, getFieldProps, setFieldValue} = formik;
 
@@ -119,10 +133,7 @@ export default function AccountGeneral() {
 				<Grid container spacing={3}>
 					<Grid item xs={12} md={4}>
 						<Card sx={{py: 1, px: 1, textAlign: 'center'}}>
-							<AvatarUploadArea
-								setImageList={handleImages}
-								imageList={user.avatar ? [{url: user.avatar}] : gallery}
-							/>
+							<AvatarUploadArea setImageList={handleImages} imageList={gallery} />
 						</Card>
 					</Grid>
 

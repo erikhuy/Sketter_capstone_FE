@@ -79,23 +79,8 @@ function SetColor(themeColor) {
 	const RED = PRIMARY_COLOR[5];
 
 	switch (themeColor) {
-		case 'purple':
-			color = PURPLE;
-			break;
-		case 'cyan':
-			color = CYAN;
-			break;
-		case 'blue':
-			color = BLUE;
-			break;
-		case 'orange':
-			color = ORANGE;
-			break;
-		case 'red':
-			color = RED;
-			break;
 		default:
-			color = DEFAULT;
+			color = PURPLE;
 	}
 	return color;
 }

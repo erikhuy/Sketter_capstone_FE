@@ -127,6 +127,7 @@ const AvatarUploadArea = (props) => {
 						key={index}
 						// Remove function for Flip card
 						remove={(e) => {
+							console.log("xóa");
 							setAvatarContained('block');
 							e.preventDefault();
 							//Replicate

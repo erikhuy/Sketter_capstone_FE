@@ -18,7 +18,7 @@ export default function PendingDestinationList() {
 			<Box sx={{mb: 3, display: 'flex', justifyContent: 'flex-end'}}>
 				<Button
 					variant="contained"
-					color="success"
+					color="primary"
 					startIcon={<AddIcon />}
 					sx={{color: 'white'}}
 					onClick={navigateToAddDestination}

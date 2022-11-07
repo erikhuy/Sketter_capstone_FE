@@ -126,8 +126,11 @@ export default function CreateDestinationForm() {
 			console.log(values);
 
 			try {
-				// processData(values);
-				await createDestination(processData(values));
+				if (values.gallery.length !== 0) {
+					createDestination(processData(values));
+				} else {
+					enqueueSnackbar('Vui lòng chọn hình ảnh', {variant: 'error'});
+				}
 				if (isMountedRef.current) {
 					setSubmitting(false);
 				}

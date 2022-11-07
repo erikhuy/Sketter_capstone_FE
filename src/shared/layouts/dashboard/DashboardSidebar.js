@@ -150,17 +150,9 @@ export default function DashboardSidebar({isOpenSidebar, onCloseSidebar}) {
 					})
 				}}
 			>
-				<Stack direction="row" alignItems="center" justifyContent="space-between">
-					<Box component={RouterLink} to="/" sx={{display: 'inline-flex'}}>
-						<Logo />
-					</Box>
-
-					<MHidden width="lgDown">
-						{!isCollapse && (
-							<IconCollapse onToggleCollapse={onToggleCollapse} collapseClick={collapseClick} />
-						)}
-					</MHidden>
-				</Stack>
+				<Box component={RouterLink} to="/" sx={{display: 'flex', justifyContent: 'center'}}>
+					<Logo />
+				</Box>
 
 				{isCollapse ? (
 					<MyAvatar sx={{mx: 'auto', mb: 2}} />

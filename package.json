@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider next build && next export",    "test": "react-scripts test",
+    "build": "react-scripts --openssl-legacy-provider build",
+    "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint --ext .js,.jsx ./src",
     "lint:fix": "eslint --fix --ext .js,.jsx ./src"

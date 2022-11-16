@@ -70,11 +70,12 @@ const style = {
 	boxShadow: 24,
 	p: 4
 };
-export default function SortingSelectingToolbar({numSelected, idSelected, reloadData, reloadNumber}) {
+export default function SortingSelectingToolbar({onReloadList, numSelected, idSelected, reloadData, reloadNumber}) {
 	const [open, setOpen] = useState(false);
 	const [openReview, setReviewOpen] = useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
+	const [reloadList, setReload] = useState();
 	const handleReviewOpen = () => setReviewOpen(true);
 	const handleReviewClose = () => setReviewOpen(false);
 	const handleOpenDialog = () => setOpenDialog(true);
@@ -107,7 +108,11 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 		},
 		[resetToolbar]
 	);
-
+	useEffect(() => {
+		onReloadList(reloadList);
+		reloadData([]);
+		reloadNumber([]);
+	}, [reloadList]);
 	const theme = useTheme();
 	const isLight = theme.palette.mode === 'light';
 	return (
@@ -156,10 +161,18 @@ export default function SortingSelectingToolbar({numSelected, idSelected, reload
 					aria-describedby="modal-modal-description"
 				>
 					<Box sx={style}>
-						{user.role.description === 'Quản lý đối tác' ? (
-							<DestinationDetailFormSupplierManager destinationID={idSelected} />
+						{user.role.description === 'Quản lý' ? (
+							<DestinationDetailFormSupplierManager
+								destinationID={idSelected}
+								onReload={setReload}
+								onOpenModal={handleClose}
+							/>
 						) : (
-							<DestinationDetailForm destinationID={idSelected} />
+							<DestinationDetailForm
+								destinationID={idSelected}
+								onReload={setReload}
+								onOpenModal={handleClose}
+							/>
 						)}
 					</Box>
 				</Modal>

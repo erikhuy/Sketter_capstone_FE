@@ -179,7 +179,7 @@ export default function DashboardSidebar({isOpenSidebar, onCloseSidebar}) {
 					// eslint-disable-next-line no-nested-ternary
 					user.role.description === 'Đối tác'
 						? sidebarConfigSupplier
-						: user.role.description === 'Quản lý đối tác'
+						: user.role.description === 'Quản lý'
 						? sidebarConfigSupplierManager
 						: sidebarConfigAdmin
 				}

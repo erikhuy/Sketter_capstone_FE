@@ -65,46 +65,76 @@ export default function SortingSelecting() {
 	const [page, setPage] = useState(0);
 	const [dense, setDense] = useState(false);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [reloadList, setReloadList] = useState();
 	const [data, setData] = useState([]);
 	const [dataNumber, setDataNumber] = useState();
 	const [maxPage, setMaxPage] = useState();
 	const [currentPage, setCurrentPage] = useState();
 	const [searchInput, setSearchInput] = useState('');
+	const [searchKey, setSearchKey] = useState('');
 	const {enqueueSnackbar} = useSnackbar();
+
+	// useEffect(() => {
+	// 	const fetchData = async () => {
+	// 		try {
+	// 			await axios.get(`${API_URL.Destination}?page=${page + 1}`).then((res) => {
+	// 				console.log(dataNumber);
+
+	// 				setData(res.data.data.destinations);
+	// 				setMaxPage(res.data.maxPage);
+	// 				setCurrentPage(res.data.currentPage);
+	// 				if (res.data.maxPage > res.data.currentPage) {
+	// 					// eslint-disable-next-line no-const-assign
+	// 					setDataNumber(res.data.data.destinations.length + page * 10 + (page === 0 ? 1 : page));
+	// 				} else {
+	// 					setDataNumber(res.data.data.destinations.length + page * 10);
+	// 				}
+	// 			});
+	// 		} catch (error) {
+	// 			setPage(page - 1);
+	// 		}
+	// 	};
+	// 	fetchData();
+	// }, [page, selectedID]);
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios.get(`${API_URL.Destination}?page=${page + 1}`).then((res) => {
-					console.log(dataNumber);
+				await axios
+					.get(`${API_URL.Destination}/search?name=${searchKey}&catalog=&page=${page + 1}&skipStay=`)
+					.then((res) => {
+						console.log(dataNumber);
 
-					setData(res.data.data.destinations);
-					setMaxPage(res.data.maxPage);
-					setCurrentPage(res.data.currentPage);
-					if (res.data.maxPage > res.data.currentPage) {
-						// eslint-disable-next-line no-const-assign
-						setDataNumber(res.data.data.destinations.length + page * 10 + (page === 0 ? 1 : page));
-					} else {
-						setDataNumber(res.data.data.destinations.length + page * 10);
-					}
-				});
+						setData(res.data.data.destinations);
+						setMaxPage(res.data.maxPage);
+						setCurrentPage(res.data.currentPage);
+						if (res.data.maxPage > res.data.currentPage) {
+							// eslint-disable-next-line no-const-assign
+							setDataNumber(res.data.data.count);
+						} else {
+							setDataNumber(res.data.data.count);
+						}
+					});
 			} catch (error) {
 				setPage(page - 1);
 			}
 		};
 		fetchData();
-	}, [page, selectedID]);
+	}, [page, selectedID, searchKey, reloadList]);
+	useEffect(() => {
+		setSelectedID([]);
+	}, [reloadList]);
 
-	const searchDestination = useCallback(async (keyword) => {
-		try {
-			await axios.get(`${API_URL.Destination}/search?name=${keyword}&catalog=&page=1&skipStay=`).then((res) => {
-				console.log(res.data.data.destinations);
-				setData(res.data.data.destinations);
-			});
-		} catch (e) {
-			console.log(e.response.data.message);
-		}
-	});
+	// const searchDestination = useCallback(async (keyword) => {
+	// 	try {
+	// 		await axios.get(`${API_URL.Destination}/search?name=${keyword}&catalog=&page=1&skipStay=`).then((res) => {
+	// 			console.log(res.data.data.destinations);
+	// 			setData(res.data.data.destinations);
+	// 		});
+	// 	} catch (e) {
+	// 		console.log(e.response.data.message);
+	// 	}
+	// });
 	const TABLE_HEAD = [
 		{
 			id: 'name',
@@ -216,8 +246,8 @@ export default function SortingSelecting() {
 				}}
 				onKeyPress={(e) => {
 					if (e.key === 'Enter') {
-						console.log(e.target.value);
-						searchDestination(e.target.value);
+						setSearchKey(e.target.value);
+						setPage(0);
 					}
 				}}
 				InputProps={{
@@ -242,7 +272,8 @@ export default function SortingSelecting() {
 							sx={{visibility: searchInput ? 'visible' : 'hidden'}}
 							onClick={() => {
 								setSearchInput('');
-								console.log('clear');
+								setSearchKey('');
+								setPage(0);
 							}}
 						>
 							<Clear />
@@ -255,6 +286,7 @@ export default function SortingSelecting() {
 				idSelected={selectedID}
 				reloadData={setSelectedID}
 				reloadNumber={setSelected}
+				onReloadList={setReloadList}
 			/>
 
 			<Scrollbar>
@@ -293,12 +325,10 @@ export default function SortingSelecting() {
 										<TableCell align="right">{row.lowestPrice}</TableCell>
 										<TableCell align="right">{row.avgRating}</TableCell>
 										<TableCell align="right">
-											{row.status === 'Activated'
+											{row.status === 'Open'
 												? 'Hoạt động'
 												: row.status === 'Deactivated'
 												? 'Bị ngưng hoạt động'
-												: row.status === 'Inactivated'
-												? 'Ngưng hoạt động'
 												: row.status === 'Closed'
 												? 'Đóng cửa'
 												: ''}

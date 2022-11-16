@@ -11,5 +11,7 @@ export const API_URL = {
 	Destination: '/api/v1/destinations',
 	Auth: '/api/v1/auth',
 	Cata: '/api/v1/catalogs',
-	PT: '/api/v1/personalities'
+	PT: '/api/v1/personalities',
+	City: '/api/v1/cities',
+	TimeFrames: '/api/v1/time_frames'
 };

@@ -22,7 +22,7 @@ export default function SupplierGuard({children}) {
 		console.log('yesSM');
 		return <Login />;
 	}
-	if (user.role.description !== 'Quản lý đối tác' && user.role.description !== 'Đối tác') {
+	if (user.role.description !== 'Quản lý' && user.role.description !== 'Đối tác') {
 		console.log('yesSM');
 		return <Navigate to="/dashboard/app" />;
 	}

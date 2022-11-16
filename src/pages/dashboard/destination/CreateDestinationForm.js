@@ -35,7 +35,6 @@ import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import ImageDropzone from 'components/imagearea/ImageDropzone';
 import PropTypes from 'prop-types';
 import useIsMountedRef from 'shared/hooks/useIsMountedRef';
-import {createNull} from 'typescript';
 import Mapfield from 'components/mapfield';
 import {API_URL} from 'shared/constants';
 import {useSnackbar} from 'notistack5';
@@ -56,6 +55,8 @@ export default function CreateDestinationForm() {
 	const [gallery, setGallery] = useState([]);
 	const [createDestinationMessage, setCreateDestinationMessage] = useState();
 	const [catalogs, setCatalogs] = useState([]);
+	const [cities, setCities] = useState([]);
+	const [timeFrames, setTimeFrames] = useState([]);
 	const [personalities, setPersonalities] = useState([]);
 
 	const CreateDestinationSchema = Yup.object().shape({
@@ -151,7 +152,7 @@ export default function CreateDestinationForm() {
 		supArray.longitude = data.location.lng;
 		supArray.latitude = data.location.lat;
 		supArray.address = data.location.destinationAddress;
-		return supArray;		
+		return supArray;
 		// return data;
 	};
 	useEffect(() => {
@@ -190,6 +191,31 @@ export default function CreateDestinationForm() {
 			} catch (error) {
 				console.log(error);
 				enqueueSnackbar(error.response.data.message, {variant: 'error'});
+			}
+		};
+		fetchSupplier();
+	}, []);
+	useEffect(() => {
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.City}`).then((res) => {
+					console.log(res.data.data.cities);
+					setCities(res.data.data.cities);
+				});
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		fetchSupplier();
+	}, []);
+	useEffect(() => {
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.TimeFrames}`).then((res) => {
+					setTimeFrames(res.data.data.timeFrames);
+				});
+			} catch (error) {
+				console.log(error);
 			}
 		};
 		fetchSupplier();
@@ -324,6 +350,25 @@ export default function CreateDestinationForm() {
 										}}
 										error={Boolean(touched.email && errors.email)}
 										helperText={touched.email && errors.email}
+									/>
+									<Autocomplete
+										onChange={(e, value) => {
+											console.log(value.id);
+											setFieldValue('cityID', value.id);
+										}}
+										id="tags-outlined"
+										options={cities}
+										value={values.city}
+										getOptionLabel={(option) => option.name}
+										filterSelectedOptions
+										renderInput={(params) => (
+											<TextField
+												{...params}
+												label="Khu vực"
+												{...getFieldProps('cityID')}
+												required
+											/>
+										)}
 									/>
 									<TextField
 										fullWidth
@@ -539,13 +584,11 @@ export default function CreateDestinationForm() {
 										<Autocomplete
 											multiple
 											id="tags-outlined"
-											options={RecommendedTimesFrame}
-											getOptionLabel={(option) => `${option.start}-${option.end}`}
+											options={timeFrames}
+											value={values.recommendedTimes}
+											getOptionLabel={(option) => `${option.from}-${option.to}`}
 											onChange={(e, value) => {
-												setFieldValue(
-													'recommendedTimes',
-													value !== null ? value : initialValues.recommendedTimes
-												);
+												setFieldValue('recommendedTimes', value);
 											}}
 											filterSelectedOptions
 											renderInput={(params) => (
@@ -553,8 +596,8 @@ export default function CreateDestinationForm() {
 													multiline="false"
 													required
 													{...params}
-													label="Khoảng thời gian lý tưởng"
 													{...getFieldProps('recommendedTimes')}
+													label="Khoảng thời gian lý tưởng"
 													error={Boolean(touched.recommendedTimes && errors.recommendedTimes)}
 													helperText={touched.recommendedTimes && errors.recommendedTimes}
 												/>
@@ -620,105 +663,105 @@ export default function CreateDestinationForm() {
 // 	{name: 'Giá rẻ là trên hết'},
 // 	{name: 'Có nhu cầu vui chơi, giải trí cao'}
 // ];
-const RecommendedTimesFrame = [
-	{
-		start: '00:00',
-		end: '23:59'
-	},
-	{
-		start: '00:00',
-		end: '01:00'
-	},
-	{
-		start: '01:00',
-		end: '02:00'
-	},
-	{
-		start: '02:00',
-		end: '03:00'
-	},
-	{
-		start: '03:00',
-		end: '04:00'
-	},
-	{
-		start: '04:00',
-		end: '05:00'
-	},
-	{
-		start: '05:00',
-		end: '06:00'
-	},
-	{
-		start: '06:00',
-		end: '07:00'
-	},
-	{
-		start: '07:00',
-		end: '08:00'
-	},
-	{
-		start: '08:00',
-		end: '09:00'
-	},
-	{
-		start: '09:00',
-		end: '10:00'
-	},
-	{
-		start: '10:00',
-		end: '11:00'
-	},
-	{
-		start: '11:00',
-		end: '12:00'
-	},
-	{
-		start: '12:00',
-		end: '13:00'
-	},
-	{
-		start: '13:00',
-		end: '14:00'
-	},
-	{
-		start: '14:00',
-		end: '15:00'
-	},
-	{
-		start: '15:00',
-		end: '16:00'
-	},
-	{
-		start: '16:00',
-		end: '17:00'
-	},
-	{
-		start: '17:00',
-		end: '18:00'
-	},
-	{
-		start: '18:00',
-		end: '19:00'
-	},
-	{
-		start: '19:00',
-		end: '20:00'
-	},
-	{
-		start: '20:00',
-		end: '21:00'
-	},
-	{
-		start: '21:00',
-		end: '22:00'
-	},
-	{
-		start: '22:00',
-		end: '23:00'
-	},
-	{
-		start: '23:00',
-		end: '24:00'
-	}
-];
+// const RecommendedTimesFrame = [
+// 	{
+// 		start: '00:00',
+// 		end: '23:59'
+// 	},
+// 	{
+// 		start: '00:00',
+// 		end: '01:00'
+// 	},
+// 	{
+// 		start: '01:00',
+// 		end: '02:00'
+// 	},
+// 	{
+// 		start: '02:00',
+// 		end: '03:00'
+// 	},
+// 	{
+// 		start: '03:00',
+// 		end: '04:00'
+// 	},
+// 	{
+// 		start: '04:00',
+// 		end: '05:00'
+// 	},
+// 	{
+// 		start: '05:00',
+// 		end: '06:00'
+// 	},
+// 	{
+// 		start: '06:00',
+// 		end: '07:00'
+// 	},
+// 	{
+// 		start: '07:00',
+// 		end: '08:00'
+// 	},
+// 	{
+// 		start: '08:00',
+// 		end: '09:00'
+// 	},
+// 	{
+// 		start: '09:00',
+// 		end: '10:00'
+// 	},
+// 	{
+// 		start: '10:00',
+// 		end: '11:00'
+// 	},
+// 	{
+// 		start: '11:00',
+// 		end: '12:00'
+// 	},
+// 	{
+// 		start: '12:00',
+// 		end: '13:00'
+// 	},
+// 	{
+// 		start: '13:00',
+// 		end: '14:00'
+// 	},
+// 	{
+// 		start: '14:00',
+// 		end: '15:00'
+// 	},
+// 	{
+// 		start: '15:00',
+// 		end: '16:00'
+// 	},
+// 	{
+// 		start: '16:00',
+// 		end: '17:00'
+// 	},
+// 	{
+// 		start: '17:00',
+// 		end: '18:00'
+// 	},
+// 	{
+// 		start: '18:00',
+// 		end: '19:00'
+// 	},
+// 	{
+// 		start: '19:00',
+// 		end: '20:00'
+// 	},
+// 	{
+// 		start: '20:00',
+// 		end: '21:00'
+// 	},
+// 	{
+// 		start: '21:00',
+// 		end: '22:00'
+// 	},
+// 	{
+// 		start: '22:00',
+// 		end: '23:00'
+// 	},
+// 	{
+// 		start: '23:00',
+// 		end: '24:00'
+// 	}
+// ];

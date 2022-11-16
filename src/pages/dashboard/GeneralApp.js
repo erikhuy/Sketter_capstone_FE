@@ -6,17 +6,10 @@ import useSettings from 'shared/hooks/useSettings';
 import {
 	AppAreaInstalled,
 	AppCurrentDownload,
-	AppFeatured,
-	AppNewInvoice,
-	AppTopAuthors,
-	AppTopInstalledCountries,
-	AppTopRelated,
 	AppTotalActiveUsers,
 	AppTotalDownloads,
 	AppTotalInstalled,
-	AppWelcome,
-	AppWidgets1,
-	AppWidgets2
+	AppWelcome
 } from '../../components/_dashboard/general-app';
 // components
 import Page from '../../components/Page';

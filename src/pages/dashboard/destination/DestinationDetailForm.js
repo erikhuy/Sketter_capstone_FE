@@ -40,21 +40,22 @@ import imgbbUploader from 'imgbb-uploader/lib/cjs';
 import {useSnackbar} from 'notistack5';
 import {storage} from 'utils/firebase';
 import {getDownloadURL, ref, uploadBytes, uploadString} from 'firebase/storage';
+import LoadingScreen from 'components/LoadingScreen';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-DestinationDetailFormSupplierManager.propTypes = {
+DestinationDetailForm.propTypes = {
 	destinationID: PropTypes.object.isRequired
 };
-export default function DestinationDetailFormSupplierManager({destinationID}) {
+export default function DestinationDetailForm({destinationID, onReload, onOpenModal}) {
 	// eslint-disable-next-line no-bitwise
 	const isMountedRef = useIsMountedRef();
 	const [gallery, setGallery] = useState([]);
-	const [valueArray, setValueArray] = useState([]);
 	const {enqueueSnackbar} = useSnackbar();
 	const [data, setData] = useState();
 	const [isBusy, setBusy] = useState(true);
-	const [suppliers, setSuppliers] = useState([]);
+	const [cities, setCities] = useState([]);
+	const [timeFrames, setTimeFrames] = useState([]);
 	const [catalogs, setCatalogs] = useState([]);
 	const [personalities, setPersonalities] = useState([]);
 
@@ -145,49 +146,51 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		try {
 			await axios.patch(`${API_URL.Destination}/${data.id}`, data).then((res) => {
 				enqueueSnackbar(res.data.message, {variant: 'success'});
-
-				console.log(res.data);
+				onReload(data);
+				onOpenModal(false);
 			});
 		} catch (e) {
 			enqueueSnackbar(e.response.data.message, {variant: 'error'});
 		}
 	});
-
+	useEffect(() => {
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.City}`).then((res) => {
+					console.log(res.data.data.cities);
+					setCities(res.data.data.cities);
+				});
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		fetchSupplier();
+	}, []);
+	useEffect(() => {
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.TimeFrames}`).then((res) => {
+					setTimeFrames(res.data.data.timeFrames);
+				});
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		fetchSupplier();
+	}, []);
 	const handleAction = useCallback(async (id, action) => {
 		console.log(data);
-		if (action === 'Approve') {
-			try {
-				await axios.patch(`${API_URL.Destination}/pending/approve?id=${id}`).then((res) => {
-					if (res.data.message === 'success') {
-						enqueueSnackbar(res.data.data, {variant: 'success'});
-					}
-					console.log(res.data);
-				});
-			} catch (e) {
-				enqueueSnackbar(e.response.data.message, {variant: 'error'});
-			}
-		} else if (action === 'Reject') {
-			try {
-				await axios.patch(`${API_URL.Destination}/pending/reject?id=${id}`).then((res) => {
-					if (res.data.message === 'success') {
-						enqueueSnackbar(res.data.data, {variant: 'success'});
-					}
-					console.log(res.data);
-				});
-			} catch (e) {
-				enqueueSnackbar(e.response.data.message, {variant: 'error'});
-			}
-		} else if (action === 'Close') {
-			try {
-				await axios.patch(`${API_URL.Destination}/pending/close?id=${id}`).then((res) => {
-					if (res.data.message === 'success') {
-						enqueueSnackbar(res.data.data, {variant: 'success'});
-					}
-					console.log(res.data);
-				});
-			} catch (e) {
-				enqueueSnackbar(e.response.data.message, {variant: 'error'});
-			}
+		const dataSup = processData(data);
+		dataSup.status = action;
+		try {
+			await axios.patch(`${API_URL.Destination}/${dataSup.id}`, dataSup).then((res) => {
+				enqueueSnackbar(res.data.message, {variant: 'success'});
+				onReload(data);
+				onOpenModal(false);
+				console.log(res.data);
+			});
+		} catch (e) {
+			enqueueSnackbar(e.response.data.message, {variant: 'error'});
 		}
 	});
 	useEffect(() => {
@@ -230,6 +233,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		};
 		fetchSupplier();
 	}, []);
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -305,7 +309,7 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 		// eslint-disable-next-line array-callback-return
 		data?.map((x) => {
 			if (typeof x === 'object') {
-				supData.push(x.personalityName);
+				supData.push(x.name);
 			} else {
 				supData.push(x);
 			}
@@ -339,7 +343,14 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 			<FormikProvider value={formik}>
 				<Form autoComplete="off" noValidate onSubmit={handleSubmit}>
 					{isBusy ? (
-						<h1 className="page-title text-center font-weight-bold">Đang tải . . .</h1>
+						<>
+							<Box
+								sx={{
+									height: 400
+								}}
+							/>
+							<LoadingScreen />
+						</>
 					) : (
 						<Card sx={{p: 3}}>
 							<h1 className="page-title text-center font-weight-bold">Trang nhập liệu</h1>
@@ -378,6 +389,21 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											}}
 											error={Boolean(touched.email && errors.email)}
 											helperText={touched.email && errors.email}
+										/>
+										<Autocomplete
+											disabled
+											onChange={(e, value) => {
+												console.log(value.id);
+												setFieldValue('cityID', value.id);
+											}}
+											id="tags-outlined"
+											options={cities}
+											value={values.city}
+											getOptionLabel={(option) => option.name}
+											filterSelectedOptions
+											renderInput={(params) => (
+												<TextField {...params} label="Khu vực" {...getFieldProps('cityID')} />
+											)}
 										/>
 										<TextField
 											fullWidth
@@ -568,13 +594,12 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 											error={Boolean(touched.estimatedTimeStay && errors.estimatedTimeStay)}
 											helperText={touched.estimatedTimeStay && errors.estimatedTimeStay}
 										/>
-										{/* <Autocomplete
-										
+										<Autocomplete
 											multiple
 											id="tags-outlined"
-											options={RecommendedTimesFrame}
+											options={timeFrames}
 											value={values.recommendedTimes}
-											getOptionLabel={(option) => `${option.start}-${option.end}`}
+											getOptionLabel={(option) => `${option.from}-${option.to}`}
 											onChange={(e, value) => {
 												setFieldValue('recommendedTimes', value);
 											}}
@@ -590,21 +615,40 @@ export default function DestinationDetailFormSupplierManager({destinationID}) {
 													helperText={touched.recommendedTimes && errors.recommendedTimes}
 												/>
 											)}
-										/> */}
+										/>
 									</Stack>
 								</Grid>
 								<ImageDropzone setImageList={handleImages} imageList={gallery} />
 							</Grid>
 
 							<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
-								<Stack direction={{xs: 'row'}} spacing={2}>
-									<Button color="error" variant="contained" onClick={() => handleAction(values.id)}>
-										Ngưng hoạt động
+								{values.status === 'Open' ? (
+									<Stack direction={{xs: 'row'}} spacing={2}>
+										<Button
+											color="success"
+											variant="contained"
+											onClick={(e, value) => {
+												handleAction(values.id, 'Closed');
+											}}
+										>
+											Đóng cửa
+										</Button>
+
+										<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+											Cập nhật
+										</LoadingButton>
+									</Stack>
+								) : values.status === 'Closed' ? (
+									<Button
+										color="success"
+										variant="contained"
+										onClick={(e, value) => {
+											handleAction(values.id, 'Open');
+										}}
+									>
+										Mở hoạt động
 									</Button>
-									<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-										Cập nhật
-									</LoadingButton>
-								</Stack>
+								) : null}
 							</Box>
 						</Card>
 					)}

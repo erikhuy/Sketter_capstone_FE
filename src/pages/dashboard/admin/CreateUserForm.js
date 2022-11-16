@@ -216,7 +216,7 @@ export default function CreateUserForm() {
 							>
 								<MenuItem value="Khách du lịch">Khách du lịch</MenuItem>
 								<MenuItem value="Đối tác">Đối tác</MenuItem>
-								<MenuItem value="Quản lý đối tác">Quản lý đối tác</MenuItem>
+								<MenuItem value="Quản lý">Quản lý</MenuItem>
 							</Select>
 							<FormHelperText error>{touched.roleName && errors.roleName}</FormHelperText>
 						</FormControl>

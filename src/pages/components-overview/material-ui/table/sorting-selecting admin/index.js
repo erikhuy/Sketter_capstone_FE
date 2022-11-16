@@ -72,9 +72,9 @@ export default function SortingSelecting() {
 					setCurrentPage(res.data.currentPage);
 					if (res.data.maxPage > res.data.currentPage) {
 						// eslint-disable-next-line no-const-assign
-						setDataNumber(res.data.data.users.length + page * 10 + (page === 0 ? 1 : page));
+						setDataNumber(res.data.data.count);
 					} else {
-						setDataNumber(res.data.data.users.length + page * 10);
+						setDataNumber(res.data.data.count);
 					}
 				});
 			} catch (error) {
@@ -122,7 +122,7 @@ export default function SortingSelecting() {
 
 	const handleSelectAllClick = (event) => {
 		if (event.target.checked) {
-			const newSelecteds = data.map((n) => n.name);
+			const newSelecteds = data.map((n) => n.email);
 			setSelected(newSelecteds);
 			return;
 		}
@@ -131,11 +131,11 @@ export default function SortingSelecting() {
 
 	const handleClick = (event, data) => {
 		console.log(data);
-		const selectedIndex = selected.indexOf(data.name);
+		const selectedIndex = selected.indexOf(data.email);
 		let newSelected = [];
 
 		if (selectedIndex === -1) {
-			newSelected = newSelected.concat(selected, data.name);
+			newSelected = newSelected.concat(selected, data.email);
 		} else if (selectedIndex === 0) {
 			newSelected = newSelected.concat(selected.slice(1));
 		} else if (selectedIndex === selected.length - 1) {
@@ -205,7 +205,7 @@ export default function SortingSelecting() {
 						/>
 						<TableBody>
 							{stableSort(data, getComparator(order, orderBy)).map((row, index) => {
-								const isItemSelected = isSelected(row.name);
+								const isItemSelected = isSelected(row.email);
 								const labelId = `enhanced-table-checkbox-${index}`;
 
 								return (

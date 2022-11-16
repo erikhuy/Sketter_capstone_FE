@@ -15,7 +15,7 @@ export default function CreateDestination() {
 	const {user} = useAuth();
 	return (
 		<RootStyle title="Sketter">
-			{user.role.description === 'Quản lý đối tác' ? (
+			{user.role.description === 'Quản lý' ? (
 				<CreateDestinationFormSupplierManager />
 			) : (
 				<CreateDestinationForm />

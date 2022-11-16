@@ -15,13 +15,6 @@ const sidebarConfigSupplierManager = [
 			{title: 'Danh sách địa điểm', path: PATH_DASHBOARD.destination.destinationList},
 			{title: 'Tạo địa điểm', path: PATH_DASHBOARD.destination.createDestination}
 		]
-	},
-	{
-		subheader: 'Quản lý trạng thái địa điểm',
-		items: [
-			{title: 'Địa điểm chờ duyệt', path: PATH_DASHBOARD.destination.pendingDestinationList},
-			{title: 'Địa điểm bị từ chối', path: PATH_DASHBOARD.destination.rejectDestinationList}
-		]
 	}
 ];
 

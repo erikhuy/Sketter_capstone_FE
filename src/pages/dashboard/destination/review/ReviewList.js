@@ -49,6 +49,7 @@ import useIsMountedRef from 'shared/hooks/useIsMountedRef';
 import imgbbUploader from 'imgbb-uploader/lib/cjs';
 import {useSnackbar} from 'notistack5';
 import Scrollbar from 'components/Scrollbar';
+import LoadingScreen from 'components/LoadingScreen';
 import SortingSelectingHead from './SortingSelectingHead';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -158,7 +159,14 @@ export default function ReviewList({destinationID}) {
 			<FormikProvider value={formik}>
 				<Form autoComplete="off" noValidate onSubmit={handleSubmit}>
 					{isBusy ? (
-						<h1 className="page-title text-center font-weight-bold">Đang tải . . .</h1>
+						<>
+							<Box
+								sx={{
+									height: 400
+								}}
+							/>
+							<LoadingScreen />
+						</>
 					) : (
 						<Card sx={{p: 3}}>
 							<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>

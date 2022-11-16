@@ -35,7 +35,6 @@ import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import ImageDropzone from 'components/imagearea/ImageDropzone';
 import PropTypes from 'prop-types';
 import useIsMountedRef from 'shared/hooks/useIsMountedRef';
-import {createNull} from 'typescript';
 import Mapfield from 'components/mapfield';
 import {API_URL} from 'shared/constants';
 import {useSnackbar} from 'notistack5';
@@ -55,6 +54,8 @@ export default function CreateDestinationFormSupplierManager() {
 	const {enqueueSnackbar} = useSnackbar();
 	const [gallery, setGallery] = useState([]);
 	const [suppliers, setSuppliers] = useState([]);
+	const [cities, setCities] = useState([]);
+	const [timeFrames, setTimeFrames] = useState([]);
 	const [catalogs, setCatalogs] = useState([]);
 	const [personalities, setPersonalities] = useState([]);
 
@@ -166,6 +167,31 @@ export default function CreateDestinationFormSupplierManager() {
 			}
 		};
 		fetchData();
+	}, []);
+	useEffect(() => {
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.City}`).then((res) => {
+					console.log(res.data.data.cities);
+					setCities(res.data.data.cities);
+				});
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		fetchSupplier();
+	}, []);
+	useEffect(() => {
+		const fetchSupplier = async () => {
+			try {
+				await axios.get(`${API_URL.TimeFrames}`).then((res) => {
+					setTimeFrames(res.data.data.timeFrames);
+				});
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		fetchSupplier();
 	}, []);
 	useEffect(() => {
 		const supList = [];
@@ -324,6 +350,23 @@ export default function CreateDestinationFormSupplierManager() {
 										}}
 										error={Boolean(touched.email && errors.email)}
 										helperText={touched.email && errors.email}
+									/>
+									<Autocomplete
+										onChange={(e, value) => {
+											console.log(value.id);
+											setFieldValue('cityID', value.id);
+										}}
+										id="tags-outlined"
+										options={cities}
+										getOptionLabel={(option) => option.name}
+										filterSelectedOptions
+										renderInput={(params) => (
+											<TextField
+												{...params}
+												label="Khu vực"
+												{...getFieldProps('cityID')}
+											/>
+										)}
 									/>
 									<TextField
 										fullWidth
@@ -556,13 +599,10 @@ export default function CreateDestinationFormSupplierManager() {
 										<Autocomplete
 											multiple
 											id="tags-outlined"
-											options={RecommendedTimesFrame}
-											getOptionLabel={(option) => `${option.start}-${option.end}`}
+											options={timeFrames}
+											getOptionLabel={(option) => `${option.from}-${option.to}`}
 											onChange={(e, value) => {
-												setFieldValue(
-													'recommendedTimes',
-													value !== null ? value : initialValues.recommendedTimes
-												);
+												setFieldValue('recommendedTimes', value);
 											}}
 											filterSelectedOptions
 											renderInput={(params) => (

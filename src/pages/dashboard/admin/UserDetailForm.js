@@ -45,6 +45,7 @@ import AvatarUploadArea from 'components/avatararea/AvatarDropzone';
 import {useNavigate} from 'react-router';
 import {storage} from 'utils/firebase';
 import {getDownloadURL, ref, uploadString} from 'firebase/storage';
+import LoadingScreen from 'components/LoadingScreen';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -64,7 +65,12 @@ export default function UserDetailForm({userID, onReload, onOpenModal}) {
 
 	const UpdateUserSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
+		address: Yup.string()
+			.min(5, 'Địa chỉ không hợp lệ')
+			.nullable(true, 'Yêu cầu nhập địa chỉ')
+			.required('Yêu cầu nhập địa chỉ'),
 		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
+		gender: Yup.string().nullable(true, 'Yêu cầu nhập giới tính').required('Yêu cầu nhập giới tính'),
 		status: Yup.string().nullable(true, 'Trạng thái không được trống').required('Yêu cầu trạng thái')
 	});
 
@@ -173,7 +179,14 @@ export default function UserDetailForm({userID, onReload, onOpenModal}) {
 			<FormikProvider value={formik}>
 				<Form autoComplete="off" noValidate onSubmit={handleSubmit}>
 					{isBusy ? (
-						<h1 className="page-title text-center font-weight-bold">Đang tải . . .</h1>
+						<>
+							<Box
+								sx={{
+									height: 400
+								}}
+							/>
+							<LoadingScreen />
+						</>
 					) : (
 						<div
 							style={{
@@ -193,15 +206,6 @@ export default function UserDetailForm({userID, onReload, onOpenModal}) {
 							</h1>
 							<Stack direction={{xs: 'column'}} spacing={3.6} sx={{m: 2}}>
 								<AvatarUploadArea setImageList={handleImages} imageList={gallery} />
-								{/* <TextField
-									style={{height: 56, width: 460}}
-									fullWidth
-									type="text"
-									label="Avatar*"
-									{...getFieldProps('avatar')}
-									error={Boolean(touched.email && errors.email)}
-									helperText={touched.email && errors.email}
-								/> */}
 								<TextField
 									style={{height: 56, width: 460}}
 									disabled
@@ -212,6 +216,54 @@ export default function UserDetailForm({userID, onReload, onOpenModal}) {
 									error={Boolean(touched.email && errors.email)}
 									helperText={touched.email && errors.email}
 								/>
+								<TextField
+									required
+									style={{height: 56, width: 460}}
+									fullWidth
+									type="text"
+									label="Địa chỉ*"
+									{...getFieldProps('address')}
+									error={Boolean(touched.address && errors.address)}
+									helperText={touched.address && errors.address}
+								/>
+								{values.role.name === 'Traveler' ? (
+									<>
+										<LocalizationProvider dateAdapter={AdapterDateFns}>
+											<DesktopDatePicker
+												label="Ngày sinh"
+												value={new Date(values.dob)}
+												// inputFormat="dd/mm/yyyy"
+												onChange={(e, value) => {
+													console.log(e.toDateString());
+													setFieldValue('dob', e.toDateString());
+												}}
+												renderInput={(params) => <TextField required {...params} />}
+											/>
+										</LocalizationProvider>
+										<Autocomplete
+											id="tags-outlined"
+											options={gender}
+											value={values.gender}
+											getOptionLabel={(option) => option}
+											onChange={(e, value) => {
+												setFieldValue('gender', value);
+											}}
+											filterSelectedOptions
+											renderInput={(params) => (
+												<TextField
+													multiline="false"
+													required
+													{...params}
+													{...getFieldProps('gender')}
+													label="Giới tính"
+													error={Boolean(touched.gender && errors.gender)}
+													helperText={touched.gender && errors.gender}
+												/>
+											)}
+										/>
+									</>
+								) : null}
+
 								<TextField
 									style={{height: 56, width: 460}}
 									fullWidth
@@ -269,7 +321,8 @@ export default function UserDetailForm({userID, onReload, onOpenModal}) {
 	);
 }
 
-const catalogs = ['Quán ăn', 'Quán cà phê', 'Địa điểm du lịch', 'Homestay', 'Khách sạn', 'Khu nghỉ dưỡng cao cấp'];
+// const catalogs = ['Quán ăn', 'Quán cà phê', 'Địa điểm du lịch', 'Homestay', 'Khách sạn', 'Khu nghỉ dưỡng cao cấp'];
 const userStatus = ['Verified', 'Unverified'];
 const userStatusSup = ['Verified', 'Deactivated'];
 const userStatusNone = ['Verified', 'Unverified', 'Deactivated'];
+const gender = ['Nam', 'Nữ'];

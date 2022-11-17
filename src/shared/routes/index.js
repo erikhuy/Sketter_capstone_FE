@@ -112,10 +112,6 @@ export default function Router() {
 					)
 				},
 				{
-					path: 'testZalo',
-					element: <TestZalo />
-				},
-				{
 					path: 'e-commerce',
 					children: [{path: '', element: <Navigate to="/dashboard/e-commerce/shop" replace />}]
 				},
@@ -178,7 +174,6 @@ const CreateDestination = Loadable(lazy(() => import('pages/dashboard/destinatio
 const UserList = Loadable(lazy(() => import('pages/dashboard/admin/UserList')));
 const CreateUser = Loadable(lazy(() => import('pages/dashboard/admin/CreateUser')));
 const CatalogManagement = Loadable(lazy(() => import('pages/dashboard/admin/CatalogManagement')));
-const TestZalo = Loadable(lazy(() => import('pages/dashboard/destination/promotion/testZaloPay')));
 
 const GeneralApp = Loadable(lazy(() => import('pages/dashboard/GeneralApp')));
 const UserAccount = Loadable(lazy(() => import('pages/dashboard/UserAccount')));

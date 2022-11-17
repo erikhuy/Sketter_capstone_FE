@@ -121,7 +121,7 @@ export default function LoginForm() {
 				</Stack>
 
 				<LoadingButton fullWidth size="large" type="submit" variant="contained" loading={isSubmitting}>
-					Login
+					Đăng nhập
 				</LoadingButton>
 			</Form>
 		</FormikProvider>

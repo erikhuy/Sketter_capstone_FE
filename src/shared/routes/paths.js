@@ -46,6 +46,10 @@ export const PATH_DASHBOARD = {
 		rejectDestinationList: path(ROOTS_DASHBOARD, '/rejectDestinationList'),
 		testZalo: path(ROOTS_DASHBOARD, '/testZalo')
 	},
+	promotion: {
+		promotionList: path(ROOTS_DASHBOARD, '/promotionList'),
+		createPromotion: path(ROOTS_DASHBOARD, '/createPromotion')
+	},
 	catalog: {
 		catalogManagement: path(ROOTS_DASHBOARD, '/catalogManagement')
 	},
@@ -62,29 +66,9 @@ export const PATH_DASHBOARD = {
 	user: {
 		root: path(ROOTS_DASHBOARD, '/user'),
 		profile: path(ROOTS_DASHBOARD, '/user/profile'),
-		cards: path(ROOTS_DASHBOARD, '/user/cards'),
-		newUser: path(ROOTS_DASHBOARD, '/user/new'),
 		userList: path(ROOTS_DASHBOARD, '/user/userList'),
 		createUser: path(ROOTS_DASHBOARD, '/user/createUser'),
-		editById: path(ROOTS_DASHBOARD, '/user/ada-lindgren/edit'),
 		account: path(ROOTS_DASHBOARD, '/user/account')
-	},
-	eCommerce: {
-		root: path(ROOTS_DASHBOARD, '/e-commerce'),
-		product: path(ROOTS_DASHBOARD, '/e-commerce/product/:name'),
-		productById: path(ROOTS_DASHBOARD, '/e-commerce/product/nike-air-force-1-ndestrukt'),
-		list: path(ROOTS_DASHBOARD, '/e-commerce/list'),
-		newProduct: path(ROOTS_DASHBOARD, '/e-commerce/product/new'),
-		editById: path(ROOTS_DASHBOARD, '/e-commerce/product/nike-blazer-low-77-vintage/edit'),
-		checkout: path(ROOTS_DASHBOARD, '/e-commerce/checkout'),
-		invoice: path(ROOTS_DASHBOARD, '/e-commerce/invoice')
-	},
-	blog: {
-		root: path(ROOTS_DASHBOARD, '/blog'),
-		posts: path(ROOTS_DASHBOARD, '/blog/posts'),
-		post: path(ROOTS_DASHBOARD, '/blog/post/:title'),
-		postById: path(ROOTS_DASHBOARD, '/blog/post/portfolio-review-is-this-portfolio-too-creative'),
-		newPost: path(ROOTS_DASHBOARD, '/blog/new-post')
 	}
 };
 

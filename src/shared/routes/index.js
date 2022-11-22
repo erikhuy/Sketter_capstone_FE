@@ -104,6 +104,22 @@ export default function Router() {
 					)
 				},
 				{
+					path: 'createPromotion',
+					element: (
+						<SupplierGuard>
+							<CreatePromotion />
+						</SupplierGuard>
+					)
+				},
+				{
+					path: 'promotionList',
+					element: (
+						<SupplierGuard>
+							<PromotionList />
+						</SupplierGuard>
+					)
+				},
+				{
 					path: 'catalogManagement',
 					element: (
 						<AdminGuard>
@@ -173,6 +189,8 @@ const DestinationList = Loadable(lazy(() => import('pages/dashboard/destination/
 const CreateDestination = Loadable(lazy(() => import('pages/dashboard/destination/CreateDestination')));
 const UserList = Loadable(lazy(() => import('pages/dashboard/admin/UserList')));
 const CreateUser = Loadable(lazy(() => import('pages/dashboard/admin/CreateUser')));
+const PromotionList = Loadable(lazy(() => import('pages/dashboard/promotion/PromotionList')));
+const CreatePromotion = Loadable(lazy(() => import('pages/dashboard/promotion/createPromotion')));
 const CatalogManagement = Loadable(lazy(() => import('pages/dashboard/admin/CatalogManagement')));
 
 const GeneralApp = Loadable(lazy(() => import('pages/dashboard/GeneralApp')));

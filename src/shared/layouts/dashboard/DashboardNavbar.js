@@ -10,7 +10,6 @@ import useCollapseDrawer from 'shared/hooks/useCollapseDrawer';
 import {MHidden} from '../../../components/@material-extend';
 import AccountPopover from './AccountPopover';
 import ContactsPopover from './ContactsPopover';
-import LanguagePopover from './LanguagePopover';
 import NotificationsPopover from './NotificationsPopover';
 import Searchbar from './Searchbar';
 

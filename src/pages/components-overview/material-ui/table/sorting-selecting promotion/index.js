@@ -57,7 +57,7 @@ function stableSort(array, comparator) {
 	return stabilizedThis.map((el) => el[0]);
 }
 
-export default function SortingSelecting() {
+export default function PromotionSortingSelecting() {
 	const [order, setOrder] = useState('asc');
 	const [orderBy, setOrderBy] = useState('name');
 	const [selected, setSelected] = useState([]);
@@ -74,47 +74,22 @@ export default function SortingSelecting() {
 	const [searchKey, setSearchKey] = useState('');
 	const {enqueueSnackbar} = useSnackbar();
 
-	// useEffect(() => {
-	// 	const fetchData = async () => {
-	// 		try {
-	// 			await axios.get(`${API_URL.Destination}?page=${page + 1}`).then((res) => {
-	// 				console.log(dataNumber);
-
-	// 				setData(res.data.data.destinations);
-	// 				setMaxPage(res.data.maxPage);
-	// 				setCurrentPage(res.data.currentPage);
-	// 				if (res.data.maxPage > res.data.currentPage) {
-	// 					// eslint-disable-next-line no-const-assign
-	// 					setDataNumber(res.data.data.destinations.length + page * 10 + (page === 0 ? 1 : page));
-	// 				} else {
-	// 					setDataNumber(res.data.data.destinations.length + page * 10);
-	// 				}
-	// 			});
-	// 		} catch (error) {
-	// 			setPage(page - 1);
-	// 		}
-	// 	};
-	// 	fetchData();
-	// }, [page, selectedID]);
-
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios
-					.get(`${API_URL.Destination}/search?name=${searchKey}&catalog=&page=${page + 1}&skipStay=`)
-					.then((res) => {
-						console.log(dataNumber);
+				await axios.get(`${API_URL.Voucher}`).then((res) => {
+					console.log(dataNumber);
 
-						setData(res.data.data.destinations);
-						setMaxPage(res.data.maxPage);
-						setCurrentPage(res.data.currentPage);
-						if (res.data.maxPage > res.data.currentPage) {
-							// eslint-disable-next-line no-const-assign
-							setDataNumber(res.data.data.count);
-						} else {
-							setDataNumber(res.data.data.count);
-						}
-					});
+					setData(res.data.data.vouchers);
+					setMaxPage(res.data.maxPage);
+					setCurrentPage(res.data.currentPage);
+					if (res.data.maxPage > res.data.currentPage) {
+						// eslint-disable-next-line no-const-assign
+						setDataNumber(res.data.data.count);
+					} else {
+						setDataNumber(res.data.data.count);
+					}
+				});
 			} catch (error) {
 				setPage(page - 1);
 			}
@@ -125,16 +100,6 @@ export default function SortingSelecting() {
 		setSelectedID([]);
 	}, [reloadList]);
 
-	// const searchDestination = useCallback(async (keyword) => {
-	// 	try {
-	// 		await axios.get(`${API_URL.Destination}/search?name=${keyword}&catalog=&page=1&skipStay=`).then((res) => {
-	// 			console.log(res.data.data.destinations);
-	// 			setData(res.data.data.destinations);
-	// 		});
-	// 	} catch (e) {
-	// 		console.log(e.response.data.message);
-	// 	}
-	// });
 	const TABLE_HEAD = [
 		{
 			id: 'name',
@@ -143,22 +108,22 @@ export default function SortingSelecting() {
 			label: 'Tên'
 		},
 		{
+			id: 'destinationName',
+			numeric: true,
+			disablePadding: false,
+			label: 'Địa điểm'
+		},
+		{
 			id: 'address',
 			numeric: true,
 			disablePadding: false,
 			label: 'Địa chỉ'
 		},
 		{
-			id: 'Giá',
+			id: 'amount',
 			numeric: true,
 			disablePadding: false,
-			label: 'Giá (vnd)'
-		},
-		{
-			id: 'Đánh_giá',
-			numeric: true,
-			disablePadding: false,
-			label: 'Đánh giá'
+			label: 'Số lượng'
 		},
 		{
 			id: 'Trạng_thái',
@@ -232,10 +197,10 @@ export default function SortingSelecting() {
 
 	return (
 		<>
-			<TextField
+			{/* <TextField
 				fullWidth
 				value={searchInput}
-				placeholder="Tìm kiếm địa điểm..."
+				placeholder="Search post..."
 				sx={{
 					'& fieldset': {
 						borderRadius: '16px'
@@ -280,7 +245,7 @@ export default function SortingSelecting() {
 						</IconButton>
 					)
 				}}
-			/>
+			/> */}
 			<SortingSelectingToolbar
 				numSelected={selected}
 				idSelected={selectedID}
@@ -321,16 +286,18 @@ export default function SortingSelecting() {
 										<TableCell component="th" id={labelId} scope="row" padding="none">
 											{row.name}
 										</TableCell>
-										<TableCell align="right">{row.address}</TableCell>
-										<TableCell align="right">{row.lowestPrice}</TableCell>
-										<TableCell align="right">{row.avgRating}</TableCell>
-										<TableCell align="right">
-											{row.status === 'Open'
-												? 'Hoạt động'
-												: row.status === 'Deactivated'
-												? 'Bị ngưng hoạt động'
-												: row.status === 'Closed'
-												? 'Đóng cửa'
+										<TableCell align="left">{row.destinationApply.name}</TableCell>
+										<TableCell align="left">{row.destinationApply.address}</TableCell>
+										<TableCell align="left">
+											{row.totalSold}/{row.quantity}
+										</TableCell>
+										<TableCell align="left">
+											{row.status === 'Draft'
+												? 'Chưa kích hoạt'
+												: row.status === 'Activated'
+												? 'Đang hoạt động'
+												: row.status === 'Done'
+												? 'Hết hoạt động'
 												: ''}
 										</TableCell>
 									</TableRow>

@@ -9,7 +9,6 @@ import UploadSVG from '../../assets/img/upload.svg';
 import {compress} from '../../utils/ImgTools';
 
 const imageMaxSize = 3000000; //3mb
-
 const AvatarUploadArea = (props) => {
 	/**
 	 * OnDrop action handler (When you drop an image to this)
@@ -127,7 +126,7 @@ const AvatarUploadArea = (props) => {
 						key={index}
 						// Remove function for Flip card
 						remove={(e) => {
-							console.log("xóa");
+							
 							setAvatarContained('block');
 							e.preventDefault();
 							//Replicate
@@ -135,9 +134,11 @@ const AvatarUploadArea = (props) => {
 							//remove index
 							rep_imageList.splice(index, 1);
 							//Set back to state
+							// console.log(rep_imageList);
 							props.setImageList(rep_imageList);
 						}}
-						imageContent={image.image_base64 ? image.image_base64 : image.url}
+						// eslint-disable-next-line no-nested-ternary
+						imageContent={image.image_base64 ? image.image_base64 : image.url ? image.url : image}
 						onTitleChange={(event) => onIMGTitleChange(index, event.target.value)}
 						onDescriptionChange={(event) => onIMGDescriptionChange(index, event.target.value)}
 					/>

@@ -83,13 +83,11 @@ export default function DestinationDetailFormSupplierManager({destinationID, onR
 
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
-
 		estimatedTimeStay: Yup.number()
 			.test('len', 'Thời gian không hợp lệ!', (val) => {
 				if (val) return val.toString().length < 5;
 			})
 			.integer('Thời gian phải là số nguyên')
-
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(240, 'Thời gian không quá 4 tiếng!')
 			.required('Yêu cầu thời gian dự kiến ở lại'),
@@ -160,15 +158,28 @@ export default function DestinationDetailFormSupplierManager({destinationID, onR
 		console.log(data);
 		const dataSup = processData(data);
 		dataSup.status = action;
-		try {
-			await axios.patch(`${API_URL.Destination}/${dataSup.id}`, dataSup).then((res) => {
-				enqueueSnackbar(res.data.message, {variant: 'success'});
-				onReload(data);
-				onOpenModal(false);
-				console.log(res.data);
-			});
-		} catch (e) {
-			enqueueSnackbar(e.response.data.message, {variant: 'error'});
+		if (action === 'Deactivated') {
+			try {
+				await axios.patch(`${API_URL.Destination}/${dataSup.id}/deactivate`).then((res) => {
+					enqueueSnackbar(res.data.message, {variant: 'success'});
+					onReload(data);
+					onOpenModal(false);
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
+		} else {
+			try {
+				await axios.patch(`${API_URL.Destination}/${dataSup.id}`, dataSup).then((res) => {
+					enqueueSnackbar(res.data.message, {variant: 'success'});
+					onReload(data);
+					onOpenModal(false);
+					console.log(res.data);
+				});
+			} catch (e) {
+				enqueueSnackbar(e.response.data.message, {variant: 'error'});
+			}
 		}
 	});
 	useEffect(() => {
@@ -399,21 +410,13 @@ export default function DestinationDetailFormSupplierManager({destinationID, onR
 										/>
 										<Autocomplete
 											disabled
-											onChange={(e, value) => {
-												console.log(value.id);
-												setFieldValue('cityID', value.id);
-											}}
-											id="tags-outlined"	
+											id="tags-outlined"
 											options={cities}
 											value={values.city}
 											getOptionLabel={(option) => option.name}
 											filterSelectedOptions
 											renderInput={(params) => (
-												<TextField
-													{...params}
-													label="Khu vực"
-													{...getFieldProps('cityID')}
-												/>
+												<TextField {...params} label="Khu vực" {...getFieldProps('cityID')} />
 											)}
 										/>
 										<TextField
@@ -427,10 +430,6 @@ export default function DestinationDetailFormSupplierManager({destinationID, onR
 										/>
 										<Autocomplete
 											disabled
-											onChange={(e, value) => {
-												console.log(value.id);
-												setFieldValue('supplierID', value.id);
-											}}
 											id="tags-outlined"
 											options={suppliers}
 											value={values.supplier}
@@ -538,9 +537,6 @@ export default function DestinationDetailFormSupplierManager({destinationID, onR
 											multiple
 											id="tags-outlined"
 											options={personalities}
-											value={convertDestinationPersonalityToArray(
-												values.destinationPersonalities
-											)}
 											getOptionLabel={(option) => option}
 											filterSelectedOptions
 											renderTags={(tagValue, getTagProps) =>
@@ -679,15 +675,26 @@ export default function DestinationDetailFormSupplierManager({destinationID, onR
 										</LoadingButton>
 									</Stack>
 								) : values.status === 'Closed' ? (
-									<Button
-										color="success"
-										variant="contained"
-										onClick={(e, value) => {
-											handleAction(values.id, 'Open');
-										}}
-									>
-										Mở hoạt động
-									</Button>
+									<Stack direction={{xs: 'row'}} spacing={2}>
+										<Button
+											color="error"
+											variant="contained"
+											onClick={(e, value) => {
+												handleAction(values.id, 'Deactivated');
+											}}
+										>
+											Ngưng vĩnh viễn
+										</Button>
+										<Button
+											color="success"
+											variant="contained"
+											onClick={(e, value) => {
+												handleAction(values.id, 'Open');
+											}}
+										>
+											Mở hoạt động
+										</Button>
+									</Stack>
 								) : null}
 							</Box>
 							{/* <Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>

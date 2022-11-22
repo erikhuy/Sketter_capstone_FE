@@ -3,12 +3,6 @@
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 
-// lazy image
-import 'lazysizes';
-import 'lazysizes/plugins/attrchange/ls.attrchange';
-import 'lazysizes/plugins/object-fit/ls.object-fit';
-import 'lazysizes/plugins/parent-fit/ls.parent-fit';
-
 // map
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -37,9 +31,6 @@ import App from './App';
 // components
 import LoadingScreen from './components/LoadingScreen';
 
-// i18n
-import './locales/i18n';
-import reportWebVitals from './reportWebVitals';
 import * as serviceWorker from './serviceWorker';
 import {CollapseDrawerProvider} from './shared/contexts/CollapseDrawerContext';
 // contexts
@@ -76,8 +67,3 @@ ReactDOM.render(
 
 // If you want to enable client cache, register instead.
 serviceWorker.unregister();
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

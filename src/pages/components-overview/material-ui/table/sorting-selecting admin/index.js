@@ -1,19 +1,28 @@
+/* eslint-disable no-nested-ternary */
+/* eslint-disable react/jsx-no-undef */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable camelcase */
 // material
+import Icon from '@iconify/react';
 import {
 	Box,
+	Button,
 	Checkbox,
 	FormControlLabel,
+	IconButton,
+	InputAdornment,
 	Switch,
 	Table,
 	TableBody,
 	TableCell,
 	TableContainer,
 	TablePagination,
-	TableRow
+	TableRow,
+	TextField
 } from '@material-ui/core';
+import Clear from '@material-ui/icons/Clear';
 import axios from 'axios';
+import searchFill from '@iconify/icons-eva/search-fill';
 import {useCallback, useEffect, useState} from 'react';
 import {API_URL} from 'shared/constants';
 // components
@@ -63,10 +72,33 @@ export default function SortingSelecting() {
 	const [dataNumber, setDataNumber] = useState();
 	const [maxPage, setMaxPage] = useState();
 	const [currentPage, setCurrentPage] = useState();
+	const [searchInput, setSearchInput] = useState('');
+	const [searchKey, setSearchKey] = useState('');
+
+	// useEffect(() => {
+	// 	const fetchData = async () => {
+	// 		try {
+	// 			await axios.get(`${API_URL.User}?page=${page + 1}&status=&search=${searchKey}`).then((res) => {
+	// 				setData(res.data.data.users);
+	// 				setMaxPage(res.data.maxPage);
+	// 				setCurrentPage(res.data.currentPage);
+	// 				if (res.data.maxPage > res.data.currentPage) {
+	// 					// eslint-disable-next-line no-const-assign
+	// 					setDataNumber(res.data.data.count);
+	// 				} else {
+	// 					setDataNumber(res.data.data.count);
+	// 				}
+	// 			});
+	// 		} catch (error) {
+	// 			setPage(page - 1);
+	// 		}
+	// 	};
+	// 	fetchData();
+	// }, [page, selectedID, reloadList]);
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios.get(`${API_URL.User}?page=${page + 1}`).then((res) => {
+				await axios.get(`${API_URL.User}?page=${page + 1}&status=&search=${searchKey}`).then((res) => {
 					setData(res.data.data.users);
 					setMaxPage(res.data.maxPage);
 					setCurrentPage(res.data.currentPage);
@@ -82,7 +114,7 @@ export default function SortingSelecting() {
 			}
 		};
 		fetchData();
-	}, [page, selectedID, reloadList]);
+	}, [page, selectedID, searchKey, reloadList]);
 	useEffect(() => {
 		setSelectedID([]);
 	}, [reloadList]);
@@ -121,12 +153,8 @@ export default function SortingSelecting() {
 	};
 
 	const handleSelectAllClick = (event) => {
-		if (event.target.checked) {
-			const newSelecteds = data.map((n) => n.email);
-			setSelected(newSelecteds);
-			return;
-		}
 		setSelected([]);
+		setSelectedID([]);
 	};
 
 	const handleClick = (event, data) => {
@@ -183,6 +211,55 @@ export default function SortingSelecting() {
 
 	return (
 		<>
+			<TextField
+				fullWidth
+				value={searchInput}
+				placeholder="Tìm kiếm tài khoản..."
+				sx={{
+					'& fieldset': {
+						borderRadius: '16px'
+					}
+				}}
+				onChange={(e) => {
+					setSearchInput(e.target.value);
+				}}
+				onKeyPress={(e) => {
+					if (e.key === 'Enter') {
+						setSearchKey(e.target.value);
+						setPage(0);
+					}
+				}}
+				InputProps={{
+					startAdornment: (
+						<>
+							<InputAdornment position="start">
+								<Box
+									component={Icon}
+									icon={searchFill}
+									sx={{
+										ml: 1,
+										width: 20,
+										height: 20,
+										color: 'text.disabled'
+									}}
+								/>
+							</InputAdornment>
+						</>
+					),
+					endAdornment: (
+						<IconButton
+							sx={{visibility: searchInput ? 'visible' : 'hidden'}}
+							onClick={() => {
+								setSearchInput('');
+								setSearchKey('');
+								setPage(0);
+							}}
+						>
+							<Clear />
+						</IconButton>
+					)
+				}}
+			/>
 			<SortingSelectingToolbar
 				numSelected={selected}
 				idSelected={selectedID}
@@ -225,7 +302,23 @@ export default function SortingSelecting() {
 										</TableCell>
 										<TableCell align="left">{row.email}</TableCell>
 										<TableCell align="left">{row.role.description}</TableCell>
-										<TableCell align="left">{row.status}</TableCell>
+										<TableCell align="left">
+											{row.status === 'Verified' ? (
+												<Button variant="contained" color="success" sx={{color: '#ffffff'}}>
+													Đã xác thực
+												</Button>
+											) : row.status === 'Unverified' ? (
+												<Button variant="contained" color="error" sx={{color: '#ffffff'}}>
+													<b>Chưa xác thực</b>
+												</Button>
+											) : row.status === 'Deactivated' ? (
+												<Button variant="contained" color="error" sx={{color: '#ffffff'}}>
+													<b>Vô hiệu hóa</b>
+												</Button>
+											) : (
+												''
+											)}
+										</TableCell>
 									</TableRow>
 								);
 							})}

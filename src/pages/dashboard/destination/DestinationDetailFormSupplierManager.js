@@ -84,9 +84,6 @@ export default function DestinationDetailFormSupplierManager({destinationID, onR
 		catalogs: Yup.array().min(1, 'Yêu cầu loại địa điểm'),
 		destinationPersonalities: Yup.array().min(1, 'Yêu cầu tính cách du lịch'),
 		estimatedTimeStay: Yup.number()
-			.test('len', 'Thời gian không hợp lệ!', (val) => {
-				if (val) return val.toString().length < 5;
-			})
 			.integer('Thời gian phải là số nguyên')
 			.min(0, 'Thời gian không hợp lệ!')
 			.max(240, 'Thời gian không quá 4 tiếng!')
@@ -448,6 +445,7 @@ export default function DestinationDetailFormSupplierManager({destinationID, onR
 										/>
 										<Stack direction={{xs: 'row'}} spacing={2}>
 											<TextField
+											type='number'
 												{...getFieldProps('lowestPrice')}
 												style={{height: 56, width: 360}}
 												label={<span className="labelText">Giá thấp nhất*</span>}
@@ -467,6 +465,7 @@ export default function DestinationDetailFormSupplierManager({destinationID, onR
 											/>
 											<div>-</div>
 											<TextField
+											type='number'
 												{...getFieldProps('highestPrice')}
 												style={{height: 56, width: 360}}
 												label={<span className="labelText">Giá cao nhất*</span>}
@@ -539,6 +538,9 @@ export default function DestinationDetailFormSupplierManager({destinationID, onR
 											options={personalities}
 											getOptionLabel={(option) => option}
 											filterSelectedOptions
+											value={convertDestinationPersonalityToArray(
+												values.destinationPersonalities
+											)}
 											renderTags={(tagValue, getTagProps) =>
 												tagValue.map((option, index) => (
 													<Chip label={option} {...getTagProps({index})} />

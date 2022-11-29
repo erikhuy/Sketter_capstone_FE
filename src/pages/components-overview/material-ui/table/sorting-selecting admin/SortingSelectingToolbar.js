@@ -98,7 +98,7 @@ export default function SortingSelectingToolbar({onReloadList, numSelected, idSe
 							})
 							.catch((e) => {
 								console.log(e.response.data.message);
-								enqueueSnackbar(e.response.data.message, {variant: 'error'});
+								enqueueSnackbar('Không thể ngưng hoạt động tài khoản', {variant: 'error'});
 							});
 					})
 				);

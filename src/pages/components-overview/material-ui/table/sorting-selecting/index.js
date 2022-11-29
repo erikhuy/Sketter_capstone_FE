@@ -4,6 +4,7 @@
 // material
 import {
 	Box,
+	Button,
 	Checkbox,
 	FormControlLabel,
 	IconButton,
@@ -15,7 +16,8 @@ import {
 	TableContainer,
 	TablePagination,
 	TableRow,
-	TextField
+	TextField,
+	Typography
 } from '@material-ui/core';
 import axios from 'axios';
 import {useCallback, useEffect, useState} from 'react';
@@ -125,16 +127,6 @@ export default function SortingSelecting() {
 		setSelectedID([]);
 	}, [reloadList]);
 
-	// const searchDestination = useCallback(async (keyword) => {
-	// 	try {
-	// 		await axios.get(`${API_URL.Destination}/search?name=${keyword}&catalog=&page=1&skipStay=`).then((res) => {
-	// 			console.log(res.data.data.destinations);
-	// 			setData(res.data.data.destinations);
-	// 		});
-	// 	} catch (e) {
-	// 		console.log(e.response.data.message);
-	// 	}
-	// });
 	const TABLE_HEAD = [
 		{
 			id: 'name',
@@ -152,7 +144,7 @@ export default function SortingSelecting() {
 			id: 'Giá',
 			numeric: true,
 			disablePadding: false,
-			label: 'Giá (vnd)'
+			label: 'Chi phí (x1000)'
 		},
 		{
 			id: 'Đánh_giá',
@@ -176,12 +168,8 @@ export default function SortingSelecting() {
 	};
 
 	const handleSelectAllClick = (event) => {
-		if (event.target.checked) {
-			const newSelecteds = data.map((n) => n.name);
-			setSelected(newSelecteds);
-			return;
-		}
 		setSelected([]);
+		setSelectedID([]);
 	};
 
 	const handleClick = (event, data) => {
@@ -321,17 +309,43 @@ export default function SortingSelecting() {
 										<TableCell component="th" id={labelId} scope="row" padding="none">
 											{row.name}
 										</TableCell>
-										<TableCell align="right">{row.address}</TableCell>
-										<TableCell align="right">{row.lowestPrice}</TableCell>
-										<TableCell align="right">{row.avgRating}</TableCell>
-										<TableCell align="right">
-											{row.status === 'Open'
-												? 'Hoạt động'
-												: row.status === 'Deactivated'
-												? 'Bị ngưng hoạt động'
-												: row.status === 'Closed'
-												? 'Đóng cửa'
-												: ''}
+										<TableCell align="left">{row.address}</TableCell>
+										<TableCell align="left">
+											{row.lowestPrice} - {row.highestPrice}
+										</TableCell>
+										<TableCell align="left">{row.avgRating}</TableCell>
+										<TableCell align="left">
+											{row.status === 'Open' ? (
+												<Button
+													size="small"
+													variant="contained"
+													color="success"
+													sx={{color: '#ffffff'}}
+												>
+													Hoạt động
+												</Button>
+											) : row.status === 'Deactivated' ? (
+												<Button
+													size="small"
+													variant="contained"
+													color="error"
+													sx={{color: '#ffffff'}}
+												>
+													<b>Bị ngưng hoạt động</b>
+												</Button>
+											) : row.status === 'Closed' ? (
+												<Button
+													size="small"
+													variant="contained"
+													color="error"
+													sx={{color: '#ffffff'}}
+												>
+													{' '}
+													<b>Đóng cửa</b>
+												</Button>
+											) : (
+												''
+											)}
 										</TableCell>
 									</TableRow>
 								);

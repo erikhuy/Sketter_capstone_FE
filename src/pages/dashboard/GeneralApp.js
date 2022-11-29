@@ -27,7 +27,7 @@ export default function GeneralApp() {
 					<Grid item xs={12} md={12}>
 						<AppWelcome displayName={user.name} displayRole={user.role.description} />
 					</Grid>
-
+					{/* 
 					<Grid item xs={12} md={4}>
 						<AppTotalActiveUsers />
 					</Grid>
@@ -46,7 +46,7 @@ export default function GeneralApp() {
 
 					<Grid item xs={12} md={6} lg={8}>
 						<AppAreaInstalled />
-					</Grid>
+					</Grid> */}
 				</Grid>
 			</Container>
 		</Page>

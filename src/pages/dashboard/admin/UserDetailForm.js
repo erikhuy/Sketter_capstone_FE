@@ -70,7 +70,6 @@ export default function UserDetailForm({userID, onReload, onOpenModal}) {
 			.nullable(true, 'Yêu cầu nhập địa chỉ')
 			.required('Yêu cầu nhập địa chỉ'),
 		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
-		gender: Yup.string().nullable(true, 'Yêu cầu nhập giới tính').required('Yêu cầu nhập giới tính'),
 		status: Yup.string().nullable(true, 'Trạng thái không được trống').required('Yêu cầu trạng thái')
 	});
 

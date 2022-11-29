@@ -32,19 +32,24 @@ export default function SortingSelectingHead({
 		<TableHead>
 			<TableRow>
 				<TableCell padding="checkbox">
-					<Box
-						sx={{
-							width: 0
-						}}
-					/>
+					{numSelected > 0 ? (
+						<Checkbox
+							indeterminate={numSelected > 0}
+							onChange={onSelectAllClick}
+							inputProps={{
+								'aria-label': 'select all desserts'
+							}}
+						/>
+					) : (
+						<Box
+							sx={{
+								width: 0
+							}}
+						/>
+					)}
 				</TableCell>
 				{headLabel.map((headCell) => (
-					<TableCell
-						key={headCell.id}
-						align={headCell.numeric ? 'right' : 'left'}
-						style={{paddingLeft: 25}}
-						sortDirection={orderBy === headCell.id ? order : false}
-					>
+					<TableCell key={headCell.id} align="left" sortDirection={orderBy === headCell.id ? order : false}>
 						<TableSortLabel
 							active={orderBy === headCell.id}
 							direction={orderBy === headCell.id ? order : 'asc'}

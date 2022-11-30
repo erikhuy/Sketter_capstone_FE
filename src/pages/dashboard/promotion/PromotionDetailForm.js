@@ -13,8 +13,8 @@ import {
 	Card,
 	FormHelperText,
 	Grid,
-	InputAdornment,
 	Stack,
+	InputAdornment,
 	TextField,
 	Typography,
 	Autocomplete,
@@ -73,10 +73,10 @@ export default function PromotionDetailForm({promotionID, onReload, onOpenModal}
 		destinationID: Yup.string().nullable(true).required('Yêu cầu địa điểm'),
 		description: Yup.string().nullable(true).required('Yêu cầu mô tả địa điểm').max(500, 'Không quá 500 ký tự!'),
 		value: Yup.number()
-			.integer('Giá trị phải là số nguyên')
-			.min(1, 'Giá trị phải là số dương')
-			.max(99999, 'Giá trị không quá hàng chục triệu')
-			.required('Yêu cầu giá trị'),
+			.integer('Giá mã khuyến mãi phải là số nguyên')
+			.min(1, 'Giá mã khuyến mãi phải là số dương')
+			.max(99999, 'Giá mã khuyến mãi không quá hàng chục triệu')
+			.required('Yêu cầu giá mã khuyến mãi'),
 		salePrice: Yup.number()
 			.integer('Giá bán phải là số nguyên')
 			.min(1, 'Giá bán phải là số dương')
@@ -193,15 +193,15 @@ export default function PromotionDetailForm({promotionID, onReload, onOpenModal}
 						<>
 							<Box
 								sx={{
-									height: 400
+									height: 350
 								}}
 							/>
 							<LoadingScreen />
 						</>
 					) : (
 						<Card sx={{p: 3}}>
-							<h1 className="page-title text-center font-weight-bold">Trang nhập liệu</h1>
-							<Grid container sx={{height: '650px'}}>
+							<h1 className="page-title text-center font-weight-bold">Thông tin mã khuyến mãi</h1>
+							<Grid container sx={{height: '600px'}}>
 								<Grid item xs={6}>
 									<Stack direction={{xs: 'column'}} spacing={2} sx={{m: 2}}>
 										<TextField
@@ -211,15 +211,40 @@ export default function PromotionDetailForm({promotionID, onReload, onOpenModal}
 											error={Boolean(touched.name && errors.name)}
 											helperText={touched.name && errors.name}
 										/>
+										<Autocomplete
+											onChange={(e, value) => {
+												setFieldValue('destinationID', value.id !== null ? value.id : null);
+											}}
+											id="tags-outlined"
+											value={values.destinationApply}
+											options={destinationList}
+											getOptionLabel={(option) => option.name}
+											filterSelectedOptions
+											renderInput={(params) => (
+												<TextField
+													style={{height: 56, width: 512}}
+													{...params}
+													label="Địa điểm áp dụng"
+													{...getFieldProps('destinationID')}
+													required
+													error={Boolean(touched.destinationID && errors.destinationID)}
+													helperText={touched.destinationID && errors.destinationID}
+												/>
+											)}
+										/>
 										<TextField
 											fullWidth
 											multiline
 											label="Thông tin khuyến mãi*"
-											rows={12}
+											rows={16}
 											{...getFieldProps('description')}
 											error={Boolean(touched.description && errors.description)}
 											helperText={touched.description && errors.description}
 										/>
+									</Stack>
+								</Grid>
+								<Grid item xs={6}>
+									<Stack direction={{xs: 'column'}} spacing={2.4} sx={{m: 2}}>
 										<TextField
 											fullWidth
 											multiline
@@ -229,20 +254,9 @@ export default function PromotionDetailForm({promotionID, onReload, onOpenModal}
 											helperText={touched.quantity && errors.quantity}
 										/>
 										<TextField
-											disabled
 											fullWidth
 											multiline
-											label="Số lượng đã bán*"
-											{...getFieldProps('totalSold')}
-										/>
-									</Stack>
-								</Grid>
-								<Grid item xs={6}>
-									<Stack direction={{xs: 'column'}} spacing={2.4} sx={{m: 2}}>
-										<TextField
-											fullWidth
-											multiline
-											label="Gía trị khuyến mãi *"
+											label="Giá mã khuyến mãi*"
 											{...getFieldProps('value')}
 											InputProps={{
 												endAdornment: (
@@ -269,14 +283,7 @@ export default function PromotionDetailForm({promotionID, onReload, onOpenModal}
 											error={Boolean(touched.salePrice && errors.salePrice)}
 											helperText={touched.salePrice && errors.salePrice}
 										/>
-										<TextField
-											fullWidth
-											disabled
-											label="Phần trăm khuyến mãi (%) *"
-											{...getFieldProps('discountPercent')}
-											error={Boolean(touched.discountPercent && errors.discountPercent)}
-											helperText={touched.discountPercent && errors.discountPercent}
-										/>
+
 										<LocalizationProvider dateAdapter={AdapterDateFns}>
 											<Stack direction={{xs: 'row'}} spacing={2}>
 												<MobileDatePicker
@@ -313,36 +320,21 @@ export default function PromotionDetailForm({promotionID, onReload, onOpenModal}
 												/>
 											</Stack>
 										</LocalizationProvider>
-										<Autocomplete
-											onChange={(e, value) => {
-												setFieldValue('destinationID', value.id !== null ? value.id : null);
-											}}
-											id="tags-outlined"
-											value={values.destinationApply}
-											options={destinationList}
-											getOptionLabel={(option) => option.name}
-											filterSelectedOptions
-											renderInput={(params) => (
-												<TextField
-													style={{height: 56, width: 512}}
-													{...params}
-													label="Địa điểm áp dụng"
-													{...getFieldProps('destinationID')}
-													required
-													error={Boolean(touched.destinationID && errors.destinationID)}
-													helperText={touched.destinationID && errors.destinationID}
-												/>
-											)}
-										/>
+
 										<AvatarUploadArea setImageList={handleImages} imageList={gallery} />
 									</Stack>
 								</Grid>
 							</Grid>
 
 							<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
-								<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-									Cập nhật
-								</LoadingButton>
+								<Stack direction={{xs: 'row'}} spacing={2}>
+									<Button color="error" variant="contained">
+										Ngưng khuyến mãi
+									</Button>
+									<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+										Cập nhật
+									</LoadingButton>
+								</Stack>
 							</Box>
 						</Card>
 					)}

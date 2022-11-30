@@ -61,10 +61,10 @@ export default function CreateUserForm() {
 		destinationID: Yup.string().nullable(true).required('Yêu cầu địa điểm'),
 		description: Yup.string().nullable(true).required('Yêu cầu mô tả địa điểm').max(500, 'Không quá 500 ký tự!'),
 		value: Yup.number()
-			.integer('Giá trị phải là số nguyên')
-			.min(1, 'Giá trị phải là số dương')
-			.max(99999, 'Giá trị không quá hàng chục triệu')
-			.required('Yêu cầu giá trị'),
+			.integer('Giá mã khuyến mãi phải là số nguyên')
+			.min(1, 'Giá mã khuyến mãi phải là số dương')
+			.max(99999, 'Giá mã khuyến mãi không quá hàng chục triệu')
+			.required('Yêu cầu giá mã khuyến mãi'),
 		salePrice: Yup.number()
 			.integer('Giá bán phải là số nguyên')
 			.min(1, 'Giá bán phải là số dương')
@@ -174,6 +174,15 @@ export default function CreateUserForm() {
 						<Grid container sx={{width: 1200}}>
 							<Grid item xs={6}>
 								<Stack direction={{xs: 'column'}} spacing={3.6} sx={{m: 2}}>
+									<TextField
+										style={{height: 56, width: 460}}
+										fullWidth
+										type="text"
+										label="Tên khuyến mãi*"
+										{...getFieldProps('name')}
+										error={Boolean(touched.name && errors.name)}
+										helperText={touched.name && errors.name}
+									/>
 									<Autocomplete
 										onChange={(e, value) => {
 											setFieldValue('destinationID', value !== null ? value.id : null);
@@ -195,18 +204,10 @@ export default function CreateUserForm() {
 											/>
 										)}
 									/>
-									<TextField
-										style={{height: 56, width: 460}}
-										fullWidth
-										type="text"
-										label="Tên khuyến mãi*"
-										{...getFieldProps('name')}
-										error={Boolean(touched.name && errors.name)}
-										helperText={touched.name && errors.name}
-									/>
+
 									<TextField
 										style={{width: 460}}
-										rows={12}
+										rows={18}
 										multiline
 										fullWidth
 										type="text"
@@ -215,11 +216,15 @@ export default function CreateUserForm() {
 										error={Boolean(touched.description && errors.description)}
 										helperText={touched.description && errors.description}
 									/>
+								</Stack>
+							</Grid>
+							<Grid item xs={6}>
+								<Stack direction={{xs: 'column'}} spacing={4} sx={{m: 2}}>
 									<TextField
 										style={{height: 56, width: 460}}
 										fullWidth
 										type="number"
-										label="Gía trị khuyến mãi*"
+										label="Gía mã khuyến mãi*"
 										{...getFieldProps('value')}
 										InputProps={{
 											endAdornment: (
@@ -231,10 +236,6 @@ export default function CreateUserForm() {
 										error={Boolean(touched.value && errors.value)}
 										helperText={touched.value && errors.value}
 									/>
-								</Stack>
-							</Grid>
-							<Grid item xs={6}>
-								<Stack direction={{xs: 'column'}} spacing={4} sx={{m: 2}}>
 									<TextField
 										style={{height: 56, width: 460}}
 										fullWidth
@@ -306,7 +307,7 @@ export default function CreateUserForm() {
 						</Grid>
 						<Box sx={{mt: 3, display: 'flex', justifyContent: 'center'}}>
 							<LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-								Check out
+								Tạo mã khuyến mãi
 							</LoadingButton>
 						</Box>
 					</Card>

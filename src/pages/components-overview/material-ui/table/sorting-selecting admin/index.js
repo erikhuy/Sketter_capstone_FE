@@ -304,15 +304,30 @@ export default function SortingSelecting() {
 										<TableCell align="left">{row.role.description}</TableCell>
 										<TableCell align="left">
 											{row.status === 'Verified' ? (
-												<Button variant="contained" color="success" sx={{color: '#ffffff'}}>
+												<Button
+													size="small"
+													variant="contained"
+													color="success"
+													sx={{color: '#ffffff'}}
+												>
 													Đã xác thực
 												</Button>
 											) : row.status === 'Unverified' ? (
-												<Button variant="contained" color="error" sx={{color: '#ffffff'}}>
+												<Button
+													size="small"
+													variant="contained"
+													color="error"
+													sx={{color: '#ffffff'}}
+												>
 													<b>Chưa xác thực</b>
 												</Button>
 											) : row.status === 'Deactivated' ? (
-												<Button variant="contained" color="error" sx={{color: '#ffffff'}}>
+												<Button
+													size="small"
+													variant="contained"
+													color="error"
+													sx={{color: '#ffffff'}}
+												>
 													<b>Vô hiệu hóa</b>
 												</Button>
 											) : (

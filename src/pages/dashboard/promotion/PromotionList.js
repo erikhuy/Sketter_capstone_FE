@@ -23,7 +23,7 @@ export default function PromotionList() {
 					sx={{color: 'white'}}
 					onClick={navigateToAddPromotion}
 				>
-					Thêm khuyến mãi
+					Thêm mã khuyến mãi
 				</Button>
 			</Box>
 			<Card>

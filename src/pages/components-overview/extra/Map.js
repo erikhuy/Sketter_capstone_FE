@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 import {Box, Card, CardContent, CardHeader, Container, Grid, Skeleton} from '@material-ui/core';
 // material
 import {styled} from '@material-ui/core/styles';

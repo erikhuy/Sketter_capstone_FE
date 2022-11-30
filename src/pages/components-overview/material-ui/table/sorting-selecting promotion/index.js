@@ -4,6 +4,7 @@
 // material
 import {
 	Box,
+	Button,
 	Checkbox,
 	FormControlLabel,
 	IconButton,
@@ -292,13 +293,31 @@ export default function PromotionSortingSelecting() {
 											{row.totalSold}/{row.quantity}
 										</TableCell>
 										<TableCell align="left">
-											{row.status === 'Draft'
-												? 'Chưa kích hoạt'
-												: row.status === 'Activated'
-												? 'Đang hoạt động'
-												: row.status === 'Done'
-												? 'Hết hoạt động'
-												: ''}
+											{row.status === 'Draft' ? (
+												<Button size="small" variant="contained" sx={{color: '#ffffff'}}>
+													Chưa kích hoạt
+												</Button>
+											) : row.status === 'Activated' ? (
+												<Button
+													size="small"
+													variant="contained"
+													color="success"
+													sx={{color: '#ffffff'}}
+												>
+													Đang hoạt động
+												</Button>
+											) : row.status === 'Done' ? (
+												<Button
+													size="small"
+													variant="contained"
+													color="error"
+													sx={{color: '#ffffff'}}
+												>
+													Hết hoạt động
+												</Button>
+											) : (
+												''
+											)}
 										</TableCell>
 									</TableRow>
 								);

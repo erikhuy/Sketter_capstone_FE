@@ -18,6 +18,7 @@ import {useDispatchAction} from 'shared/hooks';
 import useAuth from 'shared/hooks/useAuth';
 import useIsMountedRef from 'shared/hooks/useIsMountedRef';
 import {registerThunk} from 'shared/redux/thunks/auth';
+import axiosInstance from 'utils/axios';
 import * as Yup from 'yup';
 //
 import {MIconButton} from '../../@material-extend';
@@ -95,7 +96,7 @@ export default function RegisterForm() {
 	});
 	const registerSupplier = useCallback(async (data) => {
 		try {
-			await axios.post(`${API_URL.Auth}/signup/supplier`, data).then((res) => {
+			await axiosInstance.post(`${API_URL.Auth}/signup/supplier`, data).then((res) => {
 				enqueueSnackbar('Tạo địa tài khoản thành công', {variant: 'success'});
 				navigate('/dashboard');
 			});

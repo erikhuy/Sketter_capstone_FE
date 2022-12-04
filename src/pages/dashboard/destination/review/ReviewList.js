@@ -50,6 +50,7 @@ import imgbbUploader from 'imgbb-uploader/lib/cjs';
 import {useSnackbar} from 'notistack5';
 import Scrollbar from 'components/Scrollbar';
 import LoadingScreen from 'components/LoadingScreen';
+import axiosInstance from 'utils/axios';
 import SortingSelectingHead from './SortingSelectingHead';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -99,19 +100,19 @@ export default function ReviewList({destinationID}) {
 	useEffect(() => {
 		const fetchSupplier = async () => {
 			try {
-				await axios
+				await axiosInstance
 					.get(`${API_URL.Destination}/${destinationID}/rating?page=1`)
 					.then((res) => {
-						console.log(res.data.data.rating);
-						setData(res.data.data.rating);
-						setCurrentPage(res.data.currentPage);
-						if (res.data.maxPage > res.data.currentPage) {
+						console.log(res.data.rating);
+						setData(res.data.rating);
+						setCurrentPage(res.currentPage);
+						if (res.maxPage > res.currentPage) {
 							// eslint-disable-next-line no-const-assign
 							setDataNumber(
-								res.data.data.rating.travelerRating.length + page * 10 + (page === 0 ? 1 : page)
+								res.data.rating.travelerRating.length + page * 10 + (page === 0 ? 1 : page)
 							);
 						} else {
-							setDataNumber(res.data.data.rating.travelerRating.length + page * 10);
+							setDataNumber(res.data.rating.travelerRating.length + page * 10);
 						}
 						setBusy(false);
 					})

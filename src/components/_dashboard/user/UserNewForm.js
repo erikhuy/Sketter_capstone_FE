@@ -198,7 +198,7 @@ export default function UserNewForm({isEdit, currentUser}) {
 									/>
 									<TextField
 										fullWidth
-										label="Email Address"
+										label="Email"
 										{...getFieldProps('email')}
 										error={Boolean(touched.email && errors.email)}
 										helperText={touched.email && errors.email}

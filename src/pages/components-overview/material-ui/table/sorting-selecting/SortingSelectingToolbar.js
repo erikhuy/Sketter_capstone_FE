@@ -29,6 +29,7 @@ import useAuth from 'shared/hooks/useAuth';
 import DestinationDetailFormSupplierManager from 'pages/dashboard/destination/DestinationDetailFormSupplierManager';
 import ReviewList from 'pages/dashboard/destination/review/ReviewList';
 import {useSnackbar} from 'notistack5';
+import axiosInstance from 'utils/axios';
 
 // ----------------------------------------------------------------------
 
@@ -49,7 +50,6 @@ SortingSelectingToolbar.propTypes = {
 };
 const styles = {
 	position: 'absolute',
-	top: '10%',
 	left: '10%',
 	height: '100%',
 	display: 'block'
@@ -90,7 +90,7 @@ export default function SortingSelectingToolbar({onReloadList, numSelected, idSe
 			try {
 				await Promise.all(
 					idSelected.map(async (id) => {
-						await axios.delete(`${API_URL.Destination}/${id}`).then((res) => {
+						await axiosInstance.delete(`${API_URL.Destination}/${id}`).then((res) => {
 							if (res.status === 204) {
 								reloadData([]);
 								reloadNumber([]);

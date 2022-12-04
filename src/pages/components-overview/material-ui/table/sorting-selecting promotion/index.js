@@ -26,6 +26,7 @@ import {Icon} from '@iconify/react';
 import searchFill from '@iconify/icons-eva/search-fill';
 import {useSnackbar} from 'notistack5';
 import Clear from '@material-ui/icons/Clear';
+import axiosInstance from 'utils/axios';
 import Scrollbar from '../../../../../components/Scrollbar';
 //
 import SortingSelectingHead from './SortingSelectingHead';
@@ -78,17 +79,17 @@ export default function PromotionSortingSelecting() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios.get(`${API_URL.Voucher}`).then((res) => {
+				await axiosInstance.get(`${API_URL.Voucher}`).then((res) => {
 					console.log(dataNumber);
 
-					setData(res.data.data.vouchers);
-					setMaxPage(res.data.maxPage);
-					setCurrentPage(res.data.currentPage);
-					if (res.data.maxPage > res.data.currentPage) {
+					setData(res.data.vouchers);
+					setMaxPage(res.maxPage);
+					setCurrentPage(res.currentPage);
+					if (res.maxPage > res.currentPage) {
 						// eslint-disable-next-line no-const-assign
-						setDataNumber(res.data.data.count);
+						setDataNumber(res.data.count);
 					} else {
-						setDataNumber(res.data.data.count);
+						setDataNumber(res.data.count);
 					}
 				});
 			} catch (error) {

@@ -15,17 +15,6 @@ export default function UserListManagement() {
 
 	return (
 		<>
-			<Box sx={{mb: 3, display: 'flex', justifyContent: 'flex-end'}}>
-				<Button
-					variant="contained"
-					color="primary"
-					startIcon={<AddIcon />}
-					sx={{color: 'white'}}
-					onClick={navigateToAddUser}
-				>
-					Thêm tài khoản
-				</Button>
-			</Box>
 			<Card>
 				<SortingSelecting />
 			</Card>

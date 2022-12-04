@@ -41,6 +41,7 @@ import {useSnackbar} from 'notistack5';
 import {storage} from 'utils/firebase';
 import {getDownloadURL, ref, uploadBytes, uploadString} from 'firebase/storage';
 import LoadingScreen from 'components/LoadingScreen';
+import axiosInstance from 'utils/axios';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -144,8 +145,8 @@ export default function DestinationDetailForm({destinationID, onReload, onOpenMo
 	const updateDestination = useCallback(async (data) => {
 		console.log(data);
 		try {
-			await axios.patch(`${API_URL.Destination}/${data.id}`, data).then((res) => {
-				enqueueSnackbar(res.data.message, {variant: 'success'});
+			await axiosInstance.patch(`${API_URL.Destination}/${data.id}`, data).then((res) => {
+				enqueueSnackbar(res.message, {variant: 'success'});
 				onReload(data);
 				onOpenModal(false);
 			});
@@ -156,9 +157,9 @@ export default function DestinationDetailForm({destinationID, onReload, onOpenMo
 	useEffect(() => {
 		const fetchSupplier = async () => {
 			try {
-				await axios.get(`${API_URL.City}`).then((res) => {
-					console.log(res.data.data.cities);
-					setCities(res.data.data.cities);
+				await axiosInstance.get(`${API_URL.City}`).then((res) => {
+					console.log(res.data.cities);
+					setCities(res.data.cities);
 				});
 			} catch (error) {
 				console.log(error);
@@ -169,8 +170,8 @@ export default function DestinationDetailForm({destinationID, onReload, onOpenMo
 	useEffect(() => {
 		const fetchSupplier = async () => {
 			try {
-				await axios.get(`${API_URL.TimeFrames}`).then((res) => {
-					setTimeFrames(res.data.data.timeFrames);
+				await axiosInstance.get(`${API_URL.TimeFrames}`).then((res) => {
+					setTimeFrames(res.data.timeFrames);
 				});
 			} catch (error) {
 				console.log(error);
@@ -183,11 +184,11 @@ export default function DestinationDetailForm({destinationID, onReload, onOpenMo
 		const dataSup = processData(data);
 		dataSup.status = action;
 		try {
-			await axios.patch(`${API_URL.Destination}/${dataSup.id}`, dataSup).then((res) => {
-				enqueueSnackbar(res.data.message, {variant: 'success'});
+			await axiosInstance.patch(`${API_URL.Destination}/${dataSup.id}`, dataSup).then((res) => {
+				enqueueSnackbar(res.message, {variant: 'success'});
 				onReload(data);
 				onOpenModal(false);
-				console.log(res.data);
+				console.log(res);
 			});
 		} catch (e) {
 			enqueueSnackbar(e.response.data.message, {variant: 'error'});
@@ -197,17 +198,15 @@ export default function DestinationDetailForm({destinationID, onReload, onOpenMo
 		const supList = [];
 		const fetchSupplier = async () => {
 			try {
-				await axios.get(`${API_URL.Cata}`).then((res) => {
-					if (res.status === 200) {
-						console.log(res.data.data.catalogs);
-						res.data.data.catalogs.map((value) => {
-							value.sub.map((item) => {
-								// console.log(item.name);
-								supList.push(item.name);
-								setCatalogs(supList);
-							});
+				await axiosInstance.get(`${API_URL.Cata}`).then((res) => {
+					console.log(res.data.catalogs);
+					res.data.catalogs.map((value) => {
+						value.sub.map((item) => {
+							// console.log(item.name);
+							supList.push(item.name);
+							setCatalogs(supList);
 						});
-					}
+					});
 				});
 			} catch (error) {
 				console.log(error);
@@ -220,11 +219,9 @@ export default function DestinationDetailForm({destinationID, onReload, onOpenMo
 		const supList = [];
 		const fetchSupplier = async () => {
 			try {
-				await axios.get(`${API_URL.PT}`).then((res) => {
-					if (res.status === 200) {
-						console.log(res.data.data.personalities);
-						setPersonalities(res.data.data.personalities);
-					}
+				await axiosInstance.get(`${API_URL.PT}`).then((res) => {
+					console.log(res.data.personalities);
+					setPersonalities(res.data.personalities);
 				});
 			} catch (error) {
 				console.log(error);
@@ -237,17 +234,15 @@ export default function DestinationDetailForm({destinationID, onReload, onOpenMo
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios.get(`${API_URL.Destination}/${destinationID}`).then((res) => {
-					if (res.status === 200) {
-						console.log(res.data.data);
-						const supArray = Object.assign(res.data.data.destination, locationData);
-						supArray.location.lng = res.data.data.destination.longitude;
-						supArray.location.lat = res.data.data.destination.latitude;
-						supArray.location.destinationAddress = res.data.data.destination.address;
-						setData(supArray);
-						setBusy(false);
-						setGallery(res.data.data.destination.gallery);
-					}
+				await axiosInstance.get(`${API_URL.Destination}/${destinationID}`).then((res) => {
+					console.log(res.data);
+					const supArray = Object.assign(res.data.destination, locationData);
+					supArray.location.lng = res.data.destination.longitude;
+					supArray.location.lat = res.data.destination.latitude;
+					supArray.location.destinationAddress = res.data.destination.address;
+					setData(supArray);
+					setBusy(false);
+					setGallery(res.data.destination.gallery);
 				});
 			} catch (error) {
 				console.log(error);

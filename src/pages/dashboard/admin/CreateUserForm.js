@@ -7,6 +7,7 @@ import {
 	Alert,
 	Autocomplete,
 	Box,
+	Card,
 	FormControl,
 	FormHelperText,
 	IconButton,
@@ -30,6 +31,7 @@ import {useDispatchAction} from 'shared/hooks';
 import useAuth from 'shared/hooks/useAuth';
 import useIsMountedRef from 'shared/hooks/useIsMountedRef';
 import {registerThunk} from 'shared/redux/thunks/auth';
+import axiosInstance from 'utils/axios';
 import * as Yup from 'yup';
 //
 
@@ -113,16 +115,16 @@ export default function CreateUserForm() {
 	});
 	const createUser = useCallback(async (data) => {
 		console.log(data);
-		// try {
-		// 	await axios.post(`${API_URL.User}`, data).then((res) => {
-		// 		console.log(res.data);
-		// 		navigate('/dashboard/user/userList');
-		// 		enqueueSnackbar('Tạo người dùng thành công', {variant: 'success'});
-		// 	});
-		// } catch (e) {
-		// 	console.log(e.response.data.message);
-		// 	enqueueSnackbar(e.response.data.message, {variant: 'error'});
-		// }
+		try {
+			await axiosInstance.post(`${API_URL.User}`, data).then((res) => {
+				console.log(res);
+				navigate('/dashboard/user/userList');
+				enqueueSnackbar('Tạo người dùng thành công', {variant: 'success'});
+			});
+		} catch (e) {
+			console.log(e.response.data.message);
+			enqueueSnackbar(e.response.data.message, {variant: 'error'});
+		}
 	});
 	const {errors, touched, handleSubmit, isSubmitting, getFieldProps, setFieldValue, values} = formik;
 
@@ -133,145 +135,157 @@ export default function CreateUserForm() {
 					style={{
 						position: 'absolute',
 						left: '55%',
-						top: '50%',
+						top: '55%',
 						transform: 'translate(-50%, -50%)'
 					}}
 				>
-					<Stack direction={{xs: 'column'}} spacing={3.6} sx={{m: 2}}>
-						<h1 className="page-title text-center font-weight-bold">Tạo tài khoản</h1>
-						<FormControl sx={{m: 1, minWidth: 80}}>
-							<InputLabel id="demo-simple-select-label">Vai trò*</InputLabel>
-							<Select
+					{' '}
+					<Card sx={{p: 3}}>
+						<Stack direction={{xs: 'column'}} spacing={3.6} sx={{m: 2}}>
+							<h1 className="page-title text-center font-weight-bold">Tạo tài khoản</h1>
+							<FormControl sx={{m: 1, minWidth: 80}}>
+								<InputLabel id="demo-simple-select-label">Vai trò*</InputLabel>
+								<Select
+									style={{height: 56, width: 460}}
+									labelId="demo-simple-select-label"
+									id="demo-simple-select"
+									label="Vai trò*"
+									onChange={(e, value) => {
+										setFieldValue('roleName', value.props.value);
+										setRoleName(value.props.value);
+										if (value.props.value === 'Khách du lịch') {
+											setFieldValue('owner', null);
+										} else if (value.props.value === 'Quản lý') {
+											setFieldValue('phone', null);
+											setFieldValue('address', null);
+											setFieldValue('owner', null);
+										}
+									}}
+								>
+									<MenuItem value="Khách du lịch">Khách du lịch</MenuItem>
+									<MenuItem value="Đối tác">Đối tác</MenuItem>
+									<MenuItem value="Quản lý">Quản lý</MenuItem>
+								</Select>
+								<FormHelperText error>{touched.roleName && errors.roleName}</FormHelperText>
+							</FormControl>
+							<TextField
 								style={{height: 56, width: 460}}
-								labelId="demo-simple-select-label"
-								id="demo-simple-select"
-								label="Vai trò*"
-								onChange={(e, value) => {
-									setFieldValue('roleName', value.props.value);
-									setRoleName(value.props.value);
-									if (value.props.value === 'Khách du lịch') {
-										setFieldValue('owner', null);
-									} else if (value.props.value === 'Quản lý') {
-										setFieldValue('phone', null);
-										setFieldValue('address', null);
-										setFieldValue('owner', null);
-									}
+								fullWidth
+								type="email"
+								label="Email*"
+								{...getFieldProps('email')}
+								error={Boolean(touched.email && errors.email)}
+								helperText={touched.email && errors.email}
+							/>
+							<TextField
+								style={{height: 56, width: 460}}
+								fullWidth
+								type={showPassword ? 'text' : 'password'}
+								label="Mật khẩu*"
+								{...getFieldProps('password')}
+								InputProps={{
+									endAdornment: (
+										<InputAdornment position="end">
+											<IconButton edge="end" onClick={() => setShowPassword((prev) => !prev)}>
+												<Icon icon={showPassword ? eyeFill : eyeOffFill} />
+											</IconButton>
+										</InputAdornment>
+									)
 								}}
+								error={Boolean(touched.password && errors.password)}
+								helperText={touched.password && errors.password}
+							/>
+							<TextField
+								style={{height: 56, width: 460}}
+								fullWidth
+								type={showConfirmPassword ? 'text' : 'password'}
+								label="Nhập lại mật khẩu*"
+								{...getFieldProps('confirmPassword')}
+								InputProps={{
+									endAdornment: (
+										<InputAdornment position="end">
+											<IconButton
+												edge="end"
+												onClick={() => setShowConfirmPassword((prev) => !prev)}
+											>
+												<Icon icon={showConfirmPassword ? eyeFill : eyeOffFill} />
+											</IconButton>
+										</InputAdornment>
+									)
+								}}
+								error={Boolean(touched.confirmPassword && errors.confirmPassword)}
+								helperText={touched.confirmPassword && errors.confirmPassword}
+							/>
+							<TextField
+								style={{height: 56, width: 460}}
+								fullWidth
+								type="text"
+								label="Tên hiển thị*"
+								{...getFieldProps('name')}
+								error={Boolean(touched.name && errors.name)}
+								helperText={touched.name && errors.name}
+							/>
+							{values.roleName === 'Đối tác' ? (
+								<>
+									<TextField
+										fullWidth
+										type="text"
+										label="Số điện thoại*"
+										{...getFieldProps('phone')}
+										error={Boolean(touched.phone && errors.phone)}
+										helperText={touched.phone && errors.phone}
+									/>
+									<TextField
+										fullWidth
+										type="text"
+										label="Tên chủ sở hữu*"
+										{...getFieldProps('owner')}
+										error={Boolean(touched.owner && errors.owner)}
+										helperText={touched.owner && errors.owner}
+									/>
+									<TextField
+										fullWidth
+										type="text"
+										label="Địa chỉ*"
+										{...getFieldProps('address')}
+										error={Boolean(touched.address && errors.address)}
+										helperText={touched.address && errors.address}
+									/>
+								</>
+							) : null}
+
+							{values.roleName === 'Khách du lịch' ? (
+								<>
+									<TextField
+										fullWidth
+										type="text"
+										label="Số điện thoại*"
+										{...getFieldProps('phone')}
+										error={Boolean(touched.phone && errors.phone)}
+										helperText={touched.phone && errors.phone}
+									/>
+									<TextField
+										fullWidth
+										type="text"
+										label="Địa chỉ*"
+										{...getFieldProps('address')}
+										error={Boolean(touched.address && errors.address)}
+										helperText={touched.address && errors.address}
+									/>
+								</>
+							) : null}
+
+							<LoadingButton
+								fullWidth
+								size="large"
+								type="submit"
+								variant="contained"
+								loading={isSubmitting}
 							>
-								<MenuItem value="Khách du lịch">Khách du lịch</MenuItem>
-								<MenuItem value="Đối tác">Đối tác</MenuItem>
-								<MenuItem value="Quản lý">Quản lý</MenuItem>
-							</Select>
-							<FormHelperText error>{touched.roleName && errors.roleName}</FormHelperText>
-						</FormControl>
-						<TextField
-							style={{height: 56, width: 460}}
-							fullWidth
-							type="email"
-							label="Email*"
-							{...getFieldProps('email')}
-							error={Boolean(touched.email && errors.email)}
-							helperText={touched.email && errors.email}
-						/>
-						<TextField
-							style={{height: 56, width: 460}}
-							fullWidth
-							type={showPassword ? 'text' : 'password'}
-							label="Mật khẩu*"
-							{...getFieldProps('password')}
-							InputProps={{
-								endAdornment: (
-									<InputAdornment position="end">
-										<IconButton edge="end" onClick={() => setShowPassword((prev) => !prev)}>
-											<Icon icon={showPassword ? eyeFill : eyeOffFill} />
-										</IconButton>
-									</InputAdornment>
-								)
-							}}
-							error={Boolean(touched.password && errors.password)}
-							helperText={touched.password && errors.password}
-						/>
-						<TextField
-							style={{height: 56, width: 460}}
-							fullWidth
-							type={showConfirmPassword ? 'text' : 'password'}
-							label="Nhập lại mật khẩu*"
-							{...getFieldProps('confirmPassword')}
-							InputProps={{
-								endAdornment: (
-									<InputAdornment position="end">
-										<IconButton edge="end" onClick={() => setShowConfirmPassword((prev) => !prev)}>
-											<Icon icon={showConfirmPassword ? eyeFill : eyeOffFill} />
-										</IconButton>
-									</InputAdornment>
-								)
-							}}
-							error={Boolean(touched.confirmPassword && errors.confirmPassword)}
-							helperText={touched.confirmPassword && errors.confirmPassword}
-						/>
-						<TextField
-							style={{height: 56, width: 460}}
-							fullWidth
-							type="text"
-							label="Tên hiển thị*"
-							{...getFieldProps('name')}
-							error={Boolean(touched.name && errors.name)}
-							helperText={touched.name && errors.name}
-						/>
-						{values.roleName === 'Đối tác' ? (
-							<>
-								<TextField
-									fullWidth
-									type="text"
-									label="Số điện thoại*"
-									{...getFieldProps('phone')}
-									error={Boolean(touched.phone && errors.phone)}
-									helperText={touched.phone && errors.phone}
-								/>
-								<TextField
-									fullWidth
-									type="text"
-									label="Tên chủ sở hữu*"
-									{...getFieldProps('owner')}
-									error={Boolean(touched.owner && errors.owner)}
-									helperText={touched.owner && errors.owner}
-								/>
-								<TextField
-									fullWidth
-									type="text"
-									label="Địa chỉ*"
-									{...getFieldProps('address')}
-									error={Boolean(touched.address && errors.address)}
-									helperText={touched.address && errors.address}
-								/>
-							</>
-						) : null}
-
-						{values.roleName === 'Khách du lịch' ? (
-							<>
-								<TextField
-									fullWidth
-									type="text"
-									label="Số điện thoại*"
-									{...getFieldProps('phone')}
-									error={Boolean(touched.phone && errors.phone)}
-									helperText={touched.phone && errors.phone}
-								/>
-								<TextField
-									fullWidth
-									type="text"
-									label="Địa chỉ*"
-									{...getFieldProps('address')}
-									error={Boolean(touched.address && errors.address)}
-									helperText={touched.address && errors.address}
-								/>
-							</>
-						) : null}
-
-						<LoadingButton fullWidth size="large" type="submit" variant="contained" loading={isSubmitting}>
-							Tạo tài khoản
-						</LoadingButton>
-					</Stack>
+								Tạo tài khoản
+							</LoadingButton>
+						</Stack>
+					</Card>
 				</div>
 			</Form>
 		</FormikProvider>

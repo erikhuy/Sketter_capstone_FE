@@ -99,7 +99,7 @@ export default function AccountPopover() {
 
 				<Divider sx={{my: 1}} />
 
-				{MENU_OPTIONS.map((option) => (
+				{/* {MENU_OPTIONS.map((option) => (
 					<MenuItem
 						key={option.label}
 						to={option.linkTo}
@@ -119,7 +119,7 @@ export default function AccountPopover() {
 
 						{option.label}
 					</MenuItem>
-				))}
+				))} */}
 
 				<Box sx={{p: 2, pt: 1.5}}>
 					<Button fullWidth color="inherit" variant="outlined" onClick={handleLogout}>

@@ -18,6 +18,9 @@ import axios from 'axios';
 import {API_URL} from 'shared/constants';
 import {useSnackbar} from 'notistack5';
 import AddIcon from '@material-ui/icons/Add';
+import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
+import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
+import axiosInstance from 'utils/axios';
 
 export default function CatalogManagement() {
 	const [data, setData] = useState();
@@ -44,20 +47,19 @@ export default function CatalogManagement() {
 
 	const {enqueueSnackbar} = useSnackbar();
 
-
 	const catalogAction = useCallback(async (catalog, status) => {
 		try {
 			console.log(catalog, status);
 			// eslint-disable-next-line no-restricted-globals, no-global-assign
-			await axios
+			await axiosInstance
 				.patch(`${API_URL.Cata}/${catalog}?action=${status}`)
 				.then((res) => {
-					console.log(res.data);
+					console.log(res);
 					// eslint-disable-next-line no-useless-concat
 					enqueueSnackbar(`${status === 'enable' ? 'Kích hoạt' : 'Xóa'} loại địa điểm thành công`, {
 						variant: 'success'
 					});
-					setReload(res.data);
+					setReload(res);
 					setOpenCatalogDialog(false);
 				})
 				.catch((error) => enqueueSnackbar(error.data.message, {variant: 'error'}));
@@ -70,15 +72,15 @@ export default function CatalogManagement() {
 		try {
 			console.log(mainCatalog, subCatalog);
 			// eslint-disable-next-line no-restricted-globals, no-global-assign
-			await axios
+			await axiosInstance
 				.post(`${API_URL.Cata}`, {name: subCatalog, parent: mainCatalog})
 				.then((res) => {
-					console.log(res.data);
+					console.log(res);
 					// eslint-disable-next-line no-useless-concat
 					enqueueSnackbar('Thêm loại địa điểm thành công', {
 						variant: 'success'
 					});
-					setReload(res.data);
+					setReload(res);
 					setOpenCatalogDialog(false);
 				})
 				.catch((error) => enqueueSnackbar(error.data.message, {variant: 'error'}));
@@ -90,9 +92,9 @@ export default function CatalogManagement() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios.get(`${API_URL.Cata}`).then((res) => {
-					console.log(res.data.data.catalogs);
-					setData(res.data.data.catalogs);
+				await axiosInstance.get(`${API_URL.Cata}`).then((res) => {
+					console.log(res.data.catalogs);
+					setData(res.data.catalogs);
 				});
 			} catch (error) {
 				console.log(error);
@@ -126,7 +128,7 @@ export default function CatalogManagement() {
 							autoFocus
 							margin="dense"
 							id="name"
-							label="Email Address"
+							label="Loại địa điểm"
 							type="email"
 							fullWidth
 							variant="standard"
@@ -159,10 +161,18 @@ export default function CatalogManagement() {
 												subCatalog.deletedAt == null ? 'disable' : 'enable'
 											)
 										}
+										deleteIcon={
+											subCatalog.deletedAt == null ? (
+												<CancelRoundedIcon />
+											) : (
+												<CheckCircleRoundedIcon />
+											)
+										}
 									/>
 
 									{value.sub.length - 1 === index ? (
-										<IconButton sx={{p: 0,ml: 2}}
+										<IconButton
+											sx={{p: 0, ml: 2}}
 											onClick={() => {
 												handleOpenAddDialog(value.name);
 											}}

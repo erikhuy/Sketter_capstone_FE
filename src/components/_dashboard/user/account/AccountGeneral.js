@@ -27,7 +27,7 @@ export default function AccountGeneral() {
 	const UpdateUserSchema = Yup.object().shape({
 		name: Yup.string().min(2, 'Tên không hợp lệ!').max(50, 'Tên không hợp lệ!').required('Yêu cầu nhập tên'),
 		phone: Yup.string()
-			.nullable(true)
+			.required('Yêu cầu nhập số điện thoại')
 			.matches(/^[0-9]+$/, 'Yêu cầu nhập số điện thoại')
 			.min(8, 'Số điện thoại không tồn tại!')
 			.max(13, 'Số điện thoại không tồn tại!'),
@@ -136,27 +136,70 @@ export default function AccountGeneral() {
 							<AvatarUploadArea setImageList={handleImages} imageList={gallery} />
 						</Card>
 					</Grid>
+					{user.role.name === 'Manager' || user.role.name === 'Admin' ? (
+						<Grid item xs={12} md={8}>
+							<Card sx={{p: 3}}>
+								<Stack spacing={{xs: 2, md: 3}}>
+									<Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
+										<TextField disabled fullWidth label="Họ & Tên" {...getFieldProps('name')} />
+										<TextField fullWidth disabled label="Email" {...getFieldProps('email')} />
+									</Stack>
 
-					<Grid item xs={12} md={8}>
-						<Card sx={{p: 3}}>
-							<Stack spacing={{xs: 2, md: 3}}>
-								<Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
-									<TextField fullWidth label="Họ & Tên*" {...getFieldProps('name')} />
-									<TextField fullWidth disabled label="Email" {...getFieldProps('email')} />
+									<Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
+										<TextField
+											disabled
+											fullWidth
+											label="Số điện thoại"
+											{...getFieldProps('phone')}
+										/>
+										<TextField disabled fullWidth label="Địa chỉ" {...getFieldProps('address')} />
+									</Stack>
 								</Stack>
+							</Card>
+						</Grid>
+					) : (
+						<Grid item xs={12} md={8}>
+							<Card sx={{p: 3}}>
+								<Stack spacing={{xs: 2, md: 3}}>
+									<Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
+										<TextField
+											required
+											fullWidth
+											label="Họ & Tên"
+											{...getFieldProps('name')}
+											error={Boolean(touched.name && errors.name)}
+											helperText={touched.name && errors.name}
+										/>
+										<TextField fullWidth disabled label="Email" {...getFieldProps('email')} />
+									</Stack>
 
-								<Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
-									<TextField fullWidth label="Số điện thoại*" {...getFieldProps('phone')} />
-									<TextField fullWidth label="Địa chỉ*" {...getFieldProps('address')} />
+									<Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
+										<TextField
+											required
+											fullWidth
+											label="Số điện thoại"
+											{...getFieldProps('phone')}
+											error={Boolean(touched.phone && errors.phone)}
+											helperText={touched.phone && errors.phone}
+										/>
+										<TextField
+											required
+											fullWidth
+											label="Địa chỉ"
+											{...getFieldProps('address')}
+											error={Boolean(touched.address && errors.address)}
+											helperText={touched.address && errors.address}
+										/>
+									</Stack>
 								</Stack>
-							</Stack>
-							<Box sx={{mt: 3, display: 'flex', justifyContent: 'flex-end'}}>
-								<LoadingButton type="submit" variant="contained" loading={isUpdatingMe}>
-									Lưu
-								</LoadingButton>
-							</Box>
-						</Card>
-					</Grid>
+								<Box sx={{mt: 3, display: 'flex', justifyContent: 'flex-end'}}>
+									<LoadingButton type="submit" variant="contained" loading={isUpdatingMe}>
+										Lưu
+									</LoadingButton>
+								</Box>
+							</Card>
+						</Grid>
+					)}
 				</Grid>
 			</Form>
 		</FormikProvider>

@@ -190,7 +190,7 @@ const CreateDestination = Loadable(lazy(() => import('pages/dashboard/destinatio
 const UserList = Loadable(lazy(() => import('pages/dashboard/admin/UserList')));
 const CreateUser = Loadable(lazy(() => import('pages/dashboard/admin/CreateUser')));
 const PromotionList = Loadable(lazy(() => import('pages/dashboard/promotion/PromotionList')));
-const CreatePromotion = Loadable(lazy(() => import('pages/dashboard/promotion/createPromotion')));
+const CreatePromotion = Loadable(lazy(() => import('pages/dashboard/promotion/CreatePromotion')));
 const CatalogManagement = Loadable(lazy(() => import('pages/dashboard/admin/CatalogManagement')));
 
 const GeneralApp = Loadable(lazy(() => import('pages/dashboard/GeneralApp')));

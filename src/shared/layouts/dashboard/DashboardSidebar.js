@@ -2,9 +2,10 @@
 import {Box, Button, CardActionArea, Drawer, Link, Stack, Tooltip, Typography} from '@material-ui/core';
 // material
 import {alpha, styled} from '@material-ui/core/styles';
+import {useSnackbar} from 'notistack5';
 import PropTypes from 'prop-types';
 import {useEffect} from 'react';
-import {Link as RouterLink, useLocation} from 'react-router-dom';
+import {Link as RouterLink, useLocation, useNavigate} from 'react-router-dom';
 // hooks
 import useAuth from 'shared/hooks/useAuth';
 import useCollapseDrawer from 'shared/hooks/useCollapseDrawer';
@@ -116,8 +117,19 @@ DashboardSidebar.propTypes = {
 
 export default function DashboardSidebar({isOpenSidebar, onCloseSidebar}) {
 	const {pathname} = useLocation();
-	const {user} = useAuth();
+	const {user, logout} = useAuth();
+	const {enqueueSnackbar} = useSnackbar();
+	const navigate = useNavigate();
 
+	const handleLogout = async () => {
+		try {
+			await logout();
+			navigate('/');
+		} catch (error) {
+			console.error(error);
+			enqueueSnackbar('Không thể đăng xuất', {variant: 'error'});
+		}
+	};
 	const {isCollapse, collapseClick, collapseHover, onToggleCollapse, onHoverEnter, onHoverLeave} =
 		useCollapseDrawer();
 
@@ -185,6 +197,11 @@ export default function DashboardSidebar({isOpenSidebar, onCloseSidebar}) {
 				}
 				isShow={!isCollapse}
 			/>
+			<Box sx={{p: 2, pt: 1.5, position: 'absolute', top: '90%', width: '100%'}}>
+				<Button fullWidth color="inherit" variant="outlined" onClick={handleLogout}>
+					Đăng xuất
+				</Button>
+			</Box>
 		</Scrollbar>
 	);
 

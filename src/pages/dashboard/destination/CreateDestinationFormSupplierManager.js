@@ -42,6 +42,7 @@ import {isNull} from 'lodash';
 import {useNavigate} from 'react-router-dom';
 import {storage} from 'utils/firebase';
 import {getDownloadURL, ref, uploadBytes, uploadString} from 'firebase/storage';
+import axiosInstance from 'utils/axios';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -155,11 +156,9 @@ export default function CreateDestinationFormSupplierManager() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios.get(`${API_URL.User}/supplier`).then((res) => {
-					if (res.status === 200) {
-						console.log(res.data.data.suppliers);
-						setSuppliers(res.data.data.suppliers);
-					}
+				await axiosInstance.get(`${API_URL.User}/supplier`).then((res) => {
+					console.log(res.data.suppliers);
+					setSuppliers(res.data.suppliers);
 				});
 			} catch (error) {
 				console.log(error);
@@ -171,9 +170,9 @@ export default function CreateDestinationFormSupplierManager() {
 	useEffect(() => {
 		const fetchSupplier = async () => {
 			try {
-				await axios.get(`${API_URL.City}`).then((res) => {
-					console.log(res.data.data.cities);
-					setCities(res.data.data.cities);
+				await axiosInstance.get(`${API_URL.City}`).then((res) => {
+					console.log(res.data.cities);
+					setCities(res.data.cities);
 				});
 			} catch (error) {
 				console.log(error);
@@ -184,8 +183,8 @@ export default function CreateDestinationFormSupplierManager() {
 	useEffect(() => {
 		const fetchSupplier = async () => {
 			try {
-				await axios.get(`${API_URL.TimeFrames}`).then((res) => {
-					setTimeFrames(res.data.data.timeFrames);
+				await axiosInstance.get(`${API_URL.TimeFrames}`).then((res) => {
+					setTimeFrames(res.data.timeFrames);
 				});
 			} catch (error) {
 				console.log(error);
@@ -197,17 +196,15 @@ export default function CreateDestinationFormSupplierManager() {
 		const supList = [];
 		const fetchSupplier = async () => {
 			try {
-				await axios.get(`${API_URL.Cata}`).then((res) => {
-					if (res.status === 200) {
-						console.log(res.data.data.catalogs);
-						res.data.data.catalogs.map((value) => {
-							value.sub.map((item) => {
-								// console.log(item.name);
-								supList.push(item.name);
-								setCatalogs(supList);
-							});
+				await axiosInstance.get(`${API_URL.Cata}`).then((res) => {
+					console.log(res.data.catalogs);
+					res.data.catalogs.map((value) => {
+						value.sub.map((item) => {
+							// console.log(item.name);
+							supList.push(item.name);
+							setCatalogs(supList);
 						});
-					}
+					});
 				});
 			} catch (error) {
 				console.log(error);
@@ -220,11 +217,9 @@ export default function CreateDestinationFormSupplierManager() {
 		const supList = [];
 		const fetchSupplier = async () => {
 			try {
-				await axios.get(`${API_URL.PT}`).then((res) => {
-					if (res.status === 200) {
-						console.log(res.data.data.personalities);
-						setPersonalities(res.data.data.personalities);
-					}
+				await axiosInstance.get(`${API_URL.PT}`).then((res) => {
+					console.log(res.data.personalities);
+					setPersonalities(res.data.personalities);
 				});
 			} catch (error) {
 				console.log(error);
@@ -242,9 +237,9 @@ export default function CreateDestinationFormSupplierManager() {
 	const createDestination = useCallback(async (data) => {
 		console.log(data);
 		try {
-			await axios.post(`${API_URL.Destination}`, data).then((res) => {
+			await axiosInstance.post(`${API_URL.Destination}`, data).then((res) => {
 				enqueueSnackbar('Tạo địa điểm thành công', {variant: 'success'});
-				console.log(res.data);
+				console.log(res);
 			});
 		} catch (e) {
 			enqueueSnackbar(e.response.data.message, {variant: 'error'});
@@ -318,6 +313,7 @@ export default function CreateDestinationFormSupplierManager() {
 						<Grid container>
 							<Grid item xs={6}>
 								<Stack direction={{xs: 'column'}} spacing={2.4} sx={{m: 2}}>
+								<h3>Thông tin địa điểm</h3>
 									<TextField
 										fullWidth
 										label="Tên địa điểm*"
@@ -361,11 +357,7 @@ export default function CreateDestinationFormSupplierManager() {
 										getOptionLabel={(option) => option.name}
 										filterSelectedOptions
 										renderInput={(params) => (
-											<TextField
-												{...params}
-												label="Khu vực"
-												{...getFieldProps('cityID')}
-											/>
+											<TextField {...params} label="Khu vực" {...getFieldProps('cityID')} />
 										)}
 									/>
 									<TextField
@@ -478,8 +470,7 @@ export default function CreateDestinationFormSupplierManager() {
 											height: 15
 										}}
 									/>
-									<h2>Thông tin về phân loại</h2>
-									<h3 className="category-label">Loại địa điểm</h3>
+									<h3>Thông tin về phân loại</h3>
 									<Autocomplete
 										onChange={(e, value) => {
 											setFieldValue('catalogs', value !== null ? value : initialValues.catalogs);
@@ -500,7 +491,6 @@ export default function CreateDestinationFormSupplierManager() {
 											/>
 										)}
 									/>
-									<h3 className="category-label">Tính cách du lịch người dùng</h3>
 									<Autocomplete
 										multiple
 										id="tags-outlined"

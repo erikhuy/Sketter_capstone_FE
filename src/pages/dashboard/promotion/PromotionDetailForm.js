@@ -40,7 +40,7 @@ import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import ImageDropzone from 'components/imagearea/ImageDropzone';
 import PropTypes from 'prop-types';
 import Mapfield from 'components/mapfield';
-import axios from 'axios';
+import axiosInstance from 'utils/axios';
 import {API_URL} from 'shared/constants';
 import useIsMountedRef from 'shared/hooks/useIsMountedRef';
 import imgbbUploader from 'imgbb-uploader/lib/cjs';
@@ -119,8 +119,8 @@ export default function PromotionDetailForm({promotionID, onReload, onOpenModal}
 	const updatePromotion = useCallback(async (data) => {
 		console.log(data);
 		try {
-			await axios.patch(`${API_URL.Voucher}/${data.id}`, data).then((res) => {
-				enqueueSnackbar(res.data.message, {variant: 'success'});
+			await axiosInstance.patch(`${API_URL.Voucher}/${data.id}`, data).then((res) => {
+				enqueueSnackbar(res.message, {variant: 'success'});
 				onReload(data);
 				onOpenModal(false);
 			});
@@ -132,16 +132,14 @@ export default function PromotionDetailForm({promotionID, onReload, onOpenModal}
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios.get(`${API_URL.Voucher}/${promotionID}`).then((res) => {
-					if (res.status === 200) {
-						console.log(res.data.data);
-						const supArray = Object.assign(res.data.data.voucher, {
-							destinationID: res.data.data.voucher.destinationApply.id
-						});
-						setData(supArray);
-						setBusy(false);
-						setGallery(!res.data.data.voucher.image ? [] : [res.data.data.voucher.image]);
-					}
+				await axiosInstance.get(`${API_URL.Voucher}/${promotionID}`).then((res) => {
+					console.log(res.data);
+					const supArray = Object.assign(res.data.voucher, {
+						destinationID: res.data.voucher.destinationApply.id
+					});
+					setData(supArray);
+					setBusy(false);
+					setGallery(!res.data.voucher.image ? [] : [res.data.voucher.image]);
 				});
 			} catch (error) {
 				console.log(error);
@@ -152,8 +150,8 @@ export default function PromotionDetailForm({promotionID, onReload, onOpenModal}
 	useEffect(() => {
 		const fetchSupplier = async () => {
 			try {
-				await axios.get(`${API_URL.Voucher}/destinations`).then((res) => {
-					setDestinationList(res.data.data);
+				await axiosInstance.get(`${API_URL.Voucher}/destinations`).then((res) => {
+					setDestinationList(res.data);
 				});
 			} catch (error) {
 				console.log(error);

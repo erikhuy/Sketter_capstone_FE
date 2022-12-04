@@ -2,13 +2,22 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable camelcase */
 // material
+import trash2Fill from '@iconify/icons-eva/trash-2-fill';
+import CreateIcon from '@material-ui/icons/Create';
+import Reviews from '@material-ui/icons/Reviews';
+import DeleteIcon from '@material-ui/icons/Delete';
 import {
 	Box,
 	Button,
 	Checkbox,
+	Dialog,
+	DialogActions,
+	DialogTitle,
 	FormControlLabel,
 	IconButton,
 	InputAdornment,
+	Modal,
+	Stack,
 	Switch,
 	Table,
 	TableBody,
@@ -27,6 +36,11 @@ import {Icon} from '@iconify/react';
 import searchFill from '@iconify/icons-eva/search-fill';
 import {useSnackbar} from 'notistack5';
 import Clear from '@material-ui/icons/Clear';
+import axiosInstance from 'utils/axios';
+import ReviewList from 'pages/dashboard/destination/review/ReviewList';
+import useAuth from 'shared/hooks/useAuth';
+import DestinationDetailForm from 'pages/dashboard/destination/DestinationDetailForm';
+import DestinationDetailFormSupplierManager from 'pages/dashboard/destination/DestinationDetailFormSupplierManager';
 import Scrollbar from '../../../../../components/Scrollbar';
 //
 import SortingSelectingHead from './SortingSelectingHead';
@@ -58,8 +72,30 @@ function stableSort(array, comparator) {
 	});
 	return stabilizedThis.map((el) => el[0]);
 }
-
+const styles = {
+	position: 'absolute',
+	left: '10%',
+	height: '100%',
+	display: 'block'
+};
+const style = {
+	'&::-webkit-scrollbar': {
+		display: 'none'
+	},
+	position: 'absolute',
+	overflow: 'scroll',
+	borderRadius: '25px',
+	top: '50%',
+	left: '50%',
+	transform: 'translate(-50%, -50%)',
+	width: 1200,
+	height: '100%',
+	bgcolor: 'background.paper',
+	boxShadow: 24,
+	p: 4
+};
 export default function SortingSelecting() {
+	const {user} = useAuth();
 	const [order, setOrder] = useState('asc');
 	const [orderBy, setOrderBy] = useState('name');
 	const [selected, setSelected] = useState([]);
@@ -75,21 +111,29 @@ export default function SortingSelecting() {
 	const [searchInput, setSearchInput] = useState('');
 	const [searchKey, setSearchKey] = useState('');
 	const {enqueueSnackbar} = useSnackbar();
-
+	const handleReviewOpen = () => setReviewOpen(true);
+	const handleReviewClose = () => setReviewOpen(false);
+	const [openReview, setReviewOpen] = useState(false);
+	const [open, setOpen] = useState(false);
+	const handleOpen = () => setOpen(true);
+	const handleClose = () => setOpen(false);
+	const [openDialog, setOpenDialog] = useState(false);
+	const handleOpenDialog = () => setOpenDialog(true);
+	const handleCloseDialog = () => setOpenDialog(false);
 	// useEffect(() => {
 	// 	const fetchData = async () => {
 	// 		try {
 	// 			await axios.get(`${API_URL.Destination}?page=${page + 1}`).then((res) => {
 	// 				console.log(dataNumber);
 
-	// 				setData(res.data.data.destinations);
-	// 				setMaxPage(res.data.maxPage);
-	// 				setCurrentPage(res.data.currentPage);
-	// 				if (res.data.maxPage > res.data.currentPage) {
+	// 				setData(res.data.destinations);
+	// 				setMaxPage(res.maxPage);
+	// 				setCurrentPage(res.currentPage);
+	// 				if (res.maxPage > res.currentPage) {
 	// 					// eslint-disable-next-line no-const-assign
-	// 					setDataNumber(res.data.data.destinations.length + page * 10 + (page === 0 ? 1 : page));
+	// 					setDataNumber(res.data.destinations.length + page * 10 + (page === 0 ? 1 : page));
 	// 				} else {
-	// 					setDataNumber(res.data.data.destinations.length + page * 10);
+	// 					setDataNumber(res.data.destinations.length + page * 10);
 	// 				}
 	// 			});
 	// 		} catch (error) {
@@ -98,27 +142,36 @@ export default function SortingSelecting() {
 	// 	};
 	// 	fetchData();
 	// }, [page, selectedID]);
-
+	const deleteDestination = useCallback(async (idSelected) => {
+		try {
+			await axiosInstance.delete(`${API_URL.Destination}/${idSelected}`).then(() => {
+				handleCloseDialog();
+				enqueueSnackbar('Đóng cửa thành công', {variant: 'success'});
+			});
+		} catch (e) {
+			console.log('');
+		}
+	}, []);
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios
+				await axiosInstance
 					.get(`${API_URL.Destination}/search?name=${searchKey}&catalog=&page=${page + 1}&skipStay=`)
 					.then((res) => {
 						console.log(dataNumber);
 
-						setData(res.data.data.destinations);
-						setMaxPage(res.data.maxPage);
-						setCurrentPage(res.data.currentPage);
-						if (res.data.maxPage > res.data.currentPage) {
+						setData(res.data.destinations);
+						setMaxPage(res.maxPage);
+						setCurrentPage(res.currentPage);
+						if (res.maxPage > res.currentPage) {
 							// eslint-disable-next-line no-const-assign
-							setDataNumber(res.data.data.count);
+							setDataNumber(res.data.count);
 						} else {
-							setDataNumber(res.data.data.count);
+							setDataNumber(res.data.count);
 						}
 					});
 			} catch (error) {
-				setPage(page - 1);
+				console.log(error);
 			}
 		};
 		fetchData();
@@ -128,6 +181,12 @@ export default function SortingSelecting() {
 	}, [reloadList]);
 
 	const TABLE_HEAD = [
+		{
+			id: 'No',
+			numeric: false,
+			disablePadding: true,
+			label: 'No'
+		},
 		{
 			id: 'name',
 			numeric: false,
@@ -157,6 +216,12 @@ export default function SortingSelecting() {
 			numeric: true,
 			disablePadding: false,
 			label: 'Trạng thái'
+		},
+		{
+			id: 'Lựa chọn',
+			numeric: true,
+			disablePadding: false,
+			label: 'Thao tác'
 		}
 	];
 
@@ -220,6 +285,56 @@ export default function SortingSelecting() {
 
 	return (
 		<>
+			{openDialog && (
+				<Dialog
+					open={openDialog}
+					onClose={handleCloseDialog}
+					aria-labelledby="alert-dialog-title"
+					aria-describedby="alert-dialog-description"
+				>
+					<DialogTitle id="alert-dialog-title">Đóng cửa địa điểm này ?</DialogTitle>
+					<DialogActions>
+						<Button onClick={handleCloseDialog}>Hủy</Button>
+						<Button onClick={() => deleteDestination(selectedID)}>Đồng ý</Button>
+					</DialogActions>
+				</Dialog>
+			)}
+			{open && (
+				<Modal
+					sx={styles}
+					// eslint-disable-next-line react/jsx-boolean-value
+					open={true}
+					onClose={handleClose}
+					aria-labelledby="modal-modal-title"
+					aria-describedby="modal-modal-description"
+				>
+					<Box sx={style}>
+						{user.role.description === 'Quản lý' ? (
+							<DestinationDetailFormSupplierManager
+								destinationID={selectedID}
+								onReload={0}
+								onOpenModal={handleClose}
+							/>
+						) : (
+							<DestinationDetailForm destinationID={selectedID} onReload={0} onOpenModal={handleClose} />
+						)}
+					</Box>
+				</Modal>
+			)}
+			{openReview && (
+				<Modal
+					sx={styles}
+					// eslint-disable-next-line react/jsx-boolean-value
+					open={true}
+					onClose={handleReviewClose}
+					aria-labelledby="modal-modal-title"
+					aria-describedby="modal-modal-description"
+				>
+					<Box sx={style}>
+						<ReviewList destinationID={selectedID} />
+					</Box>
+				</Modal>
+			)}
 			<TextField
 				fullWidth
 				value={searchInput}
@@ -271,7 +386,8 @@ export default function SortingSelecting() {
 			/>
 			<SortingSelectingToolbar
 				numSelected={selected}
-				idSelected={selectedID}
+				// idSelected={selectedID}
+				idSelected={0}
 				reloadData={setSelectedID}
 				reloadNumber={setSelected}
 				onReloadList={setReloadList}
@@ -297,14 +413,17 @@ export default function SortingSelecting() {
 								return (
 									<TableRow
 										hover
-										onClick={(event) => handleClick(event, row)}
+										// onClick={(event) => handleClick(event, row)}
 										role="checkbox"
 										aria-checked={isItemSelected}
 										tabIndex={-1}
 										key={row.id}
 									>
-										<TableCell padding="checkbox">
+										{/* <TableCell padding="checkbox">
 											<Checkbox checked={isItemSelected} />
+										</TableCell> */}
+										<TableCell component="th" id={labelId} scope="row" padding="none">
+											{page * 10 + index + 1}
 										</TableCell>
 										<TableCell component="th" id={labelId} scope="row" padding="none">
 											{row.name}
@@ -346,6 +465,34 @@ export default function SortingSelecting() {
 											) : (
 												''
 											)}
+										</TableCell>
+										<TableCell align="left">
+											<Stack direction="row" spacing={1}>
+												<IconButton
+													onClick={() => {
+														setSelectedID(row.id);
+														handleOpenDialog();
+													}}
+												>
+													<DeleteIcon color="error" />
+												</IconButton>
+												<IconButton
+													onClick={() => {
+														setSelectedID(row.id);
+														handleOpen();
+													}}
+												>
+													<CreateIcon color="primary" />
+												</IconButton>
+												<IconButton
+													onClick={(event) => {
+														setSelectedID(row.id);
+														handleReviewOpen();
+													}}
+												>
+													<Reviews color="info" />
+												</IconButton>
+											</Stack>
 										</TableCell>
 									</TableRow>
 								);

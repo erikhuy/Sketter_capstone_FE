@@ -15,17 +15,6 @@ export default function PromotionList() {
 
 	return (
 		<>
-			<Box sx={{mb: 3, display: 'flex', justifyContent: 'flex-end'}}>
-				<Button
-					variant="contained"
-					color="primary"
-					startIcon={<AddIcon />}
-					sx={{color: 'white'}}
-					onClick={navigateToAddPromotion}
-				>
-					Thêm mã khuyến mãi
-				</Button>
-			</Box>
 			<Card>
 				<PromotionSortingSelecting />
 			</Card>

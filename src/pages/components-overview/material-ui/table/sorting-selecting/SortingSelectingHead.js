@@ -31,7 +31,7 @@ export default function SortingSelectingHead({
 	return (
 		<TableHead>
 			<TableRow>
-				<TableCell padding="checkbox">
+				{/* <TableCell padding="checkbox">
 					{numSelected > 0 ? (
 						<Checkbox
 							indeterminate={numSelected > 0}
@@ -47,7 +47,7 @@ export default function SortingSelectingHead({
 							}}
 						/>
 					)}
-				</TableCell>
+				</TableCell> */}
 				{headLabel.map((headCell) => (
 					<TableCell key={headCell.id} align="left" sortDirection={orderBy === headCell.id ? order : false}>
 						<TableSortLabel

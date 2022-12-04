@@ -26,6 +26,7 @@ import searchFill from '@iconify/icons-eva/search-fill';
 import {useCallback, useEffect, useState} from 'react';
 import {API_URL} from 'shared/constants';
 // components
+import axiosInstance from 'utils/axios';
 import Scrollbar from '../../../../../components/Scrollbar';
 //
 import SortingSelectingHead from './SortingSelectingHead';
@@ -79,14 +80,14 @@ export default function SortingSelecting() {
 	// 	const fetchData = async () => {
 	// 		try {
 	// 			await axios.get(`${API_URL.User}?page=${page + 1}&status=&search=${searchKey}`).then((res) => {
-	// 				setData(res.data.data.users);
-	// 				setMaxPage(res.data.maxPage);
-	// 				setCurrentPage(res.data.currentPage);
-	// 				if (res.data.maxPage > res.data.currentPage) {
+	// 				setData(res.data.users);
+	// 				setMaxPage(res.maxPage);
+	// 				setCurrentPage(res.currentPage);
+	// 				if (res.maxPage > res.currentPage) {
 	// 					// eslint-disable-next-line no-const-assign
-	// 					setDataNumber(res.data.data.count);
+	// 					setDataNumber(res.data.count);
 	// 				} else {
-	// 					setDataNumber(res.data.data.count);
+	// 					setDataNumber(res.data.count);
 	// 				}
 	// 			});
 	// 		} catch (error) {
@@ -98,15 +99,15 @@ export default function SortingSelecting() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios.get(`${API_URL.User}?page=${page + 1}&status=&search=${searchKey}`).then((res) => {
-					setData(res.data.data.users);
-					setMaxPage(res.data.maxPage);
-					setCurrentPage(res.data.currentPage);
-					if (res.data.maxPage > res.data.currentPage) {
+				await axiosInstance.get(`${API_URL.User}?page=${page + 1}&status=&search=${searchKey}`).then((res) => {
+					setData(res.data.users);
+					setMaxPage(res.maxPage);
+					setCurrentPage(res.currentPage);
+					if (res.maxPage > res.currentPage) {
 						// eslint-disable-next-line no-const-assign
-						setDataNumber(res.data.data.count);
+						setDataNumber(res.data.count);
 					} else {
-						setDataNumber(res.data.data.count);
+						setDataNumber(res.data.count);
 					}
 				});
 			} catch (error) {

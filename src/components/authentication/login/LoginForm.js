@@ -32,8 +32,8 @@ export default function LoginForm() {
 	const [showPassword, setShowPassword] = useState(false);
 
 	const LoginSchema = Yup.object().shape({
-		email: Yup.string().email('Email must be a valid email address').required('Email is required'),
-		password: Yup.string().required('Password is required')
+		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu nhập email'),
+		password: Yup.string().required('Yêu cầu nhập mật khẩu')
 	});
 
 	const formik = useFormik({
@@ -83,8 +83,9 @@ export default function LoginForm() {
 						fullWidth
 						autoComplete="username"
 						type="email"
-						label="Email address"
+						label="Email"
 						{...getFieldProps('email')}
+						InputLabelProps={{shrink: true}}
 						error={Boolean(touched.email && errors.email)}
 						helperText={touched.email && errors.email}
 					/>
@@ -93,8 +94,9 @@ export default function LoginForm() {
 						fullWidth
 						autoComplete="current-password"
 						type={showPassword ? 'text' : 'password'}
-						label="Password"
+						label="Mật khẩu"
 						{...getFieldProps('password')}
+						InputLabelProps={{shrink: true}}
 						InputProps={{
 							endAdornment: (
 								<InputAdornment position="end">

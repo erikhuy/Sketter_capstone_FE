@@ -70,18 +70,6 @@ export default function Register() {
 
 					<RegisterForm />
 
-					<Typography variant="body2" align="center" sx={{color: 'text.secondary', mt: 3}}>
-						Bằng cách đăng ký tài khoảng, bạn đồng ý với&nbsp;
-						<Link underline="always" color="text.primary" href="#">
-							Điều khoản
-						</Link>
-						&nbsp;and&nbsp;
-						<Link underline="always" color="text.primary" href="#">
-							Dịch vụ
-						</Link>
-						.
-					</Typography>
-
 					<MHidden width="smUp">
 						<Typography variant="subtitle2" sx={{mt: 3, textAlign: 'center'}}>
 							Đã có tài khoản ?&nbsp;

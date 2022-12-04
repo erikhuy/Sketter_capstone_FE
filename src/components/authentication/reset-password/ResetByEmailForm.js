@@ -9,6 +9,7 @@ import {API_URL} from 'shared/constants';
 // hooks
 import useAuth from 'shared/hooks/useAuth';
 import useIsMountedRef from 'shared/hooks/useIsMountedRef';
+import axiosInstance from 'utils/axios';
 import * as Yup from 'yup';
 
 // ----------------------------------------------------------------------
@@ -23,12 +24,12 @@ export default function ResetNewPasswordForm({onSent, onGetEmail}) {
 	const isMountedRef = useIsMountedRef();
 
 	const ResetPasswordSchema = Yup.object().shape({
-		email: Yup.string().email('Email must be a valid email address').required('Email is required')
+		email: Yup.string().email('Email không hợp lệ').required('Yêu cầu email')
 	});
 
 	const formik = useFormik({
 		initialValues: {
-			email: 'emailabcd@gmail.com'
+			email: ''
 		},
 		validationSchema: ResetPasswordSchema,
 		onSubmit: async (values, {setErrors, setSubmitting}) => {
@@ -51,7 +52,7 @@ export default function ResetNewPasswordForm({onSent, onGetEmail}) {
 	const {errors, touched, isSubmitting, handleSubmit, getFieldProps} = formik;
 	const sendEmailForgotPassword = useCallback(async (email) => {
 		try {
-			await axios.post(`${API_URL.User}/forgot_password`, email);
+			await axiosInstance.post(`${API_URL.User}/forgot_password`, email);
 		} catch (e) {
 			console.log('');
 		}
@@ -67,7 +68,7 @@ export default function ResetNewPasswordForm({onSent, onGetEmail}) {
 						fullWidth
 						{...getFieldProps('email')}
 						type="email"
-						label="Địa chỉ Email"
+						label="Địa chỉ Email*"
 						error={Boolean(touched.email && errors.email)}
 						helperText={touched.email && errors.email}
 					/>

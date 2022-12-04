@@ -29,6 +29,7 @@ import DestinationDetailForm from 'pages/dashboard/destination/DestinationDetail
 import useAuth from 'shared/hooks/useAuth';
 import UserDetailForm from 'pages/dashboard/admin/UserDetailForm';
 import {useSnackbar} from 'notistack5';
+import axiosInstance from 'utils/axios';
 
 // ----------------------------------------------------------------------
 
@@ -88,7 +89,7 @@ export default function SortingSelectingToolbar({onReloadList, numSelected, idSe
 				await Promise.all(
 					idSelected.map(async (id) => {
 						// eslint-disable-next-line no-restricted-globals, no-global-assign
-						await axios
+						await axiosInstance
 							.delete(`${API_URL.User}/${id}`)
 							.then((res) => {
 								reloadData([]);

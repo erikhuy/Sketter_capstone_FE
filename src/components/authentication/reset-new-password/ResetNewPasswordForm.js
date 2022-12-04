@@ -3,12 +3,14 @@ import {Alert, Stack, TextField} from '@material-ui/core';
 import {LoadingButton} from '@material-ui/lab';
 import axios from 'axios';
 import {Form, FormikProvider, useFormik} from 'formik';
+import {useSnackbar} from 'notistack5';
 import PropTypes from 'prop-types';
 import {useCallback} from 'react';
 import {API_URL} from 'shared/constants';
 // hooks
 import useAuth from 'shared/hooks/useAuth';
 import useIsMountedRef from 'shared/hooks/useIsMountedRef';
+import axiosInstance from 'utils/axios';
 import * as Yup from 'yup';
 
 // ----------------------------------------------------------------------
@@ -22,10 +24,11 @@ ResetNewPasswordForm.propTypes = {
 export default function ResetNewPasswordForm({onSent, onGetEmail, sendResetToken}) {
 	const {resetPassword} = useAuth();
 	const isMountedRef = useIsMountedRef();
+	const {enqueueSnackbar} = useSnackbar();
 
 	const ResetPasswordSchema = Yup.object().shape({
-		password: Yup.string().min(6, 'Password must be at least 6 characters').required('New Password is required'),
-		confirmPassword: Yup.string().oneOf([Yup.ref('password'), null], 'Passwords must match')
+		password: Yup.string().min(6, 'Mật khẩu yêu cầu 6 ký tự trở lên').required('Yêu cầu nhập mật khẩu mới'),
+		confirmPassword: Yup.string().oneOf([Yup.ref('password'), null], 'Mật khẩu nhập lại không khớp')
 	});
 
 	const formik = useFormik({
@@ -52,9 +55,13 @@ export default function ResetNewPasswordForm({onSent, onGetEmail, sendResetToken
 	const {errors, touched, isSubmitting, handleSubmit, getFieldProps} = formik;
 	const sendNewPassword = useCallback(async (password, resetToken) => {
 		try {
-			await axios.patch(`${API_URL.User}/reset_password/${resetToken}`, password);
+			await axiosInstance.patch(`${API_URL.User}/reset_password/${resetToken}`, password).then((res) => {
+				console.log(res);
+				enqueueSnackbar('Đặt lại mật khẩu thành công', {variant: 'success'});
+			});
 		} catch (e) {
-			console.log('');
+			console.log(e.response.data.message);
+			enqueueSnackbar(e.response.data.message, {variant: 'error'});
 		}
 	});
 	return (
@@ -68,9 +75,9 @@ export default function ResetNewPasswordForm({onSent, onGetEmail, sendResetToken
 						fullWidth
 						autoComplete="on"
 						type="password"
-						label="New Password"
+						label="Mật khẩu mới"
 						error={Boolean(touched.password && errors.password)}
-						helperText={(touched.password && errors.password) || 'Password must be minimum 6+'}
+						helperText={(touched.password && errors.password) || 'Mật khẩu tối thiểu 6 ký tự'}
 					/>
 
 					<TextField
@@ -78,7 +85,7 @@ export default function ResetNewPasswordForm({onSent, onGetEmail, sendResetToken
 						fullWidth
 						autoComplete="on"
 						type="password"
-						label="Confirm New Password"
+						label="Xác nhận lại mật khẩu"
 						error={Boolean(touched.confirmPassword && errors.confirmPassword)}
 						helperText={touched.confirmPassword && errors.confirmPassword}
 					/>

@@ -48,10 +48,10 @@ export default function UserAccount() {
 	return (
 		<Page title="Sketter">
 			<Container maxWidth={themeStretch ? false : 'lg'}>
-				<HeaderBreadcrumbs
+				{/* <HeaderBreadcrumbs
 					heading="Tài khoản"
 					links={[{name: 'Dashboard', href: PATH_DASHBOARD.root}, {name: 'Người dùng'}]}
-				/>
+				/> */}
 
 				<Stack spacing={5}>
 					<Tabs

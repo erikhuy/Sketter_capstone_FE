@@ -30,6 +30,7 @@ import DestinationDetailFormSupplierManager from 'pages/dashboard/destination/De
 import ReviewList from 'pages/dashboard/destination/review/ReviewList';
 import {useSnackbar} from 'notistack5';
 import PromotionDetailForm from 'pages/dashboard/promotion/PromotionDetailForm';
+import axiosInstance from 'utils/axios';
 
 // ----------------------------------------------------------------------
 
@@ -90,7 +91,7 @@ export default function SortingSelectingToolbar({onReloadList, numSelected, idSe
 			try {
 				await Promise.all(
 					idSelected.map(async (id) => {
-						await axios.delete(`${API_URL.Voucher}/${id}`).then((res) => {
+						await axiosInstance.delete(`${API_URL.Voucher}/${id}`).then((res) => {
 							if (res.status === 204) {
 								reloadData([]);
 								reloadNumber([]);

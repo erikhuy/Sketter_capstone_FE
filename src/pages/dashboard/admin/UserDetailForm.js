@@ -46,6 +46,7 @@ import {useNavigate} from 'react-router';
 import {storage} from 'utils/firebase';
 import {getDownloadURL, ref, uploadString} from 'firebase/storage';
 import LoadingScreen from 'components/LoadingScreen';
+import axiosInstance from 'utils/axios';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -139,7 +140,7 @@ export default function UserDetailForm({userID, onReload, onOpenModal}) {
 	};
 	const updateUser = useCallback(async (data) => {
 		try {
-			await axios
+			await axiosInstance
 				.patch(`${API_URL.User}/${data.id}`, data)
 				.then((res) => {
 					enqueueSnackbar('Cập nhật thông tin thành công', {variant: 'success'});
@@ -156,14 +157,12 @@ export default function UserDetailForm({userID, onReload, onOpenModal}) {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await axios.get(`${API_URL.User}/${userID}`).then((res) => {
-					if (res.status === 200) {
-						console.log(res.data.data);
-						setData(res.data.data);
-						// !res.data.data.avatar ? setGallery([]) : setGallery([res.data.data.avatar]);
-						setGallery(!res.data.data.avatar ? [] : [{url: res.data.data.avatar}]);
-						setBusy(false);
-					}
+				await axiosInstance.get(`${API_URL.User}/${userID}`).then((res) => {
+					console.log(res.data);
+					setData(res.data);
+					// !res.data.avatar ? setGallery([]) : setGallery([res.data.avatar]);
+					setGallery(!res.data.avatar ? [] : [{url: res.data.avatar}]);
+					setBusy(false);
 				});
 			} catch (error) {
 				console.log(error);
@@ -201,7 +200,7 @@ export default function UserDetailForm({userID, onReload, onOpenModal}) {
 									textAlign: 'center'
 								}}
 							>
-								Trang nhập liệu
+								Thông tin tài khoản
 							</h1>
 							<Stack direction={{xs: 'column'}} spacing={3.6} sx={{m: 2}}>
 								<AvatarUploadArea setImageList={handleImages} imageList={gallery} />
